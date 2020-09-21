@@ -1,0 +1,14 @@
+##############################################################################
+#  M17 interlink file
+#
+#  one line per entry
+#  each entry specifies a remote M17 reflector to peer with
+#  format:
+#    <M17 callsign> <ip> <local module><remote module>
+#  example:
+#    M17USA 158.64.26.132 BD
+#
+#  This would request the local module B to be linked with M17USA  D
+#  IPv6 address are supported as well
+#
+#############################################################################
