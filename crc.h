@@ -1,6 +1,6 @@
 /*
  * Library: libcrc
- * File:    src/crc16.c
+ * Git:     https://github.com/lammertb/libcrc
  * Author:  Lammert Bies
  *
  * This file is licensed under the MIT License as stated below
@@ -28,8 +28,8 @@
  *
  * Description
  * -----------
- * The source file src/crc16.c contains routines which calculate the common
- * CRC16 cyclic redundancy check values for an incomming byte string.
+ * The source file contains routines which calculate the CCITT CRC
+ * values for an incomming byte string.
  */
 
 #pragma once

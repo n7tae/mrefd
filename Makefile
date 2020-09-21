@@ -43,7 +43,10 @@ DEPS = $(SRCS:.cpp=.d)
 
 EXE=mrefd
 
-all : $(EXE)
+all : $(EXE) crc-test
+
+crc-test : crc-test.o crc.o
+	$(CC) $^ -o $@
 
 $(EXE) : $(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS)
