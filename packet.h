@@ -43,7 +43,7 @@ using AM17Frame = struct __attribute__((__packed__)) _ip_frame {
 	AM17Lich lich;
 	uint16_t framenumber;
 	uint8_t  payload[16];
-	uint8_t  crc[2]; 	//16 bit CRC
+	uint16_t crc; 	//16 bit CRC
 }; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes = 432 bits
 
 class CPacket
@@ -76,6 +76,16 @@ public:
 	uint16_t GetStreamId() const
 	{
 		return ntohs(m17.streamid);
+	}
+
+	uint16_t GetCRC() const
+	{
+		return ntohs(m17.crc);
+	}
+
+	void SetCRC(uint16_t crc)
+	{
+		m17.crc = htons(crc);
 	}
 
 	std::unique_ptr<CPacket> Duplicate(void) const

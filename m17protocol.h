@@ -25,6 +25,7 @@
 #include "timepoint.h"
 #include "protocol.h"
 #include "packet.h"
+#include "crc.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -67,4 +68,7 @@ protected:
 	// time
 	CTimePoint m_LastKeepaliveTime;
 	CTimePoint m_LastPeersLinkTime;
+
+private:
+	CCRC crc;
 };

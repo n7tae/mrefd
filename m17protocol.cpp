@@ -225,7 +225,7 @@ void CM17Protocol::HandleQueue(void)
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
 				client->GetCallsign().EncodeCallsign(packet->GetFrame().lich.addr_dst);
-				// TODO: Calculate CRC
+				packet->SetCRC(crc.CalcCRC(packet->GetFrame().magic, sizeof(AM17Frame) - 2));
 				Send(packet->GetFrame().magic, sizeof(AM17Frame), client->GetIp());
 			}
 		}
