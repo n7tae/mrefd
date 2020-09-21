@@ -68,17 +68,22 @@ void CM17Protocol::Task(void)
 #else
 	auto len = Receive4(buf, ip, 20);
 #endif
-	if (len > 0)
-	{
-		if ( (sizeof(AM17Frame) == len) && IsValidPacket(buf, pack) )
+	switch (len) {
+	case sizeof(AM17Frame):
+		if ( IsValidPacket(buf, pack) )
 		{
-			OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-			if (pack)                  // the packet might have been released
-			{                          // if it needed to open a new stream, but couldn't
-				OnPacketIn(pack, ip);
+			if (pack->GetDestCallsign().HasSameCallsign(g_Reflector.GetCallsign()))
+			{	// only if the packet has the destination set properly!
+				OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
+				if (pack)                  // the packet might have been erased
+				{                          // if it needed to open a new stream, but couldn't
+					OnPacketIn(pack, ip);
+				}
 			}
 		}
-		else if ( (11 == len) && IsValidConnect(buf, cs, &mod) )
+		break;
+	case 11:
+		if ( IsValidConnect(buf, cs, &mod) )
 		{
 			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << std::endl;
 
@@ -135,7 +140,21 @@ void CM17Protocol::Task(void)
 				Send(buf, 4, ip);
 			}
 		}
-		else if ( (10 == len) && IsValidDisconnect(buf, cs) )
+		break;
+	case 10:
+		if ( IsValidKeepAlive(buf, cs) )
+		{
+			// find all clients with that callsign & ip and keep them alive
+			CClients *clients = g_Reflector.GetClients();
+			auto it = clients->begin();
+			std::shared_ptr<CClient>client = nullptr;
+			while (nullptr != (client = clients->FindNextClient(cs, ip, PROTOCOL_M17, it)))
+			{
+				client->Alive();
+			}
+			g_Reflector.ReleaseClients();
+		}
+		else if ( IsValidDisconnect(buf, cs) )
 		{
 			std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
 
@@ -152,22 +171,9 @@ void CM17Protocol::Task(void)
 			}
 			g_Reflector.ReleaseClients();
 		}
-		else if ( (10 == len) && IsValidKeepAlive(buf, cs) )
-		{
-			// find all clients with that callsign & ip and keep them alive
-			CClients *clients = g_Reflector.GetClients();
-			auto it = clients->begin();
-			std::shared_ptr<CClient>client = nullptr;
-			while (nullptr != (client = clients->FindNextClient(cs, ip, PROTOCOL_M17, it)))
-			{
-				client->Alive();
-			}
-			g_Reflector.ReleaseClients();
-		}
-		else
-		{
-			std::cout << "Unknown packet of length " << len << std::endl;
-		}
+		break;
+	default:
+		break;
 	}
 
 	// handle end of streaming timeout
@@ -219,6 +225,7 @@ void CM17Protocol::HandleQueue(void)
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
 				client->GetCallsign().EncodeCallsign(packet->GetFrame().lich.addr_dst);
+				// TODO: Calculate CRC
 				Send(packet->GetFrame().magic, sizeof(AM17Frame), client->GetIp());
 			}
 		}
@@ -447,13 +454,15 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 
 bool CM17Protocol::IsValidPacket(const uint8_t *buf, std::unique_ptr<CPacket> &packet)
 {
-	if (0 == memcmp(buf, "M17 ", 4))
+	if (0 == memcmp(buf, "M17 ", 4))	// we tested the size before we got here
 	{
 		// create packet
 		packet = std::unique_ptr<CPacket>(new CPacket(buf));
 		// check validity of packet
-		if ( packet && packet->GetDestCallsign().IsValid() && packet->GetSourceCallsign().IsValid() )
+		if ( packet->GetSourceCallsign().IsValid() )
+		{	// looks like a valid source
 			return true;
+		}
 	}
 	return false;
 }

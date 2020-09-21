@@ -136,8 +136,7 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 	CPacketStream *stream = GetStream(packet->GetStreamId(), ip);
 	if ( stream )
 	{
-		//std::cout << "DV frame" << "from "  << *Ip << std::endl;
-		// and push
+		// and push the packet
 		stream->Lock();
 		stream->Push(std::move(packet));
 		stream->Unlock();

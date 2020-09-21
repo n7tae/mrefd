@@ -133,7 +133,7 @@ bool CReflector::IsStreaming(char module)
 	return false;
 }
 
-// clients MUST have bee locked by the caller so we can freely access it within the fuction
+// clients MUST have been locked by the caller so we can freely access it within the fuction
 CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
 {
 	// check sid is not zero
