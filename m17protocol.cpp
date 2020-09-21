@@ -20,8 +20,9 @@
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
 #include <string.h>
+
+#include "main.h"
 #include "m17peer.h"
 #include "m17client.h"
 #include "m17protocol.h"
@@ -110,7 +111,7 @@ void CM17Protocol::Task(void)
 					{
 						// acknowledge the request
 						EncodeConnectAckPacket(buf);
-						Send(buf, 3, ip);
+						Send(buf, 4, ip);
 
 						// create the client and append
 						g_Reflector.GetClients()->AddClient(std::make_shared<CM17Client>(cs, ip, mod));
@@ -124,14 +125,14 @@ void CM17Protocol::Task(void)
 
 					// deny the request
 					EncodeConnectNackPacket(buf);
-					Send(buf, 3, ip);
+					Send(buf, 4, ip);
 				}
 			}
 			else
 			{
 				// deny the request
 				EncodeConnectNackPacket(buf);
-				Send(buf, 3, ip);
+				Send(buf, 4, ip);
 			}
 		}
 		else if ( (10 == len) && IsValidDisconnect(buf, cs) )
@@ -145,7 +146,7 @@ void CM17Protocol::Task(void)
 			{
 				// ack disconnect packet
 				EncodeDisconnectedPacket(buf);
-				Send(buf, 12, ip);
+				Send(buf, 4, ip);
 				// and remove it
 				clients->RemoveClient(client);
 			}
@@ -264,9 +265,9 @@ void CM17Protocol::HandleKeepalives(void)
 			else
 			{
 				// no, disconnect
-				uint8_t disconnect[11];
+				uint8_t disconnect[10];
 				EncodeDisconnectPacket(disconnect, client->GetReflectorModule());
-				Send(disconnect, 11, client->GetIp());
+				Send(disconnect, 10, client->GetIp());
 
 				// remove it
 				std::cout << "DExtra client " << client->GetCallsign() << " keepalive timeout" << std::endl;
@@ -290,17 +291,17 @@ void CM17Protocol::HandleKeepalives(void)
 		if ( !peer->IsAMaster() && !peer->IsAlive() )
 		{
 			// no, disconnect all clients
-			uint8_t disconnect[11];
+			uint8_t disconnect[10];
 			EncodeDisconnectPacket(disconnect, peer->GetReflectorModules()[0]);
 			CClients *clients = g_Reflector.GetClients();
 			for ( auto cit=peer->cbegin(); cit!=peer->cend(); cit++ )
 			{
-				Send(disconnect, 11, (*cit)->GetIp());
+				Send(disconnect, 10, (*cit)->GetIp());
 			}
 			g_Reflector.ReleaseClients();
 
 			// remove it
-			std::cout << "DExtra peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
+			std::cout << "Peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
 			peers->RemovePeer(peer);
 		}
 	}
@@ -312,7 +313,7 @@ void CM17Protocol::HandleKeepalives(void)
 
 void CM17Protocol::HandlePeerLinks(void)
 {
-	uint8_t buf[11];
+	uint8_t buf[10];
 	// get the list of peers
 	CPeerCallsignList *list = g_GateKeeper.GetPeerList();
 	CPeers *peers = g_Reflector.GetPeers();
@@ -327,7 +328,7 @@ void CM17Protocol::HandlePeerLinks(void)
 		{
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, peer->GetReflectorModules()[0]);
-			Send(buf, 11, peer->GetIp());
+			Send(buf, 10, peer->GetIp());
 			std::cout << "Sending disconnect packet to XRF peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 			// remove client
 			peers->RemovePeer(peer);
@@ -336,7 +337,7 @@ void CM17Protocol::HandlePeerLinks(void)
 
 	// check if all ours peers listed by gatekeeper are connected
 	// if not, connect or reconnect
-	uint8_t connect[12];
+	uint8_t connect[11];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
 		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("XRF*")) )
@@ -349,7 +350,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			(*it).ResolveIp();
 			// send connect packet to re-initiate peer link
 			EncodeConnectPacket(connect, (*it).GetModules());
-			Send(connect, 12, (*it).GetIp());
+			Send(connect, 11, (*it).GetIp());
 			std::cout << "Sending connect packet to XRF peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
 		}
 	}
@@ -471,30 +472,30 @@ void CM17Protocol::EncodeConnectPacket(uint8_t *buf, const char *Modules)
 {
 	memcpy(buf, "CONN", 4);
 	CCallsign cs(GetReflectorCallsign());
+	cs.SetModule(Modules[0]);
 	cs.EncodeCallsign(buf + 4);
-	buf[10] = Modules[0];
-	buf[11] = Modules[1];
+	buf[10] = Modules[1];
 }
 
 void CM17Protocol::EncodeConnectAckPacket(uint8_t *buf)
 {
-	memcpy(buf, "ACK", 3);
+	memcpy(buf, "ACKN", 4);
 }
 
 void CM17Protocol::EncodeConnectNackPacket(uint8_t *buf)
 {
-	memcpy(buf, "NAK", 3);
+	memcpy(buf, "NACK", 4);
 }
 
 void CM17Protocol::EncodeDisconnectPacket(uint8_t *buf, char mod)
 {
 	memcpy(buf, "DISC", 4);
 	CCallsign cs(GetReflectorCallsign());
+	cs.SetModule(mod);
 	cs.EncodeCallsign(buf + 4);
-	buf[10] = mod;
 }
 
 void CM17Protocol::EncodeDisconnectedPacket(uint8_t *buf)
 {
-	memcpy(buf, "DISCONNECTED", 12);
+	memcpy(buf, "DISC", 4);
 }
