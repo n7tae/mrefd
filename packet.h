@@ -50,55 +50,16 @@ class CPacket
 {
 public:
 	CPacket() {}
-
-	CPacket(const uint8_t *buf)
-	{
-		memcpy(m17.magic, buf, sizeof(AM17Frame));
-		destination.DecodeCallsign(m17.lich.addr_dst);
-		source.DecodeCallsign(m17.lich.addr_src);
-	}
-
-	const CCallsign &GetDestCallsign() const
-	{
-		return destination;
-	}
-
-	char GetDestModule() const
-	{
-		return destination.GetModule();
-	}
-
-	const CCallsign &GetSourceCallsign() const
-	{
-		return source;
-	}
-
-	uint16_t GetStreamId() const
-	{
-		return ntohs(m17.streamid);
-	}
-
-	uint16_t GetCRC() const
-	{
-		return ntohs(m17.crc);
-	}
-
-	void SetCRC(uint16_t crc)
-	{
-		m17.crc = htons(crc);
-	}
-
-	std::unique_ptr<CPacket> Duplicate(void) const
-	{
-		return std::unique_ptr<CPacket>(new CPacket(*this));
-	}
-
-	bool IsLastPacket() const
-	{
-		return (0x8000u & m17.framenumber == 0x8000u);
-	}
-
-	AM17Frame &GetFrame() { return m17; }
+	CPacket(const uint8_t *buf);
+	const CCallsign &GetDestCallsign() const;
+	char GetDestModule() const;
+	const CCallsign &GetSourceCallsign() const;
+	uint16_t GetStreamId() const;
+	uint16_t GetCRC() const;
+	void SetCRC(uint16_t crc);
+	std::unique_ptr<CPacket> Duplicate(void) const;
+	bool IsLastPacket() const;
+	AM17Frame &GetFrame();
 
 private:
 	CCallsign destination, source;

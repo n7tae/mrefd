@@ -37,9 +37,6 @@
 #include <cstdint>
 #include <cstddef>
 
-#define CRC_POLY_16 0x5935U
-#define CRC_START_16 0xFFFFU
-
 class CCRC
 {
 public:

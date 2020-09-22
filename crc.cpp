@@ -39,19 +39,17 @@
 
 #include "crc.h"
 
+#define CRC_POLY_16 0x5935U
+#define CRC_START_16 0xFFFFU
+
 CCRC::CCRC()
 {
-	uint16_t i;
-	uint16_t j;
-	uint16_t crc;
-	uint16_t c;
-
-	for (i=0; i<256; i++)
+	for (uint16_t i=0; i<256; i++)
 	{
-		crc = 0;
-		c   = i << 8;
+		uint16_t crc = 0;
+		uint16_t c = i << 8;
 
-		for (j=0; j<8; j++)
+		for (uint16_t j=0; j<8; j++)
 		{
 			if ( (crc ^ c) & 0x8000 )
 				crc = ( crc << 1 ) ^ CRC_POLY_16;
@@ -60,24 +58,20 @@ CCRC::CCRC()
 
 			c = c << 1;
 		}
-
 		crc_tab16[i] = crc;
 	}
 }
 
 uint16_t CCRC::CalcCRC( const uint8_t *input_str, size_t num_bytes )
 {
-	uint16_t crc;
-	const unsigned char *ptr;
-	size_t a;
+	uint16_t crc = CRC_START_16;
+	const uint8_t *ptr = input_str;
 
-	crc = CRC_START_16;
-	ptr = input_str;
-
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++)
-	{
-		crc = (crc << 8) ^ crc_tab16[ ((crc >> 8) ^ (uint16_t) *ptr++) & 0x00FF ];
-	}
+	if ( ptr )
+		for (size_t a=0; a<num_bytes; a++)
+		{
+			crc = (crc << 8) ^ crc_tab16[ ((crc >> 8) ^ (uint16_t) *ptr++) & 0x00FF ];
+		}
 
 	return crc;
 }

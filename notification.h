@@ -56,5 +56,4 @@ protected:
 	// data
 	int         m_iId;
 	CCallsign   m_Callsign;
-
 };

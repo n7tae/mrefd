@@ -36,7 +36,7 @@ endif
 
 LDFLAGS=-pthread
 
-SRCS = callsign.cpp callsignlist.cpp callsignlistitem.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp m17client.cpp m17peer.cpp m17protocol.cpp notification.cpp packetstream.cpp peer.cpp peers.cpp peercallsignlist.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
+SRCS = callsign.cpp callsignlist.cpp callsignlistitem.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp m17client.cpp m17peer.cpp m17protocol.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peers.cpp peercallsignlist.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
@@ -55,7 +55,7 @@ $(EXE) : $(OBJS)
 	g++ $(CFLAGS) $< -o $@
 
 clean :
-	$(RM) *.o *.d $(EXE)
+	$(RM) *.o *.d $(EXE) crc-test
 
 -include $(DEPS)
 

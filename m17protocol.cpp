@@ -224,8 +224,9 @@ void CM17Protocol::HandleQueue(void)
 			// is this client busy ?
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
-				client->GetCallsign().EncodeCallsign(packet->GetFrame().lich.addr_dst);
-				packet->SetCRC(crc.CalcCRC(packet->GetFrame().magic, sizeof(AM17Frame) - 2));
+				// packet->GetFrame().lich.addr_dst won't be correct after this.
+				client->GetCallsign().EncodeCallsign(packet->GetFrame().lich.addr_dst);	      // set the destination
+				packet->SetCRC(crc.CalcCRC(packet->GetFrame().magic, sizeof(AM17Frame) - 2)); // recalculate the crc
 				Send(packet->GetFrame().magic, sizeof(AM17Frame), client->GetIp());
 			}
 		}

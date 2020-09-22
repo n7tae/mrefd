@@ -11,3 +11,4 @@ configure.h
 configure.sql
 reflector.cfg
 mrefd
+crc-test
