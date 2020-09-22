@@ -39,8 +39,8 @@
 
 #include "crc.h"
 
-#define CRC_POLY_16 0x5935U
-#define CRC_START_16 0xFFFFU
+#define CRC_POLY_16 0x5935u
+#define CRC_START_16 0xFFFFu
 
 CCRC::CCRC()
 {
@@ -62,15 +62,14 @@ CCRC::CCRC()
 	}
 }
 
-uint16_t CCRC::CalcCRC( const uint8_t *input_str, size_t num_bytes )
+uint16_t CCRC::CalcCRC( const uint8_t *input_str, size_t num_bytes ) const
 {
 	uint16_t crc = CRC_START_16;
-	const uint8_t *ptr = input_str;
 
-	if ( ptr )
+	if ( input_str )
 		for (size_t a=0; a<num_bytes; a++)
 		{
-			crc = (crc << 8) ^ crc_tab16[ ((crc >> 8) ^ (uint16_t) *ptr++) & 0x00FF ];
+			crc = (crc << 8) ^ crc_tab16[ ((crc >> 8) ^ uint16_t(input_str[a])) & 0x00FF ];
 		}
 
 	return crc;

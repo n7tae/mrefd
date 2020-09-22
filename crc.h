@@ -41,9 +41,8 @@ class CCRC
 {
 public:
 	CCRC();
-	uint16_t CalcCRC(const uint8_t *buf, size_t len);
+	uint16_t CalcCRC(const uint8_t *buf, size_t len) const;
 
 private:
 	uint16_t crc_tab16[256];
-
 };
