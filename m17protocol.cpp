@@ -337,7 +337,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, peer->GetReflectorModules()[0]);
 			Send(buf, 10, peer->GetIp());
-			std::cout << "Sending disconnect packet to XRF peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
+			std::cout << "Sending disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 			// remove client
 			peers->RemovePeer(peer);
 		}
@@ -348,7 +348,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	uint8_t connect[11];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
-		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("XRF*")) )
+		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17*")) )
 			continue;
 		if ( strlen((*it).GetModules()) != 2 )
 			continue;
@@ -359,7 +359,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			// send connect packet to re-initiate peer link
 			EncodeConnectPacket(connect, (*it).GetModules());
 			Send(connect, 11, (*it).GetIp());
-			std::cout << "Sending connect packet to XRF peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
+			std::cout << "Sending connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
 		}
 	}
 
