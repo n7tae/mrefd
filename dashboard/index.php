@@ -152,11 +152,11 @@ if ($CallingHome['Active']) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <span class="navbar-brand"><?php echo $Reflector->GetReflectorName(); ?> Multiprotocol Reflector (DExtra, DPlus and DCS)</span>
+            <span class="navbar-brand"><?php echo $Reflector->GetReflectorName(); ?> M17 Reflector</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li class="navbar-info">mrefd vQ<?php echo $Reflector->GetVersion(); ?> - Dashboard
+                <li class="navbar-info">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard
                     v<?php echo $PageOptions['DashboardVersion']; ?></li>
                 <li class="navbar-info">Service
                     uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></li>
