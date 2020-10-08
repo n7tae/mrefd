@@ -225,7 +225,7 @@ void CM17Protocol::HandleQueue(void)
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
 				// packet->GetFrame().lich.addr_dst won't be correct after this.
-				client->GetCallsign().EncodeCallsign(packet->GetFrame().lich.addr_dst);	      // set the destination
+				client->GetCallsign().CodeOut(packet->GetFrame().lich.addr_dst);	      // set the destination
 				packet->SetCRC(crc.CalcCRC(packet->GetFrame().magic, sizeof(AM17Frame) - 2)); // recalculate the crc
 				Send(packet->GetFrame().magic, sizeof(AM17Frame), client->GetIp());
 			}
@@ -416,7 +416,7 @@ bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 {
 	if (0 == memcmp(buf, "CONN", 4))
 	{
-		cs.DecodeCallsign(buf + 10);
+		cs.CodeIn(buf + 4);
 		if (cs.IsValid())
 		{
 			*mod = buf[10];
@@ -431,7 +431,7 @@ bool CM17Protocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 {
 	if (0 == memcmp(buf, "DISC", 4))
 	{
-		cs.DecodeCallsign(buf+4);
+		cs.CodeIn(buf + 4);
 		if (cs.IsValid())
 		{
 			return true;
@@ -444,7 +444,7 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 {
 	if (0 == memcmp(buf, "PING", 4))
 	{
-		cs.DecodeCallsign(buf+4);
+		cs.CodeIn(buf + 4);
 		if (cs.IsValid())
 		{
 			return true;
@@ -475,7 +475,7 @@ void CM17Protocol::EncodeKeepAlivePacket(uint8_t *buf)
 {
 	memcpy(buf, "PING", 4);
 	CCallsign cs(GetReflectorCallsign());
-	cs.EncodeCallsign(buf + 4);
+	cs.CodeOut(buf + 4);
 }
 
 void CM17Protocol::EncodeConnectPacket(uint8_t *buf, const char *Modules)
@@ -483,7 +483,7 @@ void CM17Protocol::EncodeConnectPacket(uint8_t *buf, const char *Modules)
 	memcpy(buf, "CONN", 4);
 	CCallsign cs(GetReflectorCallsign());
 	cs.SetModule(Modules[0]);
-	cs.EncodeCallsign(buf + 4);
+	cs.CodeOut(buf + 4);
 	buf[10] = Modules[1];
 }
 
@@ -502,7 +502,7 @@ void CM17Protocol::EncodeDisconnectPacket(uint8_t *buf, char mod)
 	memcpy(buf, "DISC", 4);
 	CCallsign cs(GetReflectorCallsign());
 	cs.SetModule(mod);
-	cs.EncodeCallsign(buf + 4);
+	cs.CodeOut(buf + 4);
 }
 
 void CM17Protocol::EncodeDisconnectedPacket(uint8_t *buf)

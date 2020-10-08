@@ -17,13 +17,15 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <arpa/inet.h>
+
 #include "packet.h"
 
 CPacket::CPacket(const uint8_t *buf)
 {
 	memcpy(m17.magic, buf, sizeof(AM17Frame));
-	destination.DecodeCallsign(m17.lich.addr_dst);
-	source.DecodeCallsign(m17.lich.addr_src);
+	destination.CodeIn(m17.lich.addr_dst);
+	source.CodeIn(m17.lich.addr_src);
 }
 
 const CCallsign &CPacket::GetDestCallsign() const

@@ -1,93 +1,47 @@
-//
-//  ccallsign.h
-//  m17ref
-//
-//  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
-//  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early N7TAE
-//
-// ----------------------------------------------------------------------------
-//    This file is part of m17ref.
-//
-//    m17ref is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    m17ref is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    with this software.  If not, see <http://www.gnu.org/licenses/>.
-// ----------------------------------------------------------------------------
+/*
+ *   Copyright (c) 2020 by Thomas A. Early N7TAE
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #pragma once
 
-#include "main.h"
-
-////////////////////////////////////////////////////////////////////////////////////////
-// define
-
-#define CALLSIGN_LEN        8
-#define CALLSUFFIX_LEN      4
-#define M17CHARACTERS       " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/."
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
+#include <cstdint>
+#include <string>
+#include <cstring>
 
 class CCallsign
 {
 public:
-	// contructors
 	CCallsign();
-	CCallsign(const char *);
-	// status
-	bool IsValid(void) const;
-	bool HasSuffix(void) const;
-	bool HasModule(void) const                { return m_Module != ' '; }
-
-	// set
-	void SetCallsign(const char *);
-	void SetCallsign(const uint8_t *, int);
-	void SetModule(char);
-	void SetSuffix(const char *);
-	void SetSuffix(const uint8_t *, int);
-
-	// modify
-	void PatchCallsign(int, const uint8_t *, int);
-
-	// get
-	void GetCallsign(uint8_t *) const;
-	void GetCallsignString(char *) const;
-	void GetSuffix(uint8_t *) const;
-	char GetModule(void) const              { return m_Module; }
-	void EncodeCallsign(uint8_t *) const;	// M17
-	void DecodeCallsign(const uint8_t *);	// M17
-
-
-	// compare
-	bool HasSameCallsign(const CCallsign &) const;
-	bool HasSameCallsignWithWildcard(const CCallsign &) const;
-	bool HasLowerCallsign(const CCallsign &) const;
-	bool HasSameModule(const CCallsign &) const;
-
-	// operators
-	bool operator ==(const CCallsign &) const;
-	operator const char *() const;
-
-protected:
-	// helper
-	bool IsNumber(char) const;
-	bool IsLetter(char) const;
-	bool IsSpace(char) const;
-
-protected:
-	// data
-	char         m_Callsign[CALLSIGN_LEN];
-	char         m_Suffix[CALLSUFFIX_LEN];
-	char         m_Module;
-	mutable char m_sz[CALLSIGN_LEN+CALLSUFFIX_LEN+5];
+	CCallsign(const std::string &cs);
+	CCallsign(const uint8_t *code);
+	void CSIn(const std::string &cs);
+	void CodeIn(const uint8_t *code);
+	const std::string GetCS(unsigned len = 9) const;
+	void CodeOut(uint8_t *out) const { memcpy(out, code, 6); };
+	bool operator==(const CCallsign &rhs) const;
+	bool operator!=(const CCallsign &rhs) const;
+	char GetModule(void) const;
+	bool HasSameCallsignWithWildcard(const CCallsign &callsign) const;
+	bool HasModule() const { return ('A' <= cs[9] && cs[9] <= 'Z'); }
+	void SetModule(char m);
+	bool IsValid() const;
+	friend std::ostream &operator<<(std::ostream &stream, const CCallsign &call);
+	bool HasSameCallsign(const CCallsign &call) const;
+private:
+	uint8_t code[6];
+	char cs[10];
 };

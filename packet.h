@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <string.h>
+#include <memory>
 
 #include "callsign.h"
 

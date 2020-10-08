@@ -52,7 +52,7 @@ int main()
 	std::cout << "Starting " << cs << " " << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_REVISION << std::endl;
 
 	// initialize reflector
-	g_Reflector.SetCallsign(cs.c_str());
+	g_Reflector.SetCallsign(CCallsign(cs));
 
 
 	// and let it run

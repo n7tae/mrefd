@@ -71,5 +71,3 @@ private:
 	mutable char straddr[INET6_ADDRSTRLEN];
 	bool is_set;
 };
-
-std::ostream &operator<<(std::ostream &stream, const CIp &Ip);
