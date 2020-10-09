@@ -418,7 +418,6 @@ bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 	if (0 == memcmp(buf, "CONN", 4))
 	{
 		cs.CodeIn(buf + 4);
-		std::cout << "CONN from " << cs.GetCS() << " on mod " << (char)buf[10] << std::endl;
 		if (cs.IsValid())
 		{
 			*mod = buf[10];

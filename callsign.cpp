@@ -87,8 +87,8 @@ const std::string CCallsign::GetCS(unsigned len) const
 
 char CCallsign::GetModule() const
 {
-	if (cs[9])
-		return cs[9];
+	if (cs[8])
+		return cs[8];
 	else
 		return ' ';
 }
