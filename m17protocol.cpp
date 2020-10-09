@@ -443,7 +443,7 @@ bool CM17Protocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 
 bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 {
-	if (0 == memcmp(buf, "PING", 4))
+	if (0 == memcmp(buf, "PONG", 4))
 	{
 		cs.CodeIn(buf + 4);
 		if (cs.IsValid())
