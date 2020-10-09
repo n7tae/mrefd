@@ -60,9 +60,9 @@ clean :
 -include $(DEPS)
 
 install :
-	ln -s config/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
-	ln -s config/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
-	ln -s config/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
+	ln -s $(shell pwd)/config/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
+	ln -s $(shell pwd)/config/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
+	ln -s $(shell pwd)/config/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
 	cp -f systemd/$(EXE).service /etc/systemd/system/
 	cp -f $(EXE) $(BINDIR)
 	mkdir -p $(DATADIR)
