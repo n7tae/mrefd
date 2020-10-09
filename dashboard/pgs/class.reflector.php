@@ -42,11 +42,7 @@ class xReflector {
          $this->XMLContent = fread($handle, filesize($this->XMLFile));
          fclose($handle);
 
-         $this->ServiceName = substr($this->XMLContent, strpos($this->XMLContent, "<M17")+4, 3);
-         if (!is_numeric($this->ServiceName)) {
-            $this->ServiceName = null;
-            return false;
-         }
+         $this->ServiceName = substr($this->XMLContent, strpos($this->XMLContent, "<M17")+4, 4);
 
          $this->ReflectorName = "M17".$this->ServiceName;
 
