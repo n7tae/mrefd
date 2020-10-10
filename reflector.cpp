@@ -138,11 +138,23 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 {
 	// check sid is not zero
 	if ( 0U == Header->GetStreamId() )
+	{
+		std::cerr << "Incoming stream has zero streamID" << std::endl;
 		return nullptr;
+	}
 
 	// check if client is valid candidate
-	if ( ! m_Clients.IsClient(client) || client->IsAMaster() )
+	if ( ! m_Clients.IsClient(client) )
+	{
+		std::cerr << "can't find client " << client->GetCallsign() << std::endl;
 		return nullptr;
+	}
+
+	if ( client->IsAMaster() )
+	{
+		std::cerr << "Client " << client->GetCallsign() << " is already a Master" << std::endl;
+		return nullptr;
+	}
 
 	// get the module's queue
 	char module = Header->GetDestModule();
@@ -156,8 +168,10 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 	}
 
 	CPacketStream *stream = GetStream(module);
-	if ( stream == nullptr )
+	if ( stream == nullptr ) {
+		std::cerr << "Can't get stream from module '" << module << "'" << std::endl;
 		return nullptr;
+	}
 
 	stream->Lock();
 	// is it available ?
@@ -179,6 +193,10 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 		// notify
 		g_Reflector.OnStreamOpen(stream->GetUserCallsign());
 
+	}
+	else
+	{
+		std::cerr << "Can't open a packet stream for " << client->GetCallsign() << std::endl;
 	}
 	stream->Unlock();
 	return stream;

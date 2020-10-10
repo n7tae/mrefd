@@ -68,7 +68,7 @@ void CM17Protocol::Task(void)
 #else
 	auto len = Receive4(buf, ip, 20);
 #endif
-	if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
+	//if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
 	switch (len) {
 	case sizeof(AM17Frame):
 		if ( IsValidPacket(buf, pack) )
@@ -392,6 +392,7 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 			stream = g_Reflector.OpenStream(packet, client);
 			if ( nullptr == stream )
 			{
+				std::cerr << "Cant open the stream for " << client->GetCallsign() << std::endl;
 				packet.release();	// couldn't open the stream, so destroy the packet
 			}
 			else
