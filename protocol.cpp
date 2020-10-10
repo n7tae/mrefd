@@ -136,14 +136,15 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 	CPacketStream *stream = GetStream(packet->GetStreamId(), ip);
 	if ( stream )
 	{
+		auto islast = packet->IsLastPacket(); // we'll need this after the std::move()!
+
 		// and push the packet
 		stream->Lock();
 		stream->Push(std::move(packet));
 		stream->Unlock();
-	}
-	if (packet->IsLastPacket())
-	{
-		g_Reflector.CloseStream(stream);
+
+		if (islast)
+			g_Reflector.CloseStream(stream);
 	}
 }
 
