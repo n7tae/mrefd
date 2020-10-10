@@ -95,7 +95,7 @@ char CCallsign::GetModule() const
 
 bool CCallsign::HasSameCallsign(const CCallsign &call) const
 {
-	return (0 == memcmp(cs, call.cs, 8));
+	return (this->GetCS(8) == call.GetCS(8));
 }
 
 bool CCallsign::operator==(const CCallsign &rhs) const
