@@ -185,7 +185,7 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 		client->Heard();
 
 		// report
-		std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with sid " << Header->GetStreamId() << " by user " << Header->GetSourceCallsign() << std::endl;
+		std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << " by user " << Header->GetSourceCallsign() << std::endl;
 
 		// and push header packet
 		stream->Push(std::move(Header));
@@ -234,7 +234,7 @@ void CReflector::CloseStream(CPacketStream *stream)
 			// notify
 			OnStreamClose(stream->GetUserCallsign());
 
-			std::cout << "Closing stream of module " << GetStreamModule(stream) << std::endl;
+			std::cout << "Closing stream on module " << GetStreamModule(stream) << std::endl;
 		}
 
 		// release clients
