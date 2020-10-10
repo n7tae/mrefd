@@ -81,6 +81,11 @@ void CM17Protocol::Task(void)
 					OnPacketIn(pack, ip);
 				}
 			}
+			else
+			{
+				CCallsign dest(buf+6);
+				std::cout << "Packet with wrong destination:" << dest.GetCS() << std::endl;
+			}
 		}
 		break;
 	case 11:
