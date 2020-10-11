@@ -59,8 +59,8 @@ void CM17Protocol::Task(void)
 	std::unique_ptr<CPacket> pack;
 
 	// any incoming packet ?
-#if DSTAR_IPV6==true
-#if DSTAR_IPV4==true
+#ifdef LISTEN_IPV6
+#ifdef LISTEN_IPV4
 	auto len = ReceiveDS(buf, ip, 20);
 #else
 	auto len = Receive6(buf, ip, 20);
