@@ -1,0 +1,199 @@
+#!/bin/bash
+#
+# Copyright (c) 2020 by Thomas A. Early N7TAE
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+SetBooleanValue ()
+{
+	local dvname
+	local cv
+	if [ -z $2 ]; then
+		if [ -z ${!1+x} ]; then
+			if [[ "$1" == module_[abc]_* ]]; then
+				echo matches
+				dvname=${1//_[abc]_/_x_}
+			else
+				echo does not match
+				dvname=${1}_d
+			fi
+			cv=${!dvname}
+		else
+			cv=${!1}
+		fi
+		if [[ $cv == [tT]* ]]; then
+			eval ${1}=false
+		else
+			eval ${1}=true
+		fi
+	elif [[ "$2" == [tT]* ]]; then
+		eval ${1}=true
+	else
+		eval ${1}=false
+	fi
+}
+
+EvaluateVar ()
+{
+	if [ -z ${!1+x} ]; then
+		if [ -z "${!2}" ]; then
+			echo "'' <DEFAULT>"
+		else
+			echo "${!2} <DEFAULT>"
+		fi
+	else
+		if [ -z "${!1}" ]; then
+			echo "''"
+		else
+			echo "${!1}"
+		fi
+	fi
+}
+
+WriteMemFile ()
+{
+	local file
+	file="$rcfg"
+	echo "# created on `date`"                                  > $file
+	[ -z ${callsign+x}    ] || echo    "callsign='$callsign'"  >> $file
+	[ -z ${nummod+x}      ] || echo      "nummod=$nummod"      >> $file
+	[ -z ${ip4addr+x}     ] || echo     "ip4addr='$ip4addr'"   >> $file
+	[ -z ${ip6addr+x}     ] || echo     "ip6addr='$ip6addr'"   >> $file
+	[ -z ${dbsupport+x}   ] || echo   "dbsupport=$dbsupport"   >> $file
+}
+
+WriteSRCHFile ()
+{
+	local file m
+	file="$srch"
+	echo "// Created on `date`" > $file
+	echo "#define CALLSIGN \"${callsign}\"" >> $file
+	if [ -z ${nummod+x} ]; then
+		echo "#define NB_OF_MODULES ${nummod_d}" >> $file
+	else
+		echo "#define NB_OF_MODULES ${nummod}" >> $file
+	fi
+	if [ ! -z ${ip4addr+x} ]; then
+		echo "#define LISTEN_IPV4 \"${ip4addr}\"" >> $file
+	fi
+	if [ ! -z ${ip6addr+x} ]; then
+		echo "#define LISTEN_IPV6 \"${ip6addr}\"" >> $file
+	fi
+}
+
+WriteSRCMKFile ()
+{
+	local file
+	file="$srcm"
+	echo "# Created on `date`" > $file
+	if [ -z ${dbsupport+x} ]; then
+		echo "debug = $dbsupport_d" >> $file
+	else
+		echo "debug = $dbsupport" >> $file
+	fi
+}
+
+WriteCFGFiles ()
+{
+	WriteMemFile
+	WriteSRCHFile
+	WriteSRCMKFile
+}
+
+ListCFGFiles ()
+{
+	echo "===========${rcfg}============="
+	cat $rcfg
+	echo "===========${srch}============="
+	cat $srch
+	echo "===========${srcm}============="
+	cat $srcm
+}
+
+# Execution starts here!
+# file locations
+rcfg='reflector.cfg'
+srch='configure.h'
+srcm='configure.mk'
+mrefserv='/etc/systemd/system/mrefd.service'
+# default values
+callsign_d='CHNGME'
+nummod_d=26
+ip4addr_d='none'
+ip6addr_d='none'
+dbsupport_d=false
+
+if [ -e reflector.cfg ]; then
+	source reflector.cfg
+else
+	echo 'No configuration file found...'
+	sleep 1
+fi
+
+if [ -z ${expertmode+x} ]; then
+	if [ -e $mrefserv ]; then
+		echo -n "You cannot change the configuration right now beacuse there is an m17 server running."
+		echo "===========${rcfg}============="
+		cat $rcfg
+		echo
+		echo "Please uninstall the running server before attempting to modify the configuration."
+		exit 1
+	fi
+fi
+
+key='x'
+# main loop
+while [[ "$key" != q* ]]
+do
+	clear
+	echo
+	echo "        Reflector Configuration, Version #200821"
+	echo
+	echo    "     ******* REFLECTOR ********"
+	echo -n "cs : Reflector Callsign     = "; EvaluateVar callsign{,_d}
+	echo -n "nm : Number of Modules      = "; EvaluateVar nummod{,_d}
+	echo    "     ******* ADDRESSES ********"
+	echo -n "i4 : IPv4 Listen Address    = "; EvaluateVar ip4addr{,_d}
+	echo -n "i6 : IPv6 Listen Address    = "; EvaluateVar ip6addr{,_d}
+	echo    "     ******* DEBUGGING ********"
+	echo -n "db : Debugging Support      = "; EvaluateVar dbsupport{,_d}
+	echo
+	if [[ "$callsign" == M17-* ]]; then
+		echo    "w  : Write configuration files (overwrites any existing files) and quit"
+	fi
+	echo    "q  : Quit without saving"
+	echo    "u  : Unset the value of <key> (revert to the default value)."
+	echo
+	read -p "Please input <key> <value> - omit value to toggle a true/false : " key value garbage
+	if [[ "$key" == cs*  && ${value^^} == M17-* ]]; then
+		callsign="${value^^}"
+		callsign="${callsign:0:7}"
+	elif [[ "$key" == nm* ]]; then nummod="$value"
+	elif [[ "$key" == i4* ]]; then ip4addr="$value"
+	elif [[ "$key" == i6* ]]; then ip6addr="$value"
+	elif [[ "$key" == db* ]]; then SetBooleanValue dbsupport "$value"
+	elif [[ "$key" == w* ]]; then
+		WriteCFGFiles
+		ListCFGFiles
+		exit 0
+	elif [[ "$key" == u* ]]; then
+		if   [[ "$value" == cs* ]]; then unset callsign
+		elif [[ "$value" == nm* ]]; then unset nummod
+		elif [[ "$value" == i4* ]]; then unset ip4addr
+		elif [[ "$value" == i6* ]]; then unset ip6addr
+		elif [[ "$value" == db* ]]; then unset dbsupport
+		fi
+	fi
+done
+exit 0
