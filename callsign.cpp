@@ -65,7 +65,7 @@ void CCallsign::CodeIn(const uint8_t *in)
 	for (int i=1; i<6; i++)
 		coded = (coded << 8) | in[i];
 	if (coded > 0xee6b27ffffffu) {
-		std::cerr << "Callsign code is too large, 0x" << std::hex << coded << std::endl;
+		std::cerr << "Callsign code is too large, 0x" << std::hex << coded << std::dec << std::endl;
 		return;
 	}
 	memcpy(code, in, 6);

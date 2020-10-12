@@ -185,7 +185,7 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 		client->Heard();
 
 		// report
-		std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << " by user " << Header->GetSourceCallsign() << std::endl;
+		std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << std::dec << " by user " << Header->GetSourceCallsign() << std::endl;
 
 		// and push header packet
 		stream->Push(std::move(Header));
