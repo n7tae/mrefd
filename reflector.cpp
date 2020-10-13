@@ -194,10 +194,10 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 		g_Reflector.OnStreamOpen(stream->GetUserCallsign());
 
 	}
-	else
-	{
-		std::cerr << "Can't open a packet stream for " << client->GetCallsign() << std::endl;
-	}
+	// else
+	// {
+	// 	std::cerr << "Can't open a packet stream for " << client->GetCallsign() << std::endl;
+	// }
 	stream->Unlock();
 	return stream;
 }
