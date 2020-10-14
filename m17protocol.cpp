@@ -284,7 +284,7 @@ void CM17Protocol::HandleKeepalives(void)
 				Send(disconnect, 10, client->GetIp());
 
 				// remove it
-				std::cout << "DExtra client " << client->GetCallsign() << " keepalive timeout" << std::endl;
+				std::cout << "M17 client " << client->GetCallsign() << " keepalive timeout" << std::endl;
 				clients->RemoveClient(client);
 			}
 			g_Reflector.ReleasePeers();

@@ -37,9 +37,9 @@ CM17Peer::CM17Peer()
 CM17Peer::CM17Peer(const CCallsign &callsign, const CIp &ip, const char *modules)
 	: CPeer(callsign, ip, modules)
 {
-	std::cout << "Adding DExtra peer" << std::endl;
+	std::cout << "Adding M17 peer" << std::endl;
 
-	// and construct the DExtra clients
+	// and construct the M17 clients
 	for ( unsigned i = 0; i < ::strlen(modules); i++ )
 	{
 		// create and append to vector
