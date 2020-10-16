@@ -1,14 +1,11 @@
 *.o
 *.d
 .vscode
-./*.blacklist
-./*.whitelist
-./*.interlink
-./*.terminal
-./*.service
+*.blacklist
+*.whitelist
+*.interlink
 configure.mk
 configure.h
-configure.sql
 reflector.cfg
 mrefd
 crc-test
