@@ -365,7 +365,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			// send connect packet to re-initiate peer link
 			EncodeConnectPacket(connect, (*it).GetModules());
 			Send(connect, 11, (*it).GetIp());
-			std::cout << "Sending connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
+			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
 		}
 	}
 

@@ -62,7 +62,7 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Reflector " << g_Reflector.GetCallsign()  << "started and listening" << std::endl;
+	std::cout << "Reflector " << g_Reflector.GetCallsign()  << " started and listening" << std::endl;
 
 	// write new pid file
 	std::ofstream ofs(PIDFILE_PATH, std::ofstream::out);
