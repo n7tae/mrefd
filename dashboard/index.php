@@ -173,8 +173,14 @@ if ($CallingHome['Active']) {
                             href="./index.php">Last Heard</a></li>
                 <li<?php echo ($_GET['show'] == "repeaters") ? ' class="active"' : ''; ?>><a
                             href="./index.php?show=repeaters">Links (<?php echo $Reflector->NodeCount();  ?>)</a></li>
+<!--
+                <li<?php echo ($_GET['show'] == "peers") ? ' class="active"' : ''; ?>><a href="./index.php?show=peers">Peers
+							(<?php echo $Reflector->PeerCount(); ?>)</a></li>
+                <li<?php echo ($_GET['show'] == "reflectors") ? ' class="active"' : ''; ?>><a
+                            href="./index.php?show=reflectors">Reflector List</a></li>
                 <li<?php echo ($_GET['show'] == "livequadnet") ? ' class="active"' : ''; ?>><a
                             href="./index.php?show=livequadnet">QuadNet Live</a></li>
+-->
             </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
