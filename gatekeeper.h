@@ -60,8 +60,8 @@ protected:
 
 	// operation helpers
 	bool IsNodeListedOk(const CCallsign &, const CIp &, char = ' ') const;
-	bool IsPeerListedOk(const CCallsign &, const CIp &, char) const;
-	bool IsPeerListedOk(const CCallsign &, const CIp &, char *) const;
+	// bool IsPeerListedOk(const CCallsign &, const CIp &, char) const;
+	// bool IsPeerListedOk(const CCallsign &, const CIp &, char *) const;
 
 protected:
 	// data

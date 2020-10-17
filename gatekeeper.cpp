@@ -166,46 +166,46 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign, const CIp &ip, char 
 
 }
 
-bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char module) const
-{
-	bool ok = true;
+// bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char module) const
+// {
+// 	bool ok = true;
 
-	// first check IP
+// 	// first check IP
 
-	// next, check callsign
-	if ( ok )
-	{
-		// look for an exact match in the list
-		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
-		if ( !m_PeerList.empty() )
-		{
-			ok = m_PeerList.IsCallsignListed(callsign, module);
-		}
-		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
-	}
+// 	// next, check callsign
+// 	if ( ok )
+// 	{
+// 		// look for an exact match in the list
+// 		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
+// 		if ( !m_PeerList.empty() )
+// 		{
+// 			ok = m_PeerList.IsCallsignListed(callsign, module);
+// 		}
+// 		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
+// 	}
 
-	// done
-	return ok;
-}
+// 	// done
+// 	return ok;
+// }
 
-bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char *modules) const
-{
-	bool ok = true;
+// bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char *modules) const
+// {
+// 	bool ok = true;
 
-	// first check IP
+// 	// first check IP
 
-	// next, check callsign
-	if ( ok )
-	{
-		// look for an exact match in the list
-		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
-		if ( !m_PeerList.empty() )
-		{
-			ok = m_PeerList.IsCallsignListed(callsign, modules);
-		}
-		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
-	}
+// 	// next, check callsign
+// 	if ( ok )
+// 	{
+// 		// look for an exact match in the list
+// 		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
+// 		if ( !m_PeerList.empty() )
+// 		{
+// 			ok = m_PeerList.IsCallsignListed(callsign, modules);
+// 		}
+// 		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
+// 	}
 
-	// done
-	return ok;
-}
+// 	// done
+// 	return ok;
+// }
