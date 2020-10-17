@@ -1,4 +1,4 @@
-﻿# MREFD
+# MREFD
 
 MREFD is a new M17 open source Reflector. Most of the code is originally based on XLXD and the copyrights of all relevent source files reflect this. The sources are published under GPL Licenses.
 
