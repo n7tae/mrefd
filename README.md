@@ -96,13 +96,13 @@ The blacklist, whitelist and interlink files can be modified in real time while 
 
 ### Copy dashboard to /var/www
 
+The official M17 dashboard is in another repo.
+
 ```bash
-sudo cp -r ~/xlxd/dashboard /var/www/db     # or where ever you system www root is located
+git clone git://github.com/M17-project/ref-dash /var/www/html     # or where ever you system www root is located
 ```
 
-Please note that your www root directory might be some place else. There is one file that needs configuration. Edit the copied files, not the ones from the repository:
-
-- **pgs/config.inc.php** - At a minimum set your email address, country and comment. **Do not** enable the calling home feature. This feature is not appropriate for mrefd.
+Follow the instructions on that repo for configuring your dashboard.
 
 ## Updating mrefd
 
@@ -112,7 +112,9 @@ Start by first moving to the build directory and do a `git pull`. If any .h or .
 
 MREFD requires the following port to be open and forwarded properly for network traffic:
 
-- UDP port 17000
+- UDP port 17000 for M17
+- TCP port 80 for HTTP
+- TCP port 443 for HTTPS
 
 ## Copyright
 
