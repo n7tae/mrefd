@@ -114,10 +114,6 @@ MREFD requires the following port to be open and forwarded properly for network 
 
 - UDP port 17000
 
-## Bugs
-
-Reflector-to-reflector interlinking is not yet working. Don't even bother...
-
 ## Copyright
 
 - Copyright © 2020 Thomas A. Early N7TAE
