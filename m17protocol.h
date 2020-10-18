@@ -51,10 +51,10 @@ protected:
 	void OnFirstPacketIn(std::unique_ptr<CPacket> &, const CIp &);
 
 	// packet decoding helpers
-	bool IsValidConnect(    const uint8_t *, CCallsign &, char *);
-	bool IsValidDisconnect( const uint8_t *, CCallsign &);
-	bool IsValidKeepAlive(  const uint8_t *, CCallsign &);
-	bool IsValidPacket(     const uint8_t *, std::unique_ptr<CPacket> &);
+	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
+	bool IsValidDisconnect(const uint8_t *, CCallsign &);
+	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
+	bool IsValidPacket(const uint8_t *, std::unique_ptr<CPacket> &);
 
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);

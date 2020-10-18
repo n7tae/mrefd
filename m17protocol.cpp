@@ -118,11 +118,22 @@ void CM17Protocol::Task(void)
 						}
 						g_Reflector.ReleasePeers();
 					}
-					else
+					else // this is a link request, but from who?
 					{
-						// acknowledge the request
-						EncodeConnectAckPacket(buf);
-						Send(buf, 4, ip);
+						// is this a request from another M17 reflector?
+						if (0 == cs.GetCS(4).compare("M17-")) {
+							// Yes, then it needs a special acknowledgement
+							std::cout << "Link request from peer " << cs << "@" << ip << " to module " << mod << std::endl;
+							char modules[3] = { 0 };
+							modules[0] = mod;
+							modules[1] = cs.GetModule();
+							EncodeConnectPacket(buf, modules);
+							Send(buf, 11, ip);
+						} else {
+							// acknowledge a normal request from a repeater/hot-spot/mvoice
+							EncodeConnectAckPacket(buf);
+							Send(buf, 4, ip);
+						}
 
 						// create the client and append
 						g_Reflector.GetClients()->AddClient(std::make_shared<CM17Client>(cs, ip, mod));
@@ -246,9 +257,6 @@ void CM17Protocol::HandleQueue(void)
 
 void CM17Protocol::HandleKeepalives(void)
 {
-	// DExtra protocol sends and monitors keepalives packets
-	// event if the client is currently streaming
-	// so, send keepalives to all
 	uint8_t keepalive[10];
 	EncodeKeepAlivePacket(keepalive);
 
@@ -364,7 +372,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			(*it).ResolveIp();
 			// send connect packet to re-initiate peer link
 			EncodeConnectPacket(connect, (*it).GetModules());
-			Send(connect, 11, (*it).GetIp());
+			Send(connect, 11, (*it).GetIp(), M17_PORT);
 			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
 		}
 	}
@@ -453,7 +461,7 @@ bool CM17Protocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 
 bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 {
-	if (0 == memcmp(buf, "PONG", 4))
+	if ('P' == buf[0] && ('I' == buf[1] || 'O' == buf[1]) && 'N' ==  buf[2] && 'G' == buf[3])
 	{
 		cs.CodeIn(buf + 4);
 		if (cs.IsValid())
