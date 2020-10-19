@@ -17,7 +17,7 @@ The packages which are described in this document are designed to install server
 
 ## Installation
 
-Below are instructions for building either an mrefd reflector.
+Below are instructions for building an mrefd reflector.
 
 ### After a clean installation of Debian make sure to run update and upgrade
 
@@ -73,10 +73,10 @@ After the configuration files have been written, exit the rconfig script and typ
 After you have written your configutation files, you can build and install your system:
 
 ```bash
-./radmin
+make && sudo make
 ```
 
-Use this command to compile and install your system. It can also be used to uninstall your system. It will use the information in reflector.cfg to perform each task. This radmin menu can also perform other tasks like restarting the reflector or transcoder process. It can also be used to update the software, if the system is uninstalled.
+Use this command to compile and install your system. Use `sudo make uninstall` to uninstall mrefd.
 
 ### Stoping and starting the service manually
 
@@ -106,11 +106,21 @@ Follow the instructions on that repo for configuring your dashboard.
 
 ## Updating mrefd
 
-Start by first moving to the build directory and do a `git pull`. If any .h or .cpp fiiles have updates, you can do a `make && sudo make uninstall && sudo make install`.
+Here is the safest way to update your reflector:
+
+```bash
+sudo make uninstall
+make clean
+git pull
+make
+sudo make install
+```
+
+If, after doing the `git pull`, you see that it's downloaded a new rconfig script, it would probably be a good idea to run it before doing a `make`. There may be new build options of which you might want to take advantage.
 
 ## Firewall settings
 
-MREFD requires the following port to be open and forwarded properly for network traffic:
+MREFD requires the following port to be open to inbound network traffic:
 
 - UDP port 17000 for M17
 - TCP port 80 for HTTP
