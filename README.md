@@ -39,15 +39,15 @@ sudo apt install g++
 
 ```bash
 git clone https://github.com/n7tae/mrefd.git
-cd mrefdd
+cd mrefd
 ```
 
 ### Create and edit your blacklist, whitelist and linking files
 
 ```bash
-cp ../config/mrefd.blacklist .
-cp ../config/mrefd.whitelist .
-cp ../config/mrefd.interlink .
+cp config/mrefd.blacklist .
+cp config/mrefd.whitelist .
+cp config/mrefd.interlink .
 ```
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The interlink file sets up the M17<--->M17 out-going M17 peer linking.
