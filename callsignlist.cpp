@@ -166,8 +166,16 @@ bool CCallsignList::IsCallsignListed(const CCallsign &callsign, const CIp &ip, c
 {
 	for ( const auto &item : m_Callsigns )
 	{
-		if (item.HasSameCallsign(callsign) && item.CheckListedModules(modules))
-			return true;
+		if ( item.HasSameCallsign(callsign) )
+		{
+			if ( item.CheckListedModules(modules) )
+			{
+				if ( ip == item.GetIp() )
+				{
+					return true;
+				}
+			}
+		}
 	}
 
 	return false;

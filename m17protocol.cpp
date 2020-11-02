@@ -112,13 +112,31 @@ void CM17Protocol::Task(void)
 		}
 		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
 		{
+			std::cout << "Peer ACQN packet for modules " << mods << " from " << cs << " at " << ip << std::endl;
 
+			// callsign authorized?
+			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17) )
+			{
+				// already connected ?
+				CPeers *peers = g_Reflector.GetPeers();
+				if ( nullptr == peers->FindPeer(cs, ip, PROTOCOL_M17) )
+				{
+					// create the new peer
+					// this also create one client per module
+					auto peer = std::make_shared<CM17Peer>(cs, ip, mods);
+
+					// append the peer to reflector peer list
+					// this also add all new clients to reflector client list
+					peers->AddPeer(peer);
+				}
+				g_Reflector.ReleasePeers();
+			}
 		}
 		else
 		{
-
+			Dump("Unknown packet", buf, len);
 		}
-
+		break;
 	case 11:
 		if ( IsValidConnect(buf, cs, &mod) )
 		{
@@ -522,12 +540,12 @@ bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, ch
 
 bool CM17Protocol::IsVaildInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
 {
-
+	return true;
 }
 
 bool CM17Protocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 {
-
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -556,12 +574,11 @@ void CM17Protocol::EncodeConnectAckPacket(uint8_t *buf)
 
 void CM17Protocol::EncodeInterlinkAckPacket(uint8_t *buf, const char *mods)
 {
+	memset(buf, 0, sizeof(SInterConnect));
 	memcpy(buf, "ACKN", 4);
 	CCallsign cs(GetReflectorCallsign());
 	cs.CodeOut(buf+4);
-	memset(buf+10, 0, 27);
-	for (int i=0; i<26 && mods[i]; i++)
-		buf[i+10] = mods[i];
+	memcpy(buf + 10, mods, strlen(mods));
 }
 
 void CM17Protocol::EncodeInterlinkNackPacket(uint8_t *buf)

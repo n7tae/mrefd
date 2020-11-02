@@ -178,15 +178,13 @@ bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const
 {
 	bool ok = true;
 
-	// first check IP
-
-	// next, check callsign
 	if ( ok )
 	{
 		// look for an exact match in the list
 		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
 		if ( !m_PeerList.empty() )
 		{
+			// find an exact match
 			ok = m_PeerList.IsCallsignListed(callsign, ip, modules);
 		}
 		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();

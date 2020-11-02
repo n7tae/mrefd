@@ -28,12 +28,13 @@
 #include "udpsocket.h"
 #include "packetstream.h"
 #include "packet.h"
+#include "base.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CProtocol
+class CProtocol : public CBase
 {
 public:
 	// constructor

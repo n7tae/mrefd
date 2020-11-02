@@ -30,7 +30,7 @@
 
 // M17 Packets
 //all structures must be big endian on the wire, so you'll want htonl (man byteorder 3) and such.
-using SM17Lich = struct __attribute__((__packed__)) _LICH {
+using SM17Lich = struct __attribute__((__packed__)) lich_tag {
 	uint8_t  addr_dst[6];
 	uint8_t  addr_src[6];
 	uint16_t frametype; //frametype flag field per the M17 spec
@@ -38,7 +38,7 @@ using SM17Lich = struct __attribute__((__packed__)) _LICH {
 }; // 6 + 6 + 2 + 14 = 28 bytes
 
 //without SYNC or other parts
-using SM17Frame = struct __attribute__((__packed__)) _ip_frame {
+using SM17Frame = struct __attribute__((__packed__)) m17_tag {
 	uint8_t  magic[4];
 	uint16_t streamid;
 	SM17Lich lich;
@@ -48,7 +48,7 @@ using SM17Frame = struct __attribute__((__packed__)) _ip_frame {
 }; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes
 
 // includes extra bool (1 byte) for enforcing one-hop policy
-using SRefM17Frame = struct __attribute__((__packed__)) _ip_frame {
+using SRefM17Frame = struct __attribute__((__packed__)) peer_tag {
 	SM17Frame frame;
 	bool relayed;
 }; // 4 + 2 + 28 + 2 + 16 + 2 + 1 = 55 bytes

@@ -128,7 +128,7 @@ bool CCallsignListItem::CheckListedModules(const char *mods) const
 		else
 			found[pos] = true;
 	}
-	for (auto i=0; i<count; i++)
+	for (unsigned i=0; i<count; i++)
 	{
 		if (! found[i])
 			return false;

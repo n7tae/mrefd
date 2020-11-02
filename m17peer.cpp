@@ -34,16 +34,15 @@ CM17Peer::CM17Peer()
 {
 }
 
-CM17Peer::CM17Peer(const CCallsign &callsign, const CIp &ip, const char *modules)
-	: CPeer(callsign, ip, modules)
+CM17Peer::CM17Peer(const CCallsign &cs, const CIp &ip, const char *modules) : CPeer(cs, ip, modules)
 {
-	std::cout << "Adding M17 peer" << std::endl;
+	std::cout << "Adding M17 peer " << cs << " module(s) " << modules << std::endl;
 
 	// and construct the M17 clients
-	for ( unsigned i = 0; i < ::strlen(modules); i++ )
+	for (auto p=modules; *p; p++)
 	{
 		// create and append to vector
-		m_Clients.push_back(std::make_shared<CM17Client>(callsign, ip, modules[i]));
+		m_Clients.push_back(std::make_shared<CM17Client>(cs, ip, *p));
 	}
 }
 
