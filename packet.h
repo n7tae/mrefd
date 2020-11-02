@@ -30,39 +30,53 @@
 
 // M17 Packets
 //all structures must be big endian on the wire, so you'll want htonl (man byteorder 3) and such.
-using AM17Lich = struct __attribute__((__packed__)) _LICH {
+using SM17Lich = struct __attribute__((__packed__)) _LICH {
 	uint8_t  addr_dst[6];
 	uint8_t  addr_src[6];
 	uint16_t frametype; //frametype flag field per the M17 spec
 	uint8_t  nonce[14]; //bytes for the nonce
-}; // 6 + 6 + 2 + 14 = 28 bytes = 224 bits
+}; // 6 + 6 + 2 + 14 = 28 bytes
 
 //without SYNC or other parts
-using AM17Frame = struct __attribute__((__packed__)) _ip_frame {
+using SM17Frame = struct __attribute__((__packed__)) _ip_frame {
 	uint8_t  magic[4];
 	uint16_t streamid;
-	AM17Lich lich;
+	SM17Lich lich;
 	uint16_t framenumber;
 	uint8_t  payload[16];
 	uint16_t crc; 	//16 bit CRC
-}; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes = 432 bits
+}; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes
+
+// includes extra bool (1 byte) for enforcing one-hop policy
+using SRefM17Frame = struct __attribute__((__packed__)) _ip_frame {
+	SM17Frame frame;
+	bool relayed;
+}; // 4 + 2 + 28 + 2 + 16 + 2 + 1 = 55 bytes
+
+using SInterConnect = struct __attribute__((__packed__)) interconnect_tag {
+	uint8_t magic[4];
+	uint8_t fromcs[6];
+	uint8_t mods[27];
+}; // 37 bytes
 
 class CPacket
 {
 public:
 	CPacket() {}
-	CPacket(const uint8_t *buf);
+	CPacket(const uint8_t *buf, bool is_internal);
 	const CCallsign &GetDestCallsign() const;
 	char GetDestModule() const;
 	const CCallsign &GetSourceCallsign() const;
 	uint16_t GetStreamId() const;
 	uint16_t GetCRC() const;
 	void SetCRC(uint16_t crc);
+	void SetRelay(bool state);
+	bool GetRelay() const;
 	std::unique_ptr<CPacket> Duplicate(void) const;
 	bool IsLastPacket() const;
-	AM17Frame &GetFrame();
+	SRefM17Frame &GetFrame();
 
 private:
 	CCallsign destination, source;
-	AM17Frame m17;
+	SRefM17Frame m17;
 };

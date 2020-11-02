@@ -21,11 +21,13 @@
 
 #include "packet.h"
 
-CPacket::CPacket(const uint8_t *buf)
+CPacket::CPacket(const uint8_t *buf, bool is_internal)
 {
-	memcpy(m17.magic, buf, sizeof(AM17Frame));
-	destination.CodeIn(m17.lich.addr_dst);
-	source.CodeIn(m17.lich.addr_src);
+	memcpy(m17.frame.magic, buf, is_internal ? sizeof(SRefM17Frame) : sizeof(SM17Frame));
+	if (! is_internal)
+		m17.relayed = false;
+	destination.CodeIn(m17.frame.lich.addr_dst);
+	source.CodeIn(m17.frame.lich.addr_src);
 }
 
 const CCallsign &CPacket::GetDestCallsign() const
@@ -45,17 +47,27 @@ const CCallsign &CPacket::GetSourceCallsign() const
 
 uint16_t CPacket::GetStreamId() const
 {
-	return ntohs(m17.streamid);
+	return ntohs(m17.frame.streamid);
 }
 
 uint16_t CPacket::GetCRC() const
 {
-	return ntohs(m17.crc);
+	return ntohs(m17.frame.crc);
 }
 
 void CPacket::SetCRC(uint16_t crc)
 {
-	m17.crc = htons(crc);
+	m17.frame.crc = htons(crc);
+}
+
+void CPacket::SetRelay(bool state)
+{
+	m17.relayed = state;
+}
+
+bool CPacket::GetRelay() const
+{
+	return m17.relayed;
 }
 
 std::unique_ptr<CPacket> CPacket::Duplicate(void) const
@@ -65,10 +77,10 @@ std::unique_ptr<CPacket> CPacket::Duplicate(void) const
 
 bool CPacket::IsLastPacket() const
 {
-	return (0x8000u & m17.framenumber == 0x8000u);
+	return (0x8000u & m17.frame.framenumber == 0x8000u);
 }
 
-AM17Frame &CPacket::GetFrame()
+SRefM17Frame &CPacket::GetFrame()
 {
 	return m17;
 }

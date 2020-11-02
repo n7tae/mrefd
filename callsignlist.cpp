@@ -63,21 +63,21 @@ bool CCallsignList::LoadFromFile(const char *filename)
 			char *szt = TrimWhiteSpaces(sz);
 
 			// crack it
-			if ( (::strlen(szt) > 0) && (szt[0] != '#') )
+			if ( (strlen(szt) > 0) && (szt[0] != '#') )
 			{
 				// 1st token is callsign
-				if ( (szt = ::strtok(szt, " ,\t")) != nullptr )
+				if ( (szt = strtok(szt, " ,\t")) != nullptr )
 				{
-					CCallsign callsign(szt);
+					CCallsign callsign(ToUpper(szt));
 					// 2nd token is modules list
-					szt = ::strtok(nullptr, " ,\t");
+					szt = strtok(nullptr, " ,\t");
 					// if token absent, use wildcard
 					if ( szt == nullptr )
 					{
 						szt = szStar;
 					}
 					// and add to list
-					m_Callsigns.push_back(CCallsignListItem(callsign, CIp(), szt));
+					m_Callsigns.push_back(CCallsignListItem(callsign, CIp(), ToUpper(szt)));
 				}
 			}
 		}
@@ -162,7 +162,7 @@ bool CCallsignList::IsCallsignListed(const CCallsign &callsign, char module) con
 	return false;
 }
 
-bool CCallsignList::IsCallsignListed(const CCallsign &callsign, char *modules) const
+bool CCallsignList::IsCallsignListed(const CCallsign &callsign, const CIp &ip, const char *modules) const
 {
 	for ( const auto &item : m_Callsigns )
 	{
@@ -228,4 +228,15 @@ bool CCallsignList::GetLastModTime(time_t *time)
 		}
 	}
 	return ok;
+}
+
+char *CCallsignList::ToUpper(char *str)
+{
+	constexpr auto diff = 'a' - 'A';
+	for (char *p=str; *p; p++)
+	{
+		if (*p >= 'a' && *p <= 'z')
+			*p -= diff;
+	}
+	return str;
 }

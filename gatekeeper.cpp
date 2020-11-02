@@ -79,11 +79,19 @@ void CGateKeeper::Close(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// authorisations
+// authorizations
 
 bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, int protocol, char *modules) const
 {
-	bool ok = IsNodeListedOk(callsign, ip);
+	bool ok;
+	if (callsign.GetCS(4).compare("M17-"))
+	{
+		ok = IsNodeListedOk(callsign, ip);
+	}
+	else
+	{
+		ok = IsPeerListedOk(callsign, ip, modules);
+	}
 
 	if ( !ok )
 	{
@@ -166,46 +174,24 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign, const CIp &ip, char 
 
 }
 
-// bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char module) const
-// {
-// 	bool ok = true;
+bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const char *modules) const
+{
+	bool ok = true;
 
-// 	// first check IP
+	// first check IP
 
-// 	// next, check callsign
-// 	if ( ok )
-// 	{
-// 		// look for an exact match in the list
-// 		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
-// 		if ( !m_PeerList.empty() )
-// 		{
-// 			ok = m_PeerList.IsCallsignListed(callsign, module);
-// 		}
-// 		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
-// 	}
+	// next, check callsign
+	if ( ok )
+	{
+		// look for an exact match in the list
+		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
+		if ( !m_PeerList.empty() )
+		{
+			ok = m_PeerList.IsCallsignListed(callsign, ip, modules);
+		}
+		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
+	}
 
-// 	// done
-// 	return ok;
-// }
-
-// bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, char *modules) const
-// {
-// 	bool ok = true;
-
-// 	// first check IP
-
-// 	// next, check callsign
-// 	if ( ok )
-// 	{
-// 		// look for an exact match in the list
-// 		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
-// 		if ( !m_PeerList.empty() )
-// 		{
-// 			ok = m_PeerList.IsCallsignListed(callsign, modules);
-// 		}
-// 		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
-// 	}
-
-// 	// done
-// 	return ok;
-// }
+	// done
+	return ok;
+}

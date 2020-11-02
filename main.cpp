@@ -22,28 +22,46 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
-#include "reflector.h"
-
+#include <regex>
 #include <sys/stat.h>
 
+#include "main.h"
+#include "reflector.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // global objects
 
 CReflector  g_Reflector;
 
-////////////////////////////////////////////////////////////////////////////////////////
-// function declaration
+#ifndef CALLSIGN
+#define CALLSIGN "CHANGME"
+#endif
+#ifndef LISTEN_IPV4
+#define LISTEN_IPV4 "none"
+#endif
+#ifndef LISTEN_IPV6
+#define LISTEN_IPV6 "none"
+#endif
 
 int main()
 {
-	const std::string cs(CALLSIGN);
-	if ((cs.size() > 7) || (cs.compare(0, 3, "M17")))
+	auto IPv4RegEx = std::regex("^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$", std::regex::extended);
+	auto IPv6RegEx = std::regex("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}(:[0-9a-fA-F]{1,4}){1,1}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|([0-9a-fA-F]{1,4}:){1,1}(:[0-9a-fA-F]{1,4}){1,6}|:((:[0-9a-fA-F]{1,4}){1,7}|:))$", std::regex::extended);
+	auto RefRegEx = std::regex("^M17-([A-Z0-9]){3,3}$", std::regex::extended);
+
+	if (! std::regex_match(CALLSIGN, RefRegEx))
 	{
-		std::cerr << "Malformed reflector callsign: '" << cs << "', aborting!" << std::endl;
+		std::cerr << "Malformed reflector callsign: '" << CALLSIGN << "', aborting!" << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	if (! std::regex_match(LISTEN_IPV4, IPv4RegEx) && ! std::regex_match(LISTEN_IPV6, IPv6RegEx))
+	{
+		std::cerr << "No valid IP bind address was specifed:" << std::endl;
+		std::cerr << "IPv4='" << LISTEN_IPV4 << "' IPV6='" << LISTEN_IPV6 << "'" << std::endl;
+		return EXIT_FAILURE;
+	}
+	const std::string cs(CALLSIGN);
 
 	// remove pidfile
 	remove(PIDFILE_PATH);
@@ -61,7 +79,6 @@ int main()
 		std::cout << "Error starting reflector" << std::endl;
 		return EXIT_FAILURE;
 	}
-
 	std::cout << "Reflector " << g_Reflector.GetCallsign()  << " started and listening" << std::endl;
 
 	// write new pid file

@@ -38,8 +38,8 @@ public:
 	virtual ~CCallsignList() {}
 
 	// locks
-	void Lock(void)                        { m_Mutex.lock(); }
-	void Unlock(void)                      { m_Mutex.unlock(); }
+	void Lock(void)   { m_Mutex.lock(); }
+	void Unlock(void) { m_Mutex.unlock(); }
 
 	// file io
 	virtual bool LoadFromFile(const char *);
@@ -49,8 +49,8 @@ public:
 	// compare
 	bool IsCallsignListedWithWildcard(const CCallsign &) const;
 	bool IsCallsignListedWithWildcard(const CCallsign &, char) const;
-	bool IsCallsignListed(const CCallsign &, char) const;
-	bool IsCallsignListed(const CCallsign &, char*) const;
+	bool IsCallsignListed(const CCallsign &, const char) const;
+	bool IsCallsignListed(const CCallsign &, const CIp &ip, const char*) const;
 
 	// pass-thru
 	bool empty() const                             { return m_Callsigns.empty(); }
@@ -63,10 +63,11 @@ public:
 protected:
 	bool GetLastModTime(time_t *);
 	char *TrimWhiteSpaces(char *);
+	char *ToUpper(char *str);
 
 	// data
-	std::mutex      m_Mutex;
-	const char *    m_Filename;
-	time_t          m_LastModTime;
+	std::mutex  m_Mutex;
+	const char *m_Filename;
+	time_t      m_LastModTime;
 	std::list<CCallsignListItem> m_Callsigns;
 };

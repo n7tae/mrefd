@@ -54,15 +54,20 @@ protected:
 	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(const uint8_t *, std::unique_ptr<CPacket> &);
+	bool IsValidPacket(const uint8_t *, bool is_internal, std::unique_ptr<CPacket> &);
+	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
+	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
+	bool IsVaildInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
 
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);
-	void EncodeConnectPacket(uint8_t *, const char *);
 	void EncodeConnectAckPacket(uint8_t *);
 	void EncodeConnectNackPacket(uint8_t *);
 	void EncodeDisconnectPacket(uint8_t *, char);
 	void EncodeDisconnectedPacket(uint8_t *);
+	void EncodeInterlinkConnectPacket(uint8_t *, const std::string &);
+	void EncodeInterlinkAckPacket(uint8_t *, const char *);
+	void EncodeInterlinkNackPacket(uint8_t *);
 
 protected:
 	// time

@@ -56,6 +56,7 @@ void CM17Protocol::Task(void)
 	CIp       ip;
 	CCallsign cs;
 	char      mod;
+	char      mods[27];
 	std::unique_ptr<CPacket> pack;
 
 	// any incoming packet ?
@@ -70,8 +71,9 @@ void CM17Protocol::Task(void)
 #endif
 	//if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
 	switch (len) {
-	case sizeof(AM17Frame):
-		if ( IsValidPacket(buf, pack) )
+	case sizeof(SM17Frame):	// a packet from a client
+	case sizeof(SRefM17Frame):	// a packet from a peer
+		if ( IsValidPacket(buf, (sizeof(SM17Frame) == len) ? false : true, pack) )
 		{
 			if (pack->GetDestCallsign().HasSameCallsign(g_Reflector.GetCallsign()))
 			{	// only if the packet has the destination set properly!
@@ -88,6 +90,35 @@ void CM17Protocol::Task(void)
 			}
 		}
 		break;
+	case sizeof(SInterConnect):
+		if (IsValidInterlinkConnect(buf, cs, mods))
+		{
+			std::cout << "CONN packet for modules " << mods << " from " << cs <<  " at " << ip << std::endl;
+
+			// callsign authorized?
+			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17, mods) )
+			{
+				// acknowledge the request
+				EncodeInterlinkAckPacket(buf, mods);
+				Send(buf, sizeof(SInterConnect), ip);
+			}
+			else
+			{
+				// deny the request
+				EncodeInterlinkNackPacket(buf);
+				Send(buf, 10, ip);
+			}
+
+		}
+		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
+		{
+
+		}
+		else
+		{
+
+		}
+
 	case 11:
 		if ( IsValidConnect(buf, cs, &mod) )
 		{
@@ -99,47 +130,13 @@ void CM17Protocol::Task(void)
 				// valid module ?
 				if ( g_Reflector.IsValidModule(mod) )
 				{
-					// is this an ack for a link request?
-					CPeerCallsignList *list = g_GateKeeper.GetPeerList();
-					CCallsignListItem *item = list->FindListItem(cs);
-					if ( item != nullptr && cs.GetModule() == item->GetModules()[1] && mod == item->GetModules()[0] )
-					{
-						std::cout << "ACK packet for module " << mod << " from " << cs << " at " << ip << std::endl;
+					// acknowledge a normal request from a repeater/hot-spot/mvoice
+					EncodeConnectAckPacket(buf);
+					Send(buf, 4, ip);
 
-						// already connected ?
-						CPeers *peers = g_Reflector.GetPeers();
-						if ( nullptr == peers->FindPeer(cs, ip, PROTOCOL_M17) )
-						{
-							// create the new peer
-							// this also create one client per module
-							// append the peer to reflector peer list
-							// this also add all new clients to reflector client list
-							peers->AddPeer(std::make_shared<CM17Peer>(cs, ip, std::string(1, mod).c_str()));
-						}
-						g_Reflector.ReleasePeers();
-					}
-					else // this is a link request, but from who?
-					{
-						// is this a request from another M17 reflector?
-						if (0 == cs.GetCS(4).compare("M17-")) {
-							// Yes, then it needs a special acknowledgement
-							std::cout << "Link request from peer " << cs << "@" << ip << " to module " << mod << std::endl;
-							char modules[3] = { 0 };
-							modules[0] = mod;
-							modules[1] = cs.GetModule();
-							EncodeConnectPacket(buf, modules);
-							Send(buf, 11, ip);
-						} else {
-							// acknowledge a normal request from a repeater/hot-spot/mvoice
-							EncodeConnectAckPacket(buf);
-							Send(buf, 4, ip);
-						}
-
-						// create the client and append
-						g_Reflector.GetClients()->AddClient(std::make_shared<CM17Client>(cs, ip, mod));
-						g_Reflector.ReleaseClients();
-					}
-					g_GateKeeper.ReleasePeerList();
+					// create the client and append
+					g_Reflector.GetClients()->AddClient(std::make_shared<CM17Client>(cs, ip, mod));
+					g_Reflector.ReleaseClients();
 				}
 				else
 				{
@@ -187,6 +184,10 @@ void CM17Protocol::Task(void)
 				clients->RemoveClient(client);
 			}
 			g_Reflector.ReleaseClients();
+		}
+		else if ( IsValidNAcknowledge(buf, cs))
+		{
+
 		}
 		break;
 	default:
@@ -241,10 +242,23 @@ void CM17Protocol::HandleQueue(void)
 			// is this client busy ?
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
-				// packet->GetFrame().lich.addr_dst won't be correct after this.
-				client->GetCallsign().CodeOut(packet->GetFrame().lich.addr_dst);	      // set the destination
-				packet->SetCRC(crc.CalcCRC(packet->GetFrame().magic, sizeof(AM17Frame) - 2)); // recalculate the crc
-				Send(packet->GetFrame().magic, sizeof(AM17Frame), client->GetIp());
+				auto cs = client->GetCallsign();
+				auto comp = cs.GetCS(4).compare("M17-");
+
+				if (comp) // the client is not a reflector
+				{
+					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);
+					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2));
+					Send(packet->GetFrame().frame.magic, sizeof(SM17Frame), client->GetIp());
+				}
+				else if (! packet->GetRelay())// the client is a reflector and the packet hasn't yet been relayed
+				{
+					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);	      // set the destination
+					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2)); // recalculate the crc
+					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
+					Send(packet->GetFrame().frame.magic, sizeof(SRefM17Frame), client->GetIp());
+					packet->SetRelay(false); // reset for the next client;
+				}
 			}
 		}
 		g_Reflector.ReleaseClients();
@@ -359,21 +373,17 @@ void CM17Protocol::HandlePeerLinks(void)
 
 	// check if all ours peers listed by gatekeeper are connected
 	// if not, connect or reconnect
-	uint8_t connect[11];
+	uint8_t connect[sizeof(SInterConnect)];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
-		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17*")) )
-			continue;
-		if ( strlen((*it).GetModules()) != 2 )
+		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 			continue;
 		if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
 		{
-			// resolve again peer's IP in case it's a dynamic IP
-			(*it).ResolveIp();
 			// send connect packet to re-initiate peer link
-			EncodeConnectPacket(connect, (*it).GetModules());
+			EncodeInterlinkConnectPacket(connect, (*it).GetModules());
 			Send(connect, 11, (*it).GetIp(), M17_PORT);
-			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module " << (*it).GetModules()[1] << " (module " << (*it).GetModules()[0] << ")" << std::endl;
+			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
 		}
 	}
 
@@ -472,12 +482,12 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
-bool CM17Protocol::IsValidPacket(const uint8_t *buf, std::unique_ptr<CPacket> &packet)
+bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_ptr<CPacket> &packet)
 {
 	if (0 == memcmp(buf, "M17 ", 4))	// we tested the size before we got here
 	{
 		// create packet
-		packet = std::unique_ptr<CPacket>(new CPacket(buf));
+		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
 		if ( packet->GetSourceCallsign().IsValid() )
 		{	// looks like a valid source
@@ -485,6 +495,39 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, std::unique_ptr<CPacket> &p
 		}
 	}
 	return false;
+}
+
+bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char *mods)
+{
+	if (0 == memcmp(buf, "CONN", 4))
+	{
+		cs.CodeIn(buf + 4);
+		if (cs.GetCS(4).compare("M17-"))
+		{
+			std::cout << "Link request from '" << cs << "' denied" << std::endl;
+			return false;
+		}
+	}
+	strcpy(mods, (const char *)buf+10);
+	for (unsigned i=0; i<strlen(mods); i++)
+	{
+		if (! IsLetter(mods[i]))
+		{
+			std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CM17Protocol::IsVaildInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
+{
+
+}
+
+bool CM17Protocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -497,18 +540,35 @@ void CM17Protocol::EncodeKeepAlivePacket(uint8_t *buf)
 	cs.CodeOut(buf + 4);
 }
 
-void CM17Protocol::EncodeConnectPacket(uint8_t *buf, const char *Modules)
+void CM17Protocol::EncodeInterlinkConnectPacket(uint8_t *buf, const std::string &mods)
 {
+	memset(buf, 0, sizeof(SInterConnect));
 	memcpy(buf, "CONN", 4);
 	CCallsign cs(GetReflectorCallsign());
-	cs.SetModule(Modules[0]);
 	cs.CodeOut(buf + 4);
-	buf[10] = Modules[1];
+	memcpy(buf + 10, mods.c_str(), mods.size());
 }
 
 void CM17Protocol::EncodeConnectAckPacket(uint8_t *buf)
 {
 	memcpy(buf, "ACKN", 4);
+}
+
+void CM17Protocol::EncodeInterlinkAckPacket(uint8_t *buf, const char *mods)
+{
+	memcpy(buf, "ACKN", 4);
+	CCallsign cs(GetReflectorCallsign());
+	cs.CodeOut(buf+4);
+	memset(buf+10, 0, 27);
+	for (int i=0; i<26 && mods[i]; i++)
+		buf[i+10] = mods[i];
+}
+
+void CM17Protocol::EncodeInterlinkNackPacket(uint8_t *buf)
+{
+	memcpy(buf, "NACK", 4);
+	CCallsign cs(GetReflectorCallsign());
+	cs.CodeOut(buf+4);
 }
 
 void CM17Protocol::EncodeConnectNackPacket(uint8_t *buf)

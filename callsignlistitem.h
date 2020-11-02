@@ -49,21 +49,18 @@ public:
 	// compare
 	bool HasSameCallsign(const CCallsign &) const;
 	bool HasSameCallsignWithWildcard(const CCallsign &) const;
+	bool HasSameIp(const CIp &ip);
 	bool HasModuleListed(char) const;
-	bool CheckListedModules(char*) const;
+	bool CheckListedModules(const char*) const;
 
 	// get
-	const CCallsign &GetCallsign(void) const        { return m_Callsign; }
-	const CIp &GetIp(void) const                    { return m_Ip; }
-	const char *GetModules(void)                    { return m_Modules; }
-
-	// update
-	void ResolveIp(void)                            { m_Ip = CIp(m_szUrl); }
+	const CCallsign &GetCallsign(void) const { return m_Callsign; }
+	const CIp &GetIp(void) const             { return m_Ip; }
+	const std::string &GetModules(void)      { return m_Mods; }
 
 protected:
 	// data
 	CCallsign   m_Callsign;
-	char        m_szUrl[URL_MAXLEN+1];
 	CIp         m_Ip;
-	char        m_Modules[27];
+	std::string m_Mods;
 };

@@ -30,37 +30,46 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CCallsignListItem::CCallsignListItem()
-{
-	::memset(m_Modules, 0, sizeof(m_Modules));
-	::memset(m_szUrl, 0, sizeof(m_szUrl));
-}
+CCallsignListItem::CCallsignListItem() {}
 
 CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const CIp &ip, const char *modules)
 {
 	m_Callsign = callsign;
-	::memset(m_szUrl, 0, sizeof(m_szUrl));
 	m_Ip = ip;
+	m_Ip.SetPort(M17_PORT);
+	m_Mods.clear();
 	if ( modules != nullptr )
 	{
-		::memset(m_Modules, 0, sizeof(m_Modules));
 		if ( modules[0] == '*' )
 		{
 			for ( char i = 0; i < NB_OF_MODULES; i++ )
 			{
-				m_Modules[i] = 'A' + i;
+				m_Mods.append(1, 'A' + i);
 			}
 		}
 		else
 		{
-			int n = MIN((int)::strlen(modules), sizeof(m_Modules)-1);
-			int j = 0;
-			for ( int i = 0; i < n; i++ )
+			for (const char *p=modules; *p; p++)
 			{
-				if ( (modules[i] - 'A') < NB_OF_MODULES )
+				// duplicates not allowed!
+				if (m_Mods.npos == (m_Mods.find(*p)))
 				{
-					m_Modules[j++] = modules[i];
+					int i = *p - 'A';
+					// don't add mods that aren't configured
+					if (i >= 0 && i < NB_OF_MODULES)
+					{
+						m_Mods.append(1, *p);
+					}
+					else
+					{
+						std::cerr << "Peer module " << *p << " is not configured!" << std::endl;
+					}
 				}
+				else
+				{
+					std::cout << "Warning: Module " << *p << " is listed multiple times!" << std::endl;
+				}
+
 			}
 		}
 	}
@@ -68,40 +77,15 @@ CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const CIp &ip, c
 
 CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const char *url, const char *modules)
 {
-	m_Callsign = callsign;
-	::strncpy(m_szUrl, url, URL_MAXLEN);
-	m_Ip = CIp(m_szUrl);
-	if ( modules != nullptr )
-	{
-		::memset(m_Modules, 0, sizeof(m_Modules));
-		if ( modules[0] == '*' )
-		{
-			for ( char i = 0; i < NB_OF_MODULES; i++ )
-			{
-				m_Modules[i] = 'A' + i;
-			}
-		}
-		else
-		{
-			int n = MIN((int)::strlen(modules), sizeof(m_Modules)-1);
-			int j = 0;
-			for ( int i = 0; i < n; i++ )
-			{
-				if ( (modules[i] - 'A') < NB_OF_MODULES )
-				{
-					m_Modules[j++] = modules[i];
-				}
-			}
-		}
-	}
+	CIp ip(url, M17_PORT);
+	CCallsignListItem(callsign, ip, modules);
 }
 
 CCallsignListItem::CCallsignListItem(const CCallsignListItem &item)
 {
 	m_Callsign = item.m_Callsign;
-	::memcpy(m_szUrl, item.m_szUrl, sizeof(m_szUrl));
 	m_Ip = item.m_Ip;
-	::memcpy(m_Modules, item.m_Modules, sizeof(m_Modules));
+	m_Mods.assign(item.m_Mods);
 }
 
 
@@ -120,28 +104,34 @@ bool CCallsignListItem::HasSameCallsignWithWildcard(const CCallsign &callsign) c
 
 bool CCallsignListItem::HasModuleListed(char module) const
 {
-	return (::strchr(m_Modules, (int)module) != nullptr);
+	return m_Mods.npos != m_Mods.find(module);
 }
 
-bool CCallsignListItem::CheckListedModules(char *Modules) const
+bool CCallsignListItem::HasSameIp(const CIp &ip)
 {
-	bool listed = false;
+	return ip == m_Ip;
+}
 
-	if ( Modules != nullptr )
+bool CCallsignListItem::CheckListedModules(const char *mods) const
+{
+	if (mods == nullptr)
+		return false;
+
+	// make sure every mods character is matched in m_Mods
+	const auto count = m_Mods.size();
+	bool found[count] = { false };
+	for (auto p=mods; *p; p++)
 	{
-		// build a list of common modules
-		char list[27];
-		list[0] = 0;
-		//
-		for ( unsigned i = 0; i < ::strlen(Modules); i++ )
-		{
-			if ( HasModuleListed(Modules[i]) )
-			{
-				::strncat(list, &(Modules[i]), 1);
-				listed = true;
-			}
-		}
-		::strcpy(Modules, list);
+		auto pos = m_Mods.find(*p);
+		if (pos == m_Mods.npos)
+			return false;
+		else
+			found[pos] = true;
 	}
-	return listed;
+	for (auto i=0; i<count; i++)
+	{
+		if (! found[i])
+			return false;
+	}
+	return true;
 }
