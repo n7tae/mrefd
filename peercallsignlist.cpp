@@ -48,10 +48,10 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 		{
 			// remove leading & trailing spaces
 			char *szt = TrimWhiteSpaces(sz);
-
 			// crack it
 			if ( (strlen(szt) > 0) && (szt[0] != '#') )
 			{
+				std::cout << "szt=" << szt << std::endl;
 				// 1st token is callsign
 				if ( (szt = strtok(szt, " ,\t")) != nullptr )
 				{
