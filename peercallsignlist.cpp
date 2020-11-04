@@ -63,6 +63,7 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 						// 3rd token is modules list
 						if ( (szt = strtok(nullptr, " ,\t")) != nullptr )
 						{
+							std::cout << "Adding Peer " << callsign << " at " << szip << " modules " << ToUpper(szt) << std::endl;
 							// and load
 							m_Callsigns.push_back(CCallsignListItem(callsign, szip, ToUpper(szt)));
 						}
