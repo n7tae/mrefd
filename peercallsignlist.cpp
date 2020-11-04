@@ -62,8 +62,7 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 						// 3rd token is modules list
 						if ( (szt = strtok(nullptr, " ,\t")) != nullptr )
 						{
-							std::cout << "Adding Peer " << callsign << " at " << szip << " using modules " << ToUpper(szt) << std::endl;
-							// and load
+							// create and and store
 							m_Callsigns.push_back(CCallsignListItem(callsign, szip, ToUpper(szt)));
 						}
 					}
@@ -85,7 +84,7 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 		std::cout << "Gatekeeper loaded " << m_Callsigns.size() << " lines from " << filename <<  std::endl;
 
 		Lock();
-		std::cout << "PEER ENUMERATION:" << std::endl;
+		std::cout << "PEER ENUMERATION: Count=" << m_Callsigns.size() << std::endl;
 		for (auto it = m_Callsigns.begin(); it != m_Callsigns.end(); it++)
 			std::cout << (*it).GetCallsign() << std::endl;
 		Unlock();
