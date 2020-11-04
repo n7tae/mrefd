@@ -83,6 +83,12 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 		Unlock();
 		ok = true;
 		std::cout << "Gatekeeper loaded " << m_Callsigns.size() << " lines from " << filename <<  std::endl;
+
+		Lock();
+		std::cout << "PEER ENUMERATION:" << std::endl;
+		for (auto it = m_Callsigns.begin(); it != m_Callsigns.end(); it++)
+			std::cout << (*it).GetCallsign() << std::endl;
+		Unlock();
 	}
 	else
 	{

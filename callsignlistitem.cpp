@@ -73,7 +73,6 @@ CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const CIp &ip, c
 			}
 		}
 	}
-	std::cout << "ADDED " << m_Callsign << " @ " << m_Ip << " module(s):" << m_Mods << std::endl;
 }
 
 CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const char *url, const char *modules)
