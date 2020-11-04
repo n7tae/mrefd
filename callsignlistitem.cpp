@@ -68,7 +68,7 @@ CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const CIp &ip, c
 
 CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const char *url, const char *modules)
 {
-	CIp ip(url, M17_PORT);
+	CIp ip(strchr(url, ':') ? AF_INET6 : AF_INET, M17_PORT, url);
 	CCallsignListItem(callsign, ip, modules);
 }
 
