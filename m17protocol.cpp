@@ -428,14 +428,16 @@ void CM17Protocol::HandlePeerLinks(void)
 	uint8_t connect[sizeof(SInterConnect)];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
-		if ( !(*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
-			continue;
-		if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
+		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
-			// send connect packet to re-initiate peer link
-			EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-			Send(connect, 11, (*it).GetIp(), M17_PORT);
-			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
+			std::cout << "Trying to find peer '" << (*it).GetCallsign() << "'" << std::endl;
+			if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
+			{
+				// send connect packet to re-initiate peer link
+				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
+				Send(connect, 11, (*it).GetIp(), M17_PORT);
+				std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
+			}
 		}
 	}
 
@@ -550,14 +552,6 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 			{	// looks like a valid source
 				return true;
 			}
-			else
-			{
-				std::cout << "Packet source " << packet->GetSourceCallsign() << " is improper" << std::endl;
-			}
-		}
-		else
-		{
-			std::cout << "Packet destination " << dest << " is improper" << std::endl;
 		}
 	}
 	return false;
