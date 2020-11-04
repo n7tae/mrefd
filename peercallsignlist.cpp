@@ -51,7 +51,6 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 			// crack it
 			if ( (strlen(szt) > 0) && (szt[0] != '#') )
 			{
-				std::cout << "szt=" << szt << std::endl;
 				// 1st token is callsign
 				if ( (szt = strtok(szt, " ,\t")) != nullptr )
 				{
@@ -63,7 +62,7 @@ bool CPeerCallsignList::LoadFromFile(const char *filename)
 						// 3rd token is modules list
 						if ( (szt = strtok(nullptr, " ,\t")) != nullptr )
 						{
-							std::cout << "Adding Peer " << callsign << " at " << szip << " modules " << ToUpper(szt) << std::endl;
+							std::cout << "Adding Peer " << callsign << " at " << szip << " using modules " << ToUpper(szt) << std::endl;
 							// and load
 							m_Callsigns.push_back(CCallsignListItem(callsign, szip, ToUpper(szt)));
 						}

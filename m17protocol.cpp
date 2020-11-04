@@ -429,6 +429,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
 		std::cout << "Trying to find peer '" << (*it).GetCallsign() << "'" << std::endl;
+		std::cout << "It has IP=" << (*it).GetIp() << " and modules " << (*it).GetModules() << std::endl;
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
 			if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
