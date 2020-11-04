@@ -428,9 +428,9 @@ void CM17Protocol::HandlePeerLinks(void)
 	uint8_t connect[sizeof(SInterConnect)];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
+		std::cout << "Trying to find peer '" << (*it).GetCallsign() << "'" << std::endl;
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
-			std::cout << "Trying to find peer '" << (*it).GetCallsign() << "'" << std::endl;
 			if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
 			{
 				// send connect packet to re-initiate peer link
