@@ -543,10 +543,21 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		// create packet
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
-		auto cs = packet->GetSourceCallsign().GetCS();
-		if (std::regex_match(cs, clientRegEx) || std::regex_match(cs, peerRegEx))
-		{	// looks like a valid source
-			return true;
+		auto dest = packet->GetDestCallsign().GetCS();
+		if (std::regex_match(dest, clientRegEx) || std::regex_match(dest, peerRegEx))
+		{
+			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
+			{	// looks like a valid source
+				return true;
+			}
+			else
+			{
+				std::cout << "Packet source " << packet->GetSourceCallsign() << " is improper" << std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "Packet destination " << dest << " is improper" << std::endl;
 		}
 	}
 	return false;
