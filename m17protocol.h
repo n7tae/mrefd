@@ -35,6 +35,7 @@
 class CM17Protocol : public CProtocol
 {
 public:
+	CM17Protocol();
 	// initialization
 	bool Initialize(const int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6);
 
@@ -48,9 +49,6 @@ protected:
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
-
-	// callsign helper
-	bool IsValidCallsign(const CCallsign &);
 
 	// stream helpers
 	void OnFirstPacketIn(std::unique_ptr<CPacket> &, const CIp &);

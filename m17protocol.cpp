@@ -31,13 +31,19 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// constructor
+
+CM17Protocol::CM17Protocol()
+{
+	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}[ ][A-Z]$", std::regex::extended);
+	clientRegEx = std::regex("^[0-9]{0,1}[A-Z]{1,2}[0-9][A-Z]{1,4}(()|[ ]*[A-Z]|([-/\\.][A-Z0-9]*))$", std::regex::extended);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // operation
 
 bool CM17Protocol::Initialize(int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6)
 {
-	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}[ ][A-Z]$", std::regex::extended);
-	clientRegEx = std::regex("^[0-9]{0,1}[A-Z]{1,2}[0-9][A-Z]{1,4}(()|[ ]*[A-Z]|([-/\\.][A-Z0-9]*))$", std::regex::extended);
-
 	// base class
 	if (! CProtocol::Initialize(ptype, port, has_ipv4, has_ipv6))
 		return false;
@@ -485,13 +491,6 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// callsign helper
-bool CM17Protocol::IsValidCallsign(const CCallsign &cs)
-{
-	return std::regex_match(cs.GetCS(), clientRegEx) || std::regex_match(cs.GetCS(), peerRegEx);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
 // packet decoding helpers
 
 bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
@@ -499,7 +498,7 @@ bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 	if (0 == memcmp(buf, "CONN", 4))
 	{
 		cs.CodeIn(buf + 4);
-		if (IsValidCallsign(cs))
+		if (std::regex_match(cs.GetCS(), clientRegEx))
 		{
 			*mod = buf[10];
 			if (IsLetter(*mod))
@@ -514,7 +513,8 @@ bool CM17Protocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 	if (0 == memcmp(buf, "DISC", 4))
 	{
 		cs.CodeIn(buf + 4);
-		if (IsValidCallsign(cs))
+		auto call = cs.GetCS();
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
 		{
 			return true;
 		}
@@ -527,7 +527,8 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	if ('P' == buf[0] && ('I' == buf[1] || 'O' == buf[1]) && 'N' ==  buf[2] && 'G' == buf[3])
 	{
 		cs.CodeIn(buf + 4);
-		if (IsValidCallsign(cs))
+		auto call = cs.GetCS();
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
 		{
 			return true;
 		}
@@ -542,7 +543,8 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		// create packet
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
-		if ( IsValidCallsign( packet->GetSourceCallsign() ) )
+		auto cs = packet->GetSourceCallsign().GetCS();
+		if (std::regex_match(cs, clientRegEx) || std::regex_match(cs, peerRegEx))
 		{	// looks like a valid source
 			return true;
 		}
