@@ -36,7 +36,7 @@
 CM17Protocol::CM17Protocol()
 {
 	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}[ ][A-Z]$", std::regex::extended);
-	clientRegEx = std::regex("^[0-9]{0,1}[A-Z]{1,2}[0-9][A-Z]{1,4}(()|[ ]*[A-Z]|([-/\\.][A-Z0-9]*))$", std::regex::extended);
+	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9][A-Z]{1,4}(()|([ ]*[A-Z]?)|([-/\\.][A-Z0-9]+))$", std::regex::extended);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
