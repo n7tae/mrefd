@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <regex>
+
 #include "timepoint.h"
 #include "protocol.h"
 #include "packet.h"
@@ -46,6 +48,9 @@ protected:
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
+
+	// callsign helper
+	bool IsValidCallsign(const CCallsign &);
 
 	// stream helpers
 	void OnFirstPacketIn(std::unique_ptr<CPacket> &, const CIp &);
@@ -75,5 +80,6 @@ protected:
 	CTimePoint m_LastPeersLinkTime;
 
 private:
+	std::regex clientRegEx, peerRegEx;
 	CCRC crc;
 };

@@ -35,6 +35,9 @@
 
 bool CM17Protocol::Initialize(int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6)
 {
+	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}[ ][A-Z]$", std::regex::extended);
+	clientRegEx = std::regex("^[0-9]{0,1}[A-Z]{1,2}[0-9][A-Z]{1,4}(()|[ ]*[A-Z]|([-/\\.][A-Z0-9]*))$", std::regex::extended);
+
 	// base class
 	if (! CProtocol::Initialize(ptype, port, has_ipv4, has_ipv6))
 		return false;
@@ -132,10 +135,6 @@ void CM17Protocol::Task(void)
 				g_Reflector.ReleasePeers();
 			}
 		}
-		else
-		{
-			Dump("Unknown packet", buf, len);
-		}
 		break;
 	case 11:
 		if ( IsValidConnect(buf, cs, &mod) )
@@ -176,36 +175,65 @@ void CM17Protocol::Task(void)
 	case 10:
 		if ( IsValidKeepAlive(buf, cs) )
 		{
-			// find all clients with that callsign & ip and keep them alive
-			CClients *clients = g_Reflector.GetClients();
-			auto it = clients->begin();
-			std::shared_ptr<CClient>client = nullptr;
-			while (nullptr != (client = clients->FindNextClient(cs, ip, PROTOCOL_M17, it)))
-			{
-				client->Alive();
+			if (cs.GetCS(4).compare("M17-")) {
+				// find all clients with that callsign & ip and keep them alive
+				CClients *clients = g_Reflector.GetClients();
+				auto it = clients->begin();
+				std::shared_ptr<CClient>client = nullptr;
+				while (nullptr != (client = clients->FindNextClient(cs, ip, PROTOCOL_M17, it)))
+				{
+					client->Alive();
+				}
+				g_Reflector.ReleaseClients();
 			}
-			g_Reflector.ReleaseClients();
+			else
+			{
+				// find peer
+				CPeers *peers = g_Reflector.GetPeers();
+				std::shared_ptr<CPeer>peer = peers->FindPeer(ip, PROTOCOL_M17);
+				if ( peer != nullptr )
+				{
+					// keep it alive
+					peer->Alive();
+				}
+				g_Reflector.ReleasePeers();
+			}
 		}
 		else if ( IsValidDisconnect(buf, cs) )
 		{
 			std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
-
-			// find client & remove it
-			CClients *clients = g_Reflector.GetClients();
-			std::shared_ptr<CClient>client = clients->FindClient(ip, PROTOCOL_M17);
-			if ( client != nullptr )
-			{
-				// ack disconnect packet
-				EncodeDisconnectedPacket(buf);
-				Send(buf, 4, ip);
-				// and remove it
-				clients->RemoveClient(client);
+			if (cs.GetCS(4).compare("M17-")) {
+				// find the regular client & remove it
+				CClients *clients = g_Reflector.GetClients();
+				std::shared_ptr<CClient>client = clients->FindClient(ip, PROTOCOL_M17);
+				if ( client != nullptr )
+				{
+					// ack disconnect packet
+					EncodeDisconnectedPacket(buf);
+					Send(buf, 4, ip);
+					// and remove it
+					clients->RemoveClient(client);
+				}
+				g_Reflector.ReleaseClients();
 			}
-			g_Reflector.ReleaseClients();
+			else
+			{
+				// find the peer and remove it
+				CPeers *peers = g_Reflector.GetPeers();
+				std::shared_ptr<CPeer>peer = peers->FindPeer(ip, PROTOCOL_M17);
+				if ( peer )
+				{
+					// remove it from reflector peer list
+					// this also remove all concerned clients from reflector client list
+					// and delete them
+					peers->RemovePeer(peer);
+				}
+				g_Reflector.ReleasePeers();
+			}
 		}
 		else if ( IsValidNAcknowledge(buf, cs))
 		{
-
+			std::cout << "NACK packet received from " << cs << " at " << ip << std::endl;
 		}
 		break;
 	default:
@@ -457,6 +485,13 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// callsign helper
+bool CM17Protocol::IsValidCallsign(const CCallsign &cs)
+{
+	return std::regex_match(cs.GetCS(), clientRegEx) || std::regex_match(cs.GetCS(), peerRegEx);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 // packet decoding helpers
 
 bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
@@ -464,7 +499,7 @@ bool CM17Protocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 	if (0 == memcmp(buf, "CONN", 4))
 	{
 		cs.CodeIn(buf + 4);
-		if (cs.IsValid())
+		if (IsValidCallsign(cs))
 		{
 			*mod = buf[10];
 			if (IsLetter(*mod))
@@ -479,7 +514,7 @@ bool CM17Protocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 	if (0 == memcmp(buf, "DISC", 4))
 	{
 		cs.CodeIn(buf + 4);
-		if (cs.IsValid())
+		if (IsValidCallsign(cs))
 		{
 			return true;
 		}
@@ -492,7 +527,7 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	if ('P' == buf[0] && ('I' == buf[1] || 'O' == buf[1]) && 'N' ==  buf[2] && 'G' == buf[3])
 	{
 		cs.CodeIn(buf + 4);
-		if (cs.IsValid())
+		if (IsValidCallsign(cs))
 		{
 			return true;
 		}
@@ -507,7 +542,7 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		// create packet
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
-		if ( packet->GetSourceCallsign().IsValid() )
+		if ( IsValidCallsign( packet->GetSourceCallsign() ) )
 		{	// looks like a valid source
 			return true;
 		}

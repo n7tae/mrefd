@@ -131,11 +131,6 @@ void CCallsign::SetModule(char m)
 	CSIn(call);
 }
 
-bool CCallsign::IsValid() const
-{
-	return true;
-}
-
 std::ostream &operator<<(std::ostream &stream, const CCallsign &call)
 {
 	stream << call.cs;
