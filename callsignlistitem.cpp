@@ -40,39 +40,30 @@ CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const CIp &ip, c
 	m_Mods.clear();
 	if ( modules != nullptr )
 	{
-		if ( modules[0] == '*' )
+		for (const char *p=modules; *p; p++)
 		{
-			for ( char i = 0; i < NB_OF_MODULES; i++ )
+			// duplicates not allowed!
+			if (m_Mods.npos == (m_Mods.find(*p)))
 			{
-				m_Mods.append(1, 'A' + i);
-			}
-		}
-		else
-		{
-			for (const char *p=modules; *p; p++)
-			{
-				// duplicates not allowed!
-				if (m_Mods.npos == (m_Mods.find(*p)))
+				int i = *p - 'A';
+				// don't add mods that aren't configured
+				if (i >= 0 && i < NB_OF_MODULES)
 				{
-					int i = *p - 'A';
-					// don't add mods that aren't configured
-					if (i >= 0 && i < NB_OF_MODULES)
-					{
-						m_Mods.append(1, *p);
-					}
-					else
-					{
-						std::cerr << "Peer module " << *p << " is not configured!" << std::endl;
-					}
+					m_Mods.append(1, *p);
 				}
 				else
 				{
-					std::cout << "Warning: Module " << *p << " is listed multiple times!" << std::endl;
+					std::cerr << "Peer module " << *p << " is not configured!" << std::endl;
 				}
-
 			}
+			else
+			{
+				std::cout << "Warning: Module " << *p << " is listed multiple times!" << std::endl;
+			}
+
 		}
 	}
+	std::cout << "ADDED " << m_Callsign << " @ " << m_Ip << " USING MODS " << m_Mods << std::endl;
 }
 
 CCallsignListItem::CCallsignListItem(const CCallsign &callsign, const char *url, const char *modules)
