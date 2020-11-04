@@ -332,6 +332,10 @@ void CM17Protocol::HandleKeepalives(void)
 	std::shared_ptr<CClient>client = nullptr;
 	while ( (client = clients->FindNextClient(PROTOCOL_M17, it)) != nullptr )
 	{
+		// don't ping reflector modules, we'll do each interlinked refectors below
+		if (0 == client->GetCallsign().GetCS(4).compare("M17-"))
+			continue;
+
 		// send keepalive
 		Send(keepalive, 10, client->GetIp());
 
@@ -373,23 +377,25 @@ void CM17Protocol::HandleKeepalives(void)
 	std::shared_ptr<CPeer>peer = nullptr;
 	while ( (peer = peers->FindNextPeer(PROTOCOL_M17, pit)) != nullptr )
 	{
-		// keepalives are sent between clients
+		// send keepalive
+		Send(keepalive, 10, peer->GetIp());
 
-		// some client busy or still with us ?
-		if ( !peer->IsAMaster() && !peer->IsAlive() )
+		// client busy ?
+		if ( peer->IsAMaster() )
 		{
-			// no, disconnect all clients
+			// yes, just tickle it
+			peer->Alive();
+		}
+		// otherwise check if still with us
+		else if ( !peer->IsAlive() )
+		{
+			// no, disconnect
 			uint8_t disconnect[10];
-			EncodeDisconnectPacket(disconnect, peer->GetReflectorModules()[0]);
-			CClients *clients = g_Reflector.GetClients();
-			for ( auto cit=peer->cbegin(); cit!=peer->cend(); cit++ )
-			{
-				Send(disconnect, 10, (*cit)->GetIp());
-			}
-			g_Reflector.ReleaseClients();
+			EncodeDisconnectPacket(disconnect, 0);
+			Send(disconnect, 10, peer->GetIp());
 
 			// remove it
-			std::cout << "Peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
+			std::cout << "M17 peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
 			peers->RemovePeer(peer);
 		}
 	}
@@ -415,7 +421,7 @@ void CM17Protocol::HandlePeerLinks(void)
 		if ( list->FindListItem(peer->GetCallsign()) == nullptr )
 		{
 			// send disconnect packet
-			EncodeDisconnectPacket(buf, peer->GetReflectorModules()[0]);
+			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
 			std::cout << "Sending disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 			// remove client
@@ -640,7 +646,8 @@ void CM17Protocol::EncodeDisconnectPacket(uint8_t *buf, char mod)
 {
 	memcpy(buf, "DISC", 4);
 	CCallsign cs(GetReflectorCallsign());
-	cs.SetModule(mod);
+	if (mod)
+		cs.SetModule(mod);
 	cs.CodeOut(buf + 4);
 }
 
