@@ -102,7 +102,7 @@ void CM17Protocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(buf, cs, mods))
 		{
-			std::cout << "CONN packet for modules " << mods << " from " << cs <<  " at " << ip << std::endl;
+			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17, mods) )
@@ -122,7 +122,7 @@ void CM17Protocol::Task(void)
 		}
 		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
 		{
-			std::cout << "Peer ACQN packet for modules " << mods << " from " << cs << " at " << ip << std::endl;
+			std::cout << "Peer ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17) )
@@ -441,7 +441,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			{
 				// send connect packet to re-initiate peer link
 				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-				Send(connect.magic, sizeof(SInterConnect), (*it).GetIp(), M17_PORT);
+				Send(connect.magic, sizeof(SInterConnect), (*it).GetIp());
 				std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
 			}
 		}

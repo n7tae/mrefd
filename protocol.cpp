@@ -251,7 +251,7 @@ ssize_t CProtocol::ReceiveDS(uint8_t *buf, CIp &ip, int time_ms)
 	{
 		if (rval < 0)
 			std::cerr << "ReceiveDS select error: " << strerror(errno) << std::endl;
-		return false;
+		return 0;
 	}
 
 	if (FD_ISSET(fd4, &fset))
