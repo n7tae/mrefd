@@ -164,7 +164,6 @@ bool CCallsignList::IsCallsignListed(const CCallsign &callsign, char module) con
 
 bool CCallsignList::IsCallsignListed(const CCallsign &callsign, const CIp &ip, const char *modules) const
 {
-	std::cout << "Looking for " << callsign << " with IP " << ip << " and modules " << modules << std::endl;
 	for ( const auto &item : m_Callsigns )
 	{
 		std::cout << "Checking item " << item.GetCallsign() << " with IP " << item.GetIp() << std::endl;
@@ -176,14 +175,8 @@ bool CCallsignList::IsCallsignListed(const CCallsign &callsign, const CIp &ip, c
 				{
 					return true;
 				}
-				else
-					std::cout << "Has different IP" << std::endl;
 			}
-			else
-				std::cout << "Has different module(s)" << std::endl;
 		}
-		else
-			std::cout << "Has different callsign" << std::endl;
 	}
 
 	return false;
