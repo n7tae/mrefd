@@ -166,7 +166,6 @@ bool CCallsignList::IsCallsignListed(const CCallsign &callsign, const CIp &ip, c
 {
 	for ( const auto &item : m_Callsigns )
 	{
-		std::cout << "Checking item " << item.GetCallsign() << " with IP " << item.GetIp() << std::endl;
 		if ( item.HasSameCallsign(callsign) )
 		{
 			if ( item.CheckListedModules(modules) )
