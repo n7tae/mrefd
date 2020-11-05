@@ -102,7 +102,6 @@ void CM17Protocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(buf, cs, mods))
 		{
-			Dump("CONN packet=", buf, sizeof(SInterConnect));
 			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
@@ -574,14 +573,14 @@ bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, ch
 			std::cout << "Link request from '" << cs << "' denied" << std::endl;
 			return false;
 		}
-	}
-	memcpy(mods, buf+10, 27);
-	for (unsigned i=0; i<strlen(mods); i++)
-	{
-		if (! IsLetter(mods[i]))
+		memcpy(mods, buf+10, 27);
+		for (unsigned i=0; i<strlen(mods); i++)
 		{
-			std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
-			return false;
+			if (! IsLetter(mods[i]))
+			{
+				std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
+				return false;
+			}
 		}
 	}
 	return true;
