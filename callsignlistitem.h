@@ -54,9 +54,9 @@ public:
 	bool CheckListedModules(const char*) const;
 
 	// get
-	const CCallsign &GetCallsign(void) const { return m_Callsign; }
-	const CIp &GetIp(void) const             { return m_Ip; }
-	const std::string &GetModules(void)      { return m_Mods; }
+	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
+	const CIp &GetIp(void) const              { return m_Ip; }
+	const std::string &GetModules(void) const { return m_Mods; }
 
 protected:
 	// data

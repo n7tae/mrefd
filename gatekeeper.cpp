@@ -152,22 +152,19 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign, const CIp &ip, char 
 	// first check IP
 
 	// next, check callsign
-	if ( ok )
+	// first check if callsign is in white list
+	// note if white list is empty, everybody is authorized
+	const_cast<CCallsignList &>(m_NodeWhiteList).Lock();
+	if ( !m_NodeWhiteList.empty() )
 	{
-		// first check if callsign is in white list
-		// note if white list is empty, everybody is authorized
-		const_cast<CCallsignList &>(m_NodeWhiteList).Lock();
-		if ( !m_NodeWhiteList.empty() )
-		{
-			ok = m_NodeWhiteList.IsCallsignListedWithWildcard(callsign, module);
-		}
-		const_cast<CCallsignList &>(m_NodeWhiteList).Unlock();
-
-		// then check if not blacklisted
-		const_cast<CCallsignList &>(m_NodeBlackList).Lock();
-		ok &= !m_NodeBlackList.IsCallsignListedWithWildcard(callsign);
-		const_cast<CCallsignList &>(m_NodeBlackList).Unlock();
+		ok = m_NodeWhiteList.IsCallsignListedWithWildcard(callsign, module);
 	}
+	const_cast<CCallsignList &>(m_NodeWhiteList).Unlock();
+
+	// then check if not blacklisted
+	const_cast<CCallsignList &>(m_NodeBlackList).Lock();
+	ok = ok && !m_NodeBlackList.IsCallsignListedWithWildcard(callsign);
+	const_cast<CCallsignList &>(m_NodeBlackList).Unlock();
 
 	// done
 	return ok;
@@ -176,19 +173,16 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign, const CIp &ip, char 
 
 bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const char *modules) const
 {
-	bool ok = true;
+	bool ok;
 
-	if ( ok )
+	// look for an exact match in the list
+	const_cast<CPeerCallsignList &>(m_PeerList).Lock();
+	if ( !m_PeerList.empty() )
 	{
-		// look for an exact match in the list
-		const_cast<CPeerCallsignList &>(m_PeerList).Lock();
-		if ( !m_PeerList.empty() )
-		{
-			// find an exact match
-			ok = m_PeerList.IsCallsignListed(callsign, ip, modules);
-		}
-		const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
+		// find an exact match
+		ok = m_PeerList.IsCallsignListed(callsign, ip, modules);
 	}
+	const_cast<CPeerCallsignList &>(m_PeerList).Unlock();
 
 	// done
 	return ok;
