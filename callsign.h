@@ -36,7 +36,6 @@ public:
 	bool operator!=(const CCallsign &rhs) const;
 	char GetModule(void) const;
 	bool HasSameCallsignWithWildcard(const CCallsign &callsign) const;
-	bool HasModule() const { return ('A' <= cs[9] && cs[9] <= 'Z'); }
 	void SetModule(char m);
 	friend std::ostream &operator<<(std::ostream &stream, const CCallsign &call);
 	bool HasSameCallsign(const CCallsign &call) const;

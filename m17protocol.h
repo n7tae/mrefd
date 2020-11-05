@@ -68,8 +68,8 @@ protected:
 	void EncodeConnectNackPacket(uint8_t *);
 	void EncodeDisconnectPacket(uint8_t *, char);
 	void EncodeDisconnectedPacket(uint8_t *);
-	void EncodeInterlinkConnectPacket(uint8_t *, const std::string &);
-	void EncodeInterlinkAckPacket(uint8_t *, const char *);
+	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
+	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
 	void EncodeInterlinkNackPacket(uint8_t *);
 
 protected:

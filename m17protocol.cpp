@@ -107,9 +107,10 @@ void CM17Protocol::Task(void)
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17, mods) )
 			{
+				SInterConnect ackn;
 				// acknowledge the request
-				EncodeInterlinkAckPacket(buf, mods);
-				Send(buf, sizeof(SInterConnect), ip);
+				EncodeInterlinkAckPacket(ackn, mods);
+				Send(ackn.magic, sizeof(SInterConnect), ip);
 			}
 			else
 			{
@@ -431,7 +432,7 @@ void CM17Protocol::HandlePeerLinks(void)
 
 	// check if all ours peers listed by gatekeeper are connected
 	// if not, connect or reconnect
-	uint8_t connect[sizeof(SInterConnect)];
+	SInterConnect connect;
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
@@ -440,7 +441,7 @@ void CM17Protocol::HandlePeerLinks(void)
 			{
 				// send connect packet to re-initiate peer link
 				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-				Send(connect, sizeof(SInterConnect), (*it).GetIp(), M17_PORT);
+				Send(connect.magic, sizeof(SInterConnect), (*it).GetIp(), M17_PORT);
 				std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
 			}
 		}
@@ -587,12 +588,24 @@ bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, ch
 
 bool CM17Protocol::IsVaildInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
 {
-	return true;
+	SInterConnect *p = (SInterConnect *)buf;
+	if (0 == memcmp(p->magic, "ACKN", 4))
+	{
+		CCallsign cs(p->fromcs);
+		memcpy(mods, p->mods, 27);
+		return (0 == mods[26]);
+	}
+	return false;
 }
 
 bool CM17Protocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 {
-	return true;
+	if (0 == memcmp(buf, "NACK", 4))
+	{
+		cs.CodeIn(buf + 4);
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -605,13 +618,13 @@ void CM17Protocol::EncodeKeepAlivePacket(uint8_t *buf)
 	cs.CodeOut(buf + 4);
 }
 
-void CM17Protocol::EncodeInterlinkConnectPacket(uint8_t *buf, const std::string &mods)
+void CM17Protocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
 {
-	memset(buf, 0, sizeof(SInterConnect));
-	memcpy(buf, "CONN", 4);
+	memset(conn.magic, 0, sizeof(SInterConnect));
+	memcpy(conn.magic, "CONN", 4);
 	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(buf + 4);
-	memcpy(buf + 10, mods.c_str(), mods.size());
+	cs.CodeOut(conn.fromcs);
+	memcpy(conn.mods, mods.c_str(), mods.size());
 }
 
 void CM17Protocol::EncodeConnectAckPacket(uint8_t *buf)
@@ -619,13 +632,13 @@ void CM17Protocol::EncodeConnectAckPacket(uint8_t *buf)
 	memcpy(buf, "ACKN", 4);
 }
 
-void CM17Protocol::EncodeInterlinkAckPacket(uint8_t *buf, const char *mods)
+void CM17Protocol::EncodeInterlinkAckPacket(SInterConnect &ackn, const char *mods)
 {
-	memset(buf, 0, sizeof(SInterConnect));
-	memcpy(buf, "ACKN", 4);
+	memset(ackn.magic, 0, sizeof(SInterConnect));
+	memcpy(ackn.magic, "ACKN", 4);
 	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(buf+4);
-	memcpy(buf + 10, mods, strlen(mods));
+	cs.CodeOut(ackn.fromcs);
+	memcpy(ackn.mods, mods, strlen(mods));
 }
 
 void CM17Protocol::EncodeInterlinkNackPacket(uint8_t *buf)
