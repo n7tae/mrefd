@@ -140,8 +140,10 @@ void CM17Protocol::Task(void)
 					// this also add all new clients to reflector client list
 					peers->AddPeer(peer);
 				}
+				else std::cout << "Already found " << cs << " in the list of peers, ACKN ignored" << std::endl;
 				g_Reflector.ReleasePeers();
 			}
+			else std::cout << cs << " cannot link, blocked by the gatekeeper" << std::endl;
 		}
 		break;
 	case 11:
@@ -380,6 +382,7 @@ void CM17Protocol::HandleKeepalives(void)
 	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
 	{
 		// send keepalive
+		std::cout << "Pinging " << peer->GetCallsign() << std::endl;
 		Send(keepalive, 10, peer->GetIp());
 
 		// client busy ?
