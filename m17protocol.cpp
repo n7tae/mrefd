@@ -131,9 +131,10 @@ void CM17Protocol::Task(void)
 				CPeers *peers = g_Reflector.GetPeers();
 				if ( nullptr == peers->FindPeer(cs, ip) )
 				{
+					std::cout << "Adding peer " << cs << std::endl;
 					// create the new peer
 					// this also create one client per module
-					auto peer = std::make_shared<CM17Peer>(cs, ip, mods);
+					std::shared_ptr<CPeer> peer = std::make_shared<CM17Peer>(cs, ip, mods);
 
 					// append the peer to reflector peer list
 					// this also add all new clients to reflector client list
