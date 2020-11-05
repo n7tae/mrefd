@@ -622,8 +622,7 @@ void CM17Protocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::
 {
 	memset(conn.magic, 0, sizeof(SInterConnect));
 	memcpy(conn.magic, "CONN", 4);
-	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(conn.fromcs);
+	GetReflectorCallsign().CodeOut(conn.fromcs);
 	memcpy(conn.mods, mods.c_str(), mods.size());
 }
 
