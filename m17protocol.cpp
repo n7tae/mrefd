@@ -375,7 +375,7 @@ void CM17Protocol::HandleKeepalives(void)
 	CPeers *peers = g_Reflector.GetPeers();
 	auto pit = peers->begin();
 	std::shared_ptr<CPeer>peer = nullptr;
-	while ( (peer = peers->FindNextPeer(PROTOCOL_M17, pit)) != nullptr )
+	while ( nullptr != (peer = peers->FindNextPeer(PROTOCOL_M17, pit)) )
 	{
 		// send keepalive
 		Send(keepalive, 10, peer->GetIp());
@@ -395,7 +395,7 @@ void CM17Protocol::HandleKeepalives(void)
 			Send(disconnect, 10, peer->GetIp());
 
 			// remove it
-			std::cout << "M17 peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
+			std::cout << "Peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
 			peers->RemovePeer(peer);
 		}
 	}
