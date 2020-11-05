@@ -565,22 +565,23 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 
 bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char *mods)
 {
-	if (0 == memcmp(buf, "CONN", 4))
+	if (memcmp(buf, "CONN", 4))
+		return false;
+
+	cs.CodeIn(buf + 4);
+	std::cout << "CONN from " << cs << std::endl;
+	if (cs.GetCS(4).compare("M17-"))
 	{
-		cs.CodeIn(buf + 4);
-		if (cs.GetCS(4).compare("M17-"))
+		std::cout << "Link request from '" << cs << "' denied" << std::endl;
+		return false;
+	}
+	memcpy(mods, buf+10, 27);
+	for (unsigned i=0; i<strlen(mods); i++)
+	{
+		if (! IsLetter(mods[i]))
 		{
-			std::cout << "Link request from '" << cs << "' denied" << std::endl;
+			std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
 			return false;
-		}
-		memcpy(mods, buf+10, 27);
-		for (unsigned i=0; i<strlen(mods); i++)
-		{
-			if (! IsLetter(mods[i]))
-			{
-				std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
-				return false;
-			}
 		}
 	}
 	return true;
