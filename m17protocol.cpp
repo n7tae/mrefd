@@ -122,7 +122,7 @@ void CM17Protocol::Task(void)
 		}
 		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
 		{
-			std::cout << "Peer ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
+			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17) )
@@ -569,7 +569,6 @@ bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, ch
 		return false;
 
 	cs.CodeIn(buf + 4);
-	std::cout << "CONN from " << cs << std::endl;
 	if (cs.GetCS(4).compare("M17-"))
 	{
 		std::cout << "Link request from '" << cs << "' denied" << std::endl;
@@ -592,7 +591,7 @@ bool CM17Protocol::IsVaildInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs
 	SInterConnect *p = (SInterConnect *)buf;
 	if (0 == memcmp(p->magic, "ACKN", 4))
 	{
-		CCallsign cs(p->fromcs);
+		cs.CodeIn(p->fromcs);
 		memcpy(mods, p->mods, 27);
 		return (0 == mods[26]);
 	}
