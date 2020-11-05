@@ -434,15 +434,13 @@ void CM17Protocol::HandlePeerLinks(void)
 	uint8_t connect[sizeof(SInterConnect)];
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
-		std::cout << "Trying to find peer '" << (*it).GetCallsign() << "'" << std::endl;
-		std::cout << "It has IP=" << (*it).GetIp() << " and modules " << (*it).GetModules() << std::endl;
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
 			if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
 			{
 				// send connect packet to re-initiate peer link
 				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-				Send(connect, 11, (*it).GetIp(), M17_PORT);
+				Send(connect, sizeof(SInterConnect), (*it).GetIp(), M17_PORT);
 				std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
 			}
 		}
