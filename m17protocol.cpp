@@ -102,6 +102,7 @@ void CM17Protocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(buf, cs, mods))
 		{
+			Dump("CONN packet=", buf, sizeof(SInterConnect));
 			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
@@ -574,7 +575,7 @@ bool CM17Protocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, ch
 			return false;
 		}
 	}
-	strcpy(mods, (const char *)buf+10);
+	memcpy(mods, buf+10, 27);
 	for (unsigned i=0; i<strlen(mods); i++)
 	{
 		if (! IsLetter(mods[i]))
