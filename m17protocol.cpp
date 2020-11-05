@@ -42,10 +42,10 @@ CM17Protocol::CM17Protocol()
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation
 
-bool CM17Protocol::Initialize(int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6)
+bool CM17Protocol::Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6)
 {
 	// base class
-	if (! CProtocol::Initialize(ptype, port, has_ipv4, has_ipv6))
+	if (! CProtocol::Initialize(port, has_ipv4, has_ipv6))
 		return false;
 
 	// update time
@@ -105,7 +105,7 @@ void CM17Protocol::Task(void)
 			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17, mods) )
+			if ( g_GateKeeper.MayLink(cs, ip, mods) )
 			{
 				SInterConnect ackn;
 				// acknowledge the request
@@ -125,11 +125,11 @@ void CM17Protocol::Task(void)
 			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17) )
+			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				// already connected ?
 				CPeers *peers = g_Reflector.GetPeers();
-				if ( nullptr == peers->FindPeer(cs, ip, PROTOCOL_M17) )
+				if ( nullptr == peers->FindPeer(cs, ip) )
 				{
 					// create the new peer
 					// this also create one client per module
@@ -149,7 +149,7 @@ void CM17Protocol::Task(void)
 			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip, PROTOCOL_M17) )
+			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				// valid module ?
 				if ( g_Reflector.IsValidModule(mod) )
@@ -187,7 +187,7 @@ void CM17Protocol::Task(void)
 				CClients *clients = g_Reflector.GetClients();
 				auto it = clients->begin();
 				std::shared_ptr<CClient>client = nullptr;
-				while (nullptr != (client = clients->FindNextClient(cs, ip, PROTOCOL_M17, it)))
+				while (nullptr != (client = clients->FindNextClient(cs, ip, it)))
 				{
 					client->Alive();
 				}
@@ -197,7 +197,7 @@ void CM17Protocol::Task(void)
 			{
 				// find peer
 				CPeers *peers = g_Reflector.GetPeers();
-				std::shared_ptr<CPeer>peer = peers->FindPeer(ip, PROTOCOL_M17);
+				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
 				if ( peer != nullptr )
 				{
 					// keep it alive
@@ -212,7 +212,7 @@ void CM17Protocol::Task(void)
 			if (cs.GetCS(4).compare("M17-")) {
 				// find the regular client & remove it
 				CClients *clients = g_Reflector.GetClients();
-				std::shared_ptr<CClient>client = clients->FindClient(ip, PROTOCOL_M17);
+				std::shared_ptr<CClient>client = clients->FindClient(ip);
 				if ( client != nullptr )
 				{
 					// ack disconnect packet
@@ -227,7 +227,7 @@ void CM17Protocol::Task(void)
 			{
 				// find the peer and remove it
 				CPeers *peers = g_Reflector.GetPeers();
-				std::shared_ptr<CPeer>peer = peers->FindPeer(ip, PROTOCOL_M17);
+				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
 				if ( peer )
 				{
 					// remove it from reflector peer list
@@ -290,7 +290,7 @@ void CM17Protocol::HandleQueue(void)
 		CClients *clients = g_Reflector.GetClients();
 		auto it = clients->begin();
 		std::shared_ptr<CClient>client = nullptr;
-		while (nullptr != (client = clients->FindNextClient(PROTOCOL_M17, it)))
+		while (nullptr != (client = clients->FindNextClient(it)))
 		{
 			// is this client busy ?
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
@@ -331,7 +331,7 @@ void CM17Protocol::HandleKeepalives(void)
 	CClients *clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	std::shared_ptr<CClient>client = nullptr;
-	while ( (client = clients->FindNextClient(PROTOCOL_M17, it)) != nullptr )
+	while ( nullptr != (client = clients->FindNextClient(it)) )
 	{
 		// don't ping reflector modules, we'll do each interlinked refectors below
 		if (0 == client->GetCallsign().GetCS(4).compare("M17-"))
@@ -350,7 +350,7 @@ void CM17Protocol::HandleKeepalives(void)
 		else if ( !client->IsAlive() )
 		{
 			CPeers *peers = g_Reflector.GetPeers();
-			std::shared_ptr<CPeer>peer = peers->FindPeer(client->GetCallsign(), client->GetIp(), PROTOCOL_M17);
+			std::shared_ptr<CPeer>peer = peers->FindPeer(client->GetCallsign(), client->GetIp());
 			if ( (peer != nullptr) && (peer->GetReflectorModules()[0] == client->GetReflectorModule()) )
 			{
 				// no, but this is a peer client, so it will be handled below
@@ -376,7 +376,7 @@ void CM17Protocol::HandleKeepalives(void)
 	CPeers *peers = g_Reflector.GetPeers();
 	auto pit = peers->begin();
 	std::shared_ptr<CPeer>peer = nullptr;
-	while ( nullptr != (peer = peers->FindNextPeer(PROTOCOL_M17, pit)) )
+	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
 	{
 		// send keepalive
 		Send(keepalive, 10, peer->GetIp());
@@ -417,7 +417,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	// if not, disconnect
 	auto pit = peers->begin();
 	std::shared_ptr<CPeer>peer = nullptr;
-	while ( (peer = peers->FindNextPeer(PROTOCOL_M17, pit)) != nullptr )
+	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
 		if ( list->FindListItem(peer->GetCallsign()) == nullptr )
 		{
@@ -437,7 +437,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	{
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
-			if ( nullptr == peers->FindPeer((*it).GetCallsign(), PROTOCOL_M17) )
+			if ( nullptr == peers->FindPeer((*it).GetCallsign()) )
 			{
 				// send connect packet to re-initiate peer link
 				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
@@ -468,7 +468,7 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 	else
 	{
 		// find this client
-		std::shared_ptr<CClient>client = g_Reflector.GetClients()->FindClient(ip, PROTOCOL_M17);
+		std::shared_ptr<CClient>client = g_Reflector.GetClients()->FindClient(ip);
 		if ( client )
 		{
 			// save the source and destination for Hearing().

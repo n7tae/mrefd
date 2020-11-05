@@ -59,16 +59,15 @@ public:
 
 	// find clients
 	std::shared_ptr<CClient> FindClient(const CIp &);
-	std::shared_ptr<CClient> FindClient(const CIp &, int);
-	std::shared_ptr<CClient> FindClient(const CIp &, int, char);
-	std::shared_ptr<CClient> FindClient(const CCallsign &, const CIp &, int);
-	std::shared_ptr<CClient> FindClient(const CCallsign &, char, const CIp &, int);
-	std::shared_ptr<CClient> FindClient(const CCallsign &, int);
+	std::shared_ptr<CClient> FindClient(const CIp &, char);
+	std::shared_ptr<CClient> FindClient(const CCallsign &, const CIp &);
+	std::shared_ptr<CClient> FindClient(const CCallsign &, char, const CIp &);
+	std::shared_ptr<CClient> FindClient(const CCallsign &);
 
 	// iterate on clients
-	std::shared_ptr<CClient> FindNextClient(int, std::list<std::shared_ptr<CClient>>::iterator &);
-	std::shared_ptr<CClient> FindNextClient(const CIp &, int, std::list<std::shared_ptr<CClient>>::iterator &);
-	std::shared_ptr<CClient> FindNextClient(const CCallsign &, const CIp &, int, std::list<std::shared_ptr<CClient>>::iterator &);
+	std::shared_ptr<CClient> FindNextClient(std::list<std::shared_ptr<CClient>>::iterator &);
+	std::shared_ptr<CClient> FindNextClient(const CIp &, std::list<std::shared_ptr<CClient>>::iterator &);
+	std::shared_ptr<CClient> FindNextClient(const CCallsign &, const CIp &, std::list<std::shared_ptr<CClient>>::iterator &);
 
 protected:
 	// data

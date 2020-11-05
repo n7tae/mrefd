@@ -114,11 +114,11 @@ void CPeers::RemovePeer(std::shared_ptr<CPeer> peer)
 ////////////////////////////////////////////////////////////////////////////////////////
 // find peers
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CIp &Ip, int Protocol)
+std::shared_ptr<CPeer> CPeers::FindPeer(const CIp &Ip)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( ((*it)->GetIp() == Ip)  && ((*it)->GetProtocol() == Protocol))
+		if ( ((*it)->GetIp() == Ip) )
 		{
 			return *it;
 		}
@@ -127,11 +127,11 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CIp &Ip, int Protocol)
 	return nullptr;
 }
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip, int Protocol)
+std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetIp() == Ip)  && ((*it)->GetProtocol() == Protocol) )
+		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetIp() == Ip) )
 		{
 			return *it;
 		}
@@ -140,11 +140,11 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip
 	return nullptr;
 }
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, int Protocol)
+std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( ((*it)->GetProtocol() == Protocol) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
+		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) )
 		{
 			return *it;
 		}
@@ -157,15 +157,10 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, int Protocol)
 ////////////////////////////////////////////////////////////////////////////////////////
 // iterate on peers
 
-std::shared_ptr<CPeer> CPeers::FindNextPeer(int Protocol, std::list<std::shared_ptr<CPeer>>::iterator &it)
+std::shared_ptr<CPeer> CPeers::FindNextPeer(std::list<std::shared_ptr<CPeer>>::iterator &it)
 {
-	while ( it!=end() )
-	{
-		if ( (*it)->GetProtocol() == Protocol )
-		{
-			return *it++;
-		}
-		it++;
-	}
+	if ( it!=end() )
+		return *it++;
+
 	return nullptr;
 }

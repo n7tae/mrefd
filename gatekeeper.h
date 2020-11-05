@@ -47,8 +47,8 @@ public:
 	void Close(void);
 
 	// authorizations
-	bool MayLink(const CCallsign &, const CIp &, int, char * = nullptr) const;
-	bool MayTransmit(const CCallsign &, const CIp &, int = PROTOCOL_ANY, char = ' ') const;
+	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
+	bool MayTransmit(const CCallsign &, const CIp &, char = ' ') const;
 
 	// peer list handeling
 	CPeerCallsignList *GetPeerList(void)    { m_PeerList.Lock(); return &m_PeerList; }

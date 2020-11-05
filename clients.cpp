@@ -132,12 +132,12 @@ std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip)
 	return nullptr;
 }
 
-std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip, int Protocol)
+std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip, char ReflectorModule)
 {
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( ((*it)->GetIp() == Ip)  && ((*it)->GetProtocol() == Protocol))
+		if ( ((*it)->GetIp() == Ip)  && ((*it)->GetReflectorModule() == ReflectorModule) )
 		{
 			return *it;
 		}
@@ -147,27 +147,12 @@ std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip, int Protocol)
 	return nullptr;
 }
 
-std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip, int Protocol, char ReflectorModule)
+std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, const CIp &Ip)
 {
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( ((*it)->GetIp() == Ip)  && ((*it)->GetReflectorModule() == ReflectorModule) && ((*it)->GetProtocol() == Protocol) )
-		{
-			return *it;
-		}
-	}
-
-	// done
-	return nullptr;
-}
-
-std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, const CIp &Ip, int Protocol)
-{
-	// find client
-	for ( auto it=begin(); it!=end(); it++ )
-	{
-		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetIp() == Ip)  && ((*it)->GetProtocol() == Protocol) )
+		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetIp() == Ip) )
 		{
 			return *it;
 		}
@@ -176,12 +161,12 @@ std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, const C
 	return nullptr;
 }
 
-std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, char module, const CIp &Ip, int Protocol)
+std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, char module, const CIp &Ip)
 {
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetModule() == module) && ((*it)->GetIp() == Ip)  && ((*it)->GetProtocol() == Protocol) )
+		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetModule() == module) && ((*it)->GetIp() == Ip) )
 		{
 			return *it;
 		}
@@ -190,12 +175,12 @@ std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, char mo
 	return nullptr;
 }
 
-std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, int Protocol)
+std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign)
 {
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if ( ((*it)->GetProtocol() == Protocol) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
+		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) )
 		{
 			return *it;
 		}
@@ -207,11 +192,19 @@ std::shared_ptr<CClient> CClients::FindClient(const CCallsign &Callsign, int Pro
 ////////////////////////////////////////////////////////////////////////////////////////
 // iterate on clients
 
-std::shared_ptr<CClient> CClients::FindNextClient(int Protocol, std::list<std::shared_ptr<CClient>>::iterator &it)
+std::shared_ptr<CClient> CClients::FindNextClient(std::list<std::shared_ptr<CClient>>::iterator &it)
+{
+	if ( it != end() )
+		return *it++;
+
+	return nullptr;
+}
+
+std::shared_ptr<CClient> CClients::FindNextClient(const CIp &Ip, std::list<std::shared_ptr<CClient>>::iterator &it)
 {
 	while ( it != end() )
 	{
-		if ( (*it)->GetProtocol() == Protocol )
+		if ((*it)->GetIp() == Ip )
 		{
 			return *it++;
 		}
@@ -220,24 +213,11 @@ std::shared_ptr<CClient> CClients::FindNextClient(int Protocol, std::list<std::s
 	return nullptr;
 }
 
-std::shared_ptr<CClient> CClients::FindNextClient(const CIp &Ip, int Protocol, std::list<std::shared_ptr<CClient>>::iterator &it)
+std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, const CIp &Ip, std::list<std::shared_ptr<CClient>>::iterator &it)
 {
 	while ( it != end() )
 	{
-		if ( ((*it)->GetProtocol() == Protocol) && ((*it)->GetIp() == Ip) )
-		{
-			return *it++;
-		}
-		it++;
-	}
-	return nullptr;
-}
-
-std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, const CIp &Ip, int Protocol, std::list<std::shared_ptr<CClient>>::iterator &it)
-{
-	while ( it != end() )
-	{
-		if ( ((*it)->GetProtocol() == Protocol) && ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
+		if ( ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
 		{
 			return *it++;
 		}

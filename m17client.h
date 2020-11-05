@@ -40,7 +40,6 @@ public:
 	virtual ~CM17Client() {};
 
 	// identity
-	int GetProtocol(void) const                 { return PROTOCOL_M17; }
 	const char *GetProtocolName(void) const     { return "M17"; }
 	bool IsNode(void) const                     { return true; }
 

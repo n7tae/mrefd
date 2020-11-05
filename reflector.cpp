@@ -74,7 +74,7 @@ bool CReflector::Start(void)
 	g_GateKeeper.Init();
 
 	// create protocols
-	if (! m_Protocol.Initialize(PROTOCOL_M17, M17_PORT, true, true))
+	if (! m_Protocol.Initialize(M17_PORT, true, true))
 	{
 		m_Protocol.Close();
 		return false;

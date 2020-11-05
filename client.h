@@ -58,7 +58,6 @@ public:
 	void SetReflectorModule(char c)                     { m_ReflectorModule = c; }
 
 	// identity
-	virtual int GetProtocol(void) const                 { return PROTOCOL_NONE; }
 	virtual const char *GetProtocolName(void) const     { return "none"; }
 	virtual bool IsNode(void) const                     { return false; }
 	virtual bool IsPeer(void) const                     { return false; }

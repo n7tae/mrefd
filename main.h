@@ -63,10 +63,6 @@
 
 // protocols ---------------------------------------------------
 
-#define PROTOCOL_ANY                    -1
-#define PROTOCOL_NONE                   0
-#define PROTOCOL_M17                    1
-
 // M17
 #define M17_PORT                        17000
 #define M17_KEEPALIVE_PERIOD			3

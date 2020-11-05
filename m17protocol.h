@@ -37,7 +37,7 @@ class CM17Protocol : public CProtocol
 public:
 	CM17Protocol();
 	// initialization
-	bool Initialize(const int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6);
+	bool Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6);
 
 	// task
 	void Task(void);

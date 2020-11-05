@@ -44,7 +44,7 @@ public:
 	virtual ~CProtocol();
 
 	// initialization
-	virtual bool Initialize(const int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6);
+	virtual bool Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6);
 	virtual void Close(void);
 
 	// queue

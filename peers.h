@@ -60,12 +60,12 @@ public:
 	std::list<std::shared_ptr<CPeer>>::const_iterator cend() const   { return m_Peers.cend(); }
 
 	// find peers
-	std::shared_ptr<CPeer> FindPeer(const CIp &, int);
-	std::shared_ptr<CPeer> FindPeer(const CCallsign &, const CIp &, int);
-	std::shared_ptr<CPeer> FindPeer(const CCallsign &, int);
+	std::shared_ptr<CPeer> FindPeer(const CIp &);
+	std::shared_ptr<CPeer> FindPeer(const CCallsign &, const CIp &);
+	std::shared_ptr<CPeer> FindPeer(const CCallsign &);
 
 	// iterate on peers
-	std::shared_ptr<CPeer> FindNextPeer(int, std::list<std::shared_ptr<CPeer>>::iterator &);
+	std::shared_ptr<CPeer> FindNextPeer(std::list<std::shared_ptr<CPeer>>::iterator &);
 
 protected:
 	// data

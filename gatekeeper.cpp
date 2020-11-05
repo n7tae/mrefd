@@ -81,7 +81,7 @@ void CGateKeeper::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // authorizations
 
-bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, int protocol, char *modules) const
+bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, char *modules) const
 {
 	bool ok;
 	if (callsign.GetCS(4).compare("M17-"))
@@ -95,20 +95,20 @@ bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, int protocol
 
 	if ( !ok )
 	{
-		std::cout << "Gatekeeper blocking linking of " << callsign << " @ " << ip << " using protocol " << protocol << std::endl;
+		std::cout << "Gatekeeper blocking linking of " << callsign << " @ " << ip << std::endl;
 	}
 
 	// done
 	return ok;
 }
 
-bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &ip, int protocol, char module) const
+bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &ip, char module) const
 {
 	bool ok = IsNodeListedOk(callsign, ip, module);
 
 	if ( !ok )
 	{
-		std::cout << "Gatekeeper blocking transmitting of " << callsign << " @ " << ip << " using protocol " << protocol << std::endl;
+		std::cout << "Gatekeeper blocking transmitting of " << callsign << " @ " << ip << std::endl;
 	}
 
 	// done

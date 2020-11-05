@@ -44,7 +44,6 @@ public:
 	bool IsAlive(void) const;
 
 	// identity
-	int GetProtocol(void) const                 { return PROTOCOL_M17; }
 	const char *GetProtocolName(void) const     { return "M17"; }
 
 	// revision helper

@@ -56,7 +56,7 @@ CProtocol::~CProtocol()
 ////////////////////////////////////////////////////////////////////////////////////////
 // initialization
 
-bool CProtocol::Initialize(int ptype, const uint16_t port, const bool has_ipv4, const bool has_ipv6)
+bool CProtocol::Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6)
 {
 	// init reflector apparent callsign
 	m_ReflectorCallsign = g_Reflector.GetCallsign();
