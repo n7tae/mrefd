@@ -182,6 +182,7 @@ void CM17Protocol::Task(void)
 	case 10:
 		if ( IsValidKeepAlive(buf, cs) )
 		{
+			std::cout << "Got PING from " << cs << std::endl;
 			if (cs.GetCS(4).compare("M17-")) {
 				// find all clients with that callsign & ip and keep them alive
 				CClients *clients = g_Reflector.GetClients();
@@ -196,7 +197,6 @@ void CM17Protocol::Task(void)
 			else
 			{
 				// find peer
-				std::cout << "Got PING from " << cs << std::endl;
 				CPeers *peers = g_Reflector.GetPeers();
 				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
 				if ( peer )
@@ -381,7 +381,7 @@ void CM17Protocol::HandleKeepalives(void)
 	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
 	{
 		// send keepalive
-		std::cout << "Pinging " << peer->GetCallsign() << std::endl;
+		std::cout << "Pinging " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 		Send(keepalive, 10, peer->GetIp());
 
 		// client busy ?
