@@ -131,7 +131,6 @@ void CM17Protocol::Task(void)
 				CPeers *peers = g_Reflector.GetPeers();
 				if ( nullptr == peers->FindPeer(cs, ip) )
 				{
-					std::cout << "Adding peer " << cs << std::endl;
 					// create the new peer
 					// this also create one client per module
 					std::shared_ptr<CPeer> peer = std::make_shared<CM17Peer>(cs, ip, mods);
@@ -140,10 +139,8 @@ void CM17Protocol::Task(void)
 					// this also add all new clients to reflector client list
 					peers->AddPeer(peer);
 				}
-				else std::cout << "Already found " << cs << " in the list of peers, ACKN ignored" << std::endl;
 				g_Reflector.ReleasePeers();
 			}
-			else std::cout << cs << " cannot link, blocked by the gatekeeper" << std::endl;
 		}
 		break;
 	case 11:
@@ -201,7 +198,7 @@ void CM17Protocol::Task(void)
 				// find peer
 				CPeers *peers = g_Reflector.GetPeers();
 				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
-				if ( peer != nullptr )
+				if ( peer )
 				{
 					// keep it alive
 					peer->Alive();
@@ -299,16 +296,17 @@ void CM17Protocol::HandleQueue(void)
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
 				auto cs = client->GetCallsign();
-				auto comp = cs.GetCS(4).compare("M17-");
 
-				if (comp) // the client is not a reflector
+				if (cs.GetCS(4).compare("M17-"))
 				{
+					// the client is not a reflector
 					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);
 					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2));
 					Send(packet->GetFrame().frame.magic, sizeof(SM17Frame), client->GetIp());
 				}
-				else if (! packet->GetRelay())// the client is a reflector and the packet hasn't yet been relayed
+				else if (! packet->GetRelay())
 				{
+					// the client is a reflector and the packet hasn't yet been relayed
 					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);	      // set the destination
 					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2)); // recalculate the crc
 					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
@@ -333,10 +331,10 @@ void CM17Protocol::HandleKeepalives(void)
 	// iterate on clients
 	CClients *clients = g_Reflector.GetClients();
 	auto it = clients->begin();
-	std::shared_ptr<CClient>client = nullptr;
+	std::shared_ptr<CClient> client;
 	while ( nullptr != (client = clients->FindNextClient(it)) )
 	{
-		// don't ping reflector modules, we'll do each interlinked refectors below
+		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
 		if (0 == client->GetCallsign().GetCS(4).compare("M17-"))
 			continue;
 
@@ -353,8 +351,8 @@ void CM17Protocol::HandleKeepalives(void)
 		else if ( !client->IsAlive() )
 		{
 			CPeers *peers = g_Reflector.GetPeers();
-			std::shared_ptr<CPeer>peer = peers->FindPeer(client->GetCallsign(), client->GetIp());
-			if ( (peer != nullptr) && (peer->GetReflectorModules()[0] == client->GetReflectorModule()) )
+			auto peer = peers->FindPeer(client->GetCallsign(), client->GetIp());
+			if ( peer && (peer->GetReflectorModules()[0] == client->GetReflectorModule()) )
 			{
 				// no, but this is a peer client, so it will be handled below
 			}
@@ -378,7 +376,7 @@ void CM17Protocol::HandleKeepalives(void)
 	// iterate on peers
 	CPeers *peers = g_Reflector.GetPeers();
 	auto pit = peers->begin();
-	std::shared_ptr<CPeer>peer = nullptr;
+	std::shared_ptr<CPeer> peer;
 	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
 	{
 		// send keepalive
@@ -618,8 +616,7 @@ bool CM17Protocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 void CM17Protocol::EncodeKeepAlivePacket(uint8_t *buf)
 {
 	memcpy(buf, "PING", 4);
-	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(buf + 4);
+	GetReflectorCallsign().CodeOut(buf + 4);
 }
 
 void CM17Protocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
@@ -639,16 +636,14 @@ void CM17Protocol::EncodeInterlinkAckPacket(SInterConnect &ackn, const char *mod
 {
 	memset(ackn.magic, 0, sizeof(SInterConnect));
 	memcpy(ackn.magic, "ACKN", 4);
-	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(ackn.fromcs);
+	GetReflectorCallsign().CodeOut(ackn.fromcs);
 	memcpy(ackn.mods, mods, strlen(mods));
 }
 
 void CM17Protocol::EncodeInterlinkNackPacket(uint8_t *buf)
 {
 	memcpy(buf, "NACK", 4);
-	CCallsign cs(GetReflectorCallsign());
-	cs.CodeOut(buf+4);
+	GetReflectorCallsign().CodeOut(buf+4);
 }
 
 void CM17Protocol::EncodeConnectNackPacket(uint8_t *buf)
