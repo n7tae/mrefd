@@ -125,7 +125,7 @@ void CM17Protocol::Task(void)
 			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip) )
+			if ( g_GateKeeper.MayLink(cs, ip, mods) )
 			{
 				// already connected ?
 				CPeers *peers = g_Reflector.GetPeers();
