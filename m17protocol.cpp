@@ -35,7 +35,7 @@
 
 CM17Protocol::CM17Protocol()
 {
-	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}[ ][A-Z]$", std::regex::extended);
+	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}(()|( [A-Z]))$", std::regex::extended);
 	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9][A-Z]{1,4}(()|([ ]*[A-Z]?)|([-/\\.][A-Z0-9]+))$", std::regex::extended);
 }
 
@@ -102,7 +102,7 @@ void CM17Protocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(buf, cs, mods))
 		{
-			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
+			//std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, mods) )
@@ -122,7 +122,7 @@ void CM17Protocol::Task(void)
 		}
 		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
 		{
-			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
+			//std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, mods) )
@@ -554,8 +554,8 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		// create packet
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
-		auto dest = packet->GetDestCallsign().GetCS();
-		if (std::regex_match(dest, clientRegEx) || std::regex_match(dest, peerRegEx))
+		auto dest = packet->GetDestCallsign();
+		if (dest.HasValidModule() && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source

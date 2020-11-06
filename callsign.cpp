@@ -18,6 +18,7 @@
 
 #include <iostream>
 
+#include "configure.h"
 #include "callsign.h"
 
 #define M17CHARACTERS " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/."
@@ -42,16 +43,24 @@ void CCallsign::CSIn(const std::string &callsign)
 {
 	const std::string m17_alphabet(M17CHARACTERS);
 	memset(cs, 0, sizeof(cs));
-	memcpy(cs, callsign.c_str(), (callsign.size()<10) ? callsign.size() : 9);
+	memcpy(cs, callsign.c_str(), (callsign.size()<10) ? callsign.size() : 9);	// no more than 9 chars
 	uint64_t encoded = 0;
 	for( int i=int(callsign.size()-1); i>=0; i-- ) {
 		auto pos = m17_alphabet.find(cs[i]);
 		if (pos == std::string::npos) {
 			pos = 0;
 		}
+		cs[i] = m17_alphabet[pos];	// replace with valid character
 		encoded *= 40;
 		encoded += pos;
 	}
+
+	// strip trailing spaces (just to be nice!)
+	auto len = strlen(cs);
+	while ((' ' == cs[len-1]) && len)
+		cs[--len] = 0;
+
+	// fill in the encoded value
 	for (int i=0; i<6; i++) {
 		code[i] = (encoded >> (8*(5-i)) & 0xFFU);
 	}
@@ -96,6 +105,17 @@ char CCallsign::GetModule() const
 bool CCallsign::HasSameCallsign(const CCallsign &call) const
 {
 	return (this->GetCS(8) == call.GetCS(8));
+}
+
+bool CCallsign::HasValidModule() const
+{
+	auto i = GetModule() - 'A';
+	if (i >= 0)
+	{
+		if (i < NB_OF_MODULES)
+			return true;
+	}
+	return false;
 }
 
 bool CCallsign::operator==(const CCallsign &rhs) const
