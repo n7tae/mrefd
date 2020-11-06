@@ -196,6 +196,7 @@ void CM17Protocol::Task(void)
 			else
 			{
 				// find peer
+				std::cout << "Got PING from " << cs << std::endl;
 				CPeers *peers = g_Reflector.GetPeers();
 				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
 				if ( peer )
