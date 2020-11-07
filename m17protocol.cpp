@@ -303,6 +303,8 @@ void CM17Protocol::HandleQueue(void)
 					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);
 					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2));
 					Send(packet->GetFrame().frame.magic, sizeof(SM17Frame), client->GetIp());
+					if (packet->IsLastPacket())
+						std::cout << "Sent voice-stream to " << cs << " at " << client->GetIp() << std::endl;
 				}
 				else if (! packet->GetRelay())
 				{
@@ -312,6 +314,8 @@ void CM17Protocol::HandleQueue(void)
 					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
 					Send(packet->GetFrame().frame.magic, sizeof(SRefM17Frame), client->GetIp());
 					packet->SetRelay(false); // reset for the next client;
+					if (packet->IsLastPacket())
+						std::cout << "Sent voice-stream to " << cs << " at " << client->GetIp() << std::endl;
 				}
 			}
 		}
