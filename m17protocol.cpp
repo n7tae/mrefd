@@ -573,6 +573,10 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 			{	// looks like a valid source
 				return true;
 			}
+			else
+			{
+				std::cout << packet->GetSourceCallsign().GetCS() << " Source C/S FAILED RegEx test" << std::endl;
+			}
 		}
 	}
 	return false;
