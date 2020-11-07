@@ -292,6 +292,8 @@ void CM17Protocol::HandleQueue(void)
 		std::shared_ptr<CClient>client = nullptr;
 		while (nullptr != (client = clients->FindNextClient(it)))
 		{
+			if (packet->IsLastPacket())
+				std::cout << "Last packet ready for " << client->GetCallsign() << std::endl;
 			// is this client busy ?
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
