@@ -98,6 +98,12 @@ void CM17Protocol::Task(void)
 				std::cout << "Packet with wrong destination:" << dest.GetCS() << std::endl;
 			}
 		}
+		else
+		{
+			CCallsign call(buf+14);
+			std::cout << "Rejected packet from " << call << std::endl;
+			Dump("Rejected packet:", buf, len);
+		}
 		break;
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(buf, cs, mods))
