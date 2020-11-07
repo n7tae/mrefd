@@ -316,6 +316,7 @@ void CM17Protocol::HandleQueue(void)
 				{
 					// the client is a reflector and the packet hasn't yet been relayed
 					cs.SetModule(client->GetModule());
+					std::cout << "Relay packet to " << cs << std::endl;
 					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);	      // set the destination
 					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2)); // recalculate the crc
 					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
