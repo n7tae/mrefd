@@ -436,7 +436,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	SInterConnect connect;
 	for ( auto it=list->begin(); it!=list->end(); it++ )
 	{
-		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
+		if ( nullptr == peers->FindPeer((*it).GetCallsign()) )
 		{
 			// send connect packet to re-initiate peer link
 			EncodeInterlinkConnectPacket(connect, (*it).GetModules());
