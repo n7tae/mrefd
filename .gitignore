@@ -8,4 +8,4 @@ configure.mk
 configure.h
 reflector.cfg
 mrefd
-crc-test
+test-all

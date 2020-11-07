@@ -43,9 +43,9 @@ DEPS = $(SRCS:.cpp=.d)
 
 EXE=mrefd
 
-all : $(EXE) crc-test
+all : $(EXE) test-all
 
-crc-test : crc-test.o crc.o
+test-all : test-all.o crc.o callsign.o
 	$(CC) $^ -o $@
 
 $(EXE) : $(OBJS)

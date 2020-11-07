@@ -440,13 +440,10 @@ void CM17Protocol::HandlePeerLinks(void)
 	{
 		if ( (*it).GetCallsign().HasSameCallsignWithWildcard(CCallsign("M17-*")) )
 		{
-			if ( nullptr == peers->FindPeer((*it).GetCallsign()) )
-			{
-				// send connect packet to re-initiate peer link
-				EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-				Send(connect.magic, sizeof(SInterConnect), (*it).GetIp());
-				std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
-			}
+			// send connect packet to re-initiate peer link
+			EncodeInterlinkConnectPacket(connect, (*it).GetModules());
+			Send(connect.magic, sizeof(SInterConnect), (*it).GetIp());
+			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
 		}
 	}
 
@@ -547,6 +544,17 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
+bool CM17Protocol::HasValidModule(const CCallsign &cs) const
+{
+	auto i = cs.GetModule() - 'A';
+	if (i >= 0)
+	{
+		if (i < NB_OF_MODULES)
+			return true;
+	}
+	return false;
+}
+
 bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_ptr<CPacket> &packet)
 {
 	if (0 == memcmp(buf, "M17 ", 4))	// we tested the size before we got here
@@ -555,7 +563,7 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
 		auto dest = packet->GetDestCallsign();
-		if (dest.HasValidModule() && dest.HasSameCallsign(GetReflectorCallsign()))
+		if (HasValidModule(dest) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source

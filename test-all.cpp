@@ -2,9 +2,37 @@
 #include <cstring>
 
 #include "crc.h"
+#include "callsign.h"
 
 int main()
 {
+	if (sizeof(uint64_t) != sizeof(size_t))
+	{
+		printf("ERROR! Type size_t is not 64 bits.\n");
+		return 1;
+	}
+
+	std::string callsign("M17-USA A");
+	CCallsign cs(callsign);
+	auto coded = cs.Hash();
+	if (coded == 0x05f74c74caedu)
+	{
+		uint8_t code[6] = { 0 };
+		auto c = coded;
+		for (int i=5; c; i--)
+		{
+			code[i] = c % 0x100u;
+			c /= 0x100u;
+		}
+		CCallsign cs1(code);
+		printf("Callsign %s is 0x%lx and decodes back to %s\n", callsign.c_str(), coded, cs1.GetCS().c_str());
+	}
+	else
+	{
+		printf("ERROR with callsign encoding!\n");
+		return 1;
+	}
+
 	CCRC crc;
 
 	unsigned char string[256];

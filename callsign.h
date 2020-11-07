@@ -30,17 +30,17 @@ public:
 	CCallsign(const uint8_t *code);
 	void CSIn(const std::string &cs);
 	void CodeIn(const uint8_t *code);
-	const std::string GetCS(unsigned len = 9) const;
-	void CodeOut(uint8_t *out) const { memcpy(out, code, 6); };
+	const std::string GetCS(unsigned len = 0) const;
+	void CodeOut(uint8_t *out) const;
+	size_t Hash() const { return coded; }
 	bool operator==(const CCallsign &rhs) const;
 	bool operator!=(const CCallsign &rhs) const;
 	char GetModule(void) const;
-	bool HasValidModule() const;
 	bool HasSameCallsignWithWildcard(const CCallsign &callsign) const;
 	void SetModule(char m);
 	friend std::ostream &operator<<(std::ostream &stream, const CCallsign &call);
 	bool HasSameCallsign(const CCallsign &call) const;
 private:
-	uint8_t code[6];
+	uint64_t coded;
 	char cs[10];
 };
