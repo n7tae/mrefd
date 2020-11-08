@@ -444,7 +444,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// iterate on clients
 	for ( auto cit=clients->cbegin(); cit!=clients->cend(); cit++ )
 	{
-		if ( (*cit)->IsNode() )
+		if ( (*cit)->IsNode() && (*cit)->GetCallsign().GetCS(4).compare("M17-") )
 		{
 			(*cit)->WriteXml(xmlFile);
 		}
