@@ -492,7 +492,8 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 
 				// update last heard
 				auto from = client->GetCallsign();
-				from.SetModule(client->GetReflectorModule());
+				if (0 == from.GetCS(4).compare("M17-"))
+					from.SetModule(client->GetReflectorModule());
 				g_Reflector.GetUsers()->Hearing(s, from);
 				g_Reflector.ReleaseUsers();
 			}
