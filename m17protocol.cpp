@@ -100,7 +100,9 @@ void CM17Protocol::Task(void)
 		}
 		else
 		{
-			Dump("Rejected voice packet:", buf, len);
+			CCallsign d(buf+6);
+			CCallsign s(buf+12);
+			std::cout << "Rejected " << len << " byte packet to " << d << ", from " << s << std::endl;
 		}
 		break;
 	case sizeof(SInterConnect):
@@ -296,8 +298,6 @@ void CM17Protocol::HandleQueue(void)
 		std::shared_ptr<CClient>client = nullptr;
 		while (nullptr != (client = clients->FindNextClient(it)))
 		{
-			// if (packet->IsLastPacket())
-			// 	std::cout << "Last packet ready for " << client->GetCallsign() << std::endl;
 			// is this client busy ?
 			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
@@ -309,8 +309,6 @@ void CM17Protocol::HandleQueue(void)
 					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);
 					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2));
 					Send(packet->GetFrame().frame.magic, sizeof(SM17Frame), client->GetIp());
-					// if (packet->IsLastPacket())
-					// 	std::cout << "Sent voice-stream to " << cs << " at " << client->GetIp() << std::endl;
 				}
 				else if (! packet->GetRelay())
 				{
@@ -321,8 +319,6 @@ void CM17Protocol::HandleQueue(void)
 					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
 					Send(packet->GetFrame().frame.magic, sizeof(SRefM17Frame), client->GetIp());
 					packet->SetRelay(false); // reset for the next client;
-					// if (packet->IsLastPacket())
-					// 	std::cout << "Sent voice-stream to " << cs << " at " << client->GetIp() << std::endl;
 				}
 			}
 		}
@@ -375,7 +371,7 @@ void CM17Protocol::HandleKeepalives(void)
 				Send(disconnect, 10, client->GetIp());
 
 				// remove it
-				std::cout << "M17 client " << client->GetCallsign() << " keepalive timeout" << std::endl;
+				std::cout << "Client " << client->GetCallsign() << " keepalive timeout" << std::endl;
 				clients->RemoveClient(client);
 			}
 			g_Reflector.ReleasePeers();
