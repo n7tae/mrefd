@@ -73,7 +73,7 @@ void CUser::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "\t<Callsign>" << m_Source << "</Callsign>" << std::endl;
 	xmlFile << "\t<Via node>" << m_Destination << "</Via node>" << std::endl;
 	xmlFile << "\t<On module>" << m_Reflector.GetModule() << "</On module>" << std::endl;
-	xmlFile << "\t<Via peer>" << m_Reflector << "</Via peer>" << std::endl;
+	xmlFile << "\t<Via peer>" << m_Reflector.GetCS(7) << "</Via peer>" << std::endl;
 
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&m_LastHeardTime)))
