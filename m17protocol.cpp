@@ -237,7 +237,7 @@ void CM17Protocol::Task(void)
 				if ( peer )
 				{
 					// remove it from reflector peer list
-					// this also remove all concerned clients from reflector client list
+					// this also remove all peer's clients from reflector client list
 					// and delete them
 					peers->RemovePeer(peer);
 				}
