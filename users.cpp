@@ -53,11 +53,6 @@ void CUsers::AddUser(const CUser &user)
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation
 
-void CUsers::Hearing(const CCallsign &source, const CCallsign &destination)
-{
-	Hearing(source, destination, g_Reflector.GetCallsign());
-}
-
 void CUsers::Hearing(const CCallsign &source, const CCallsign &destination, const CCallsign &reflector)
 {
 	CUser heard(source, destination, reflector);

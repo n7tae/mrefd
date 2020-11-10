@@ -476,10 +476,10 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 		std::shared_ptr<CClient> client = g_Reflector.GetClients()->FindClient(ip);
 		if ( client )
 		{
-			// save the source and destination for Hearing().
-			// We're going to lose packet on OpenStream();
+			// save the source and destination module for Hearing().
+			// We're going to lose packet after the OpenStream() call.
 			auto s = packet->GetSourceCallsign();
-			auto d = packet->GetDestCallsign();
+			auto d = packet->GetDestCallsign().GetModule();
 			// try to open the stream
 			stream = g_Reflector.OpenStream(packet, client);
 			if ( nullptr == stream )
@@ -494,9 +494,9 @@ void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &
 				// update last heard
 				auto from = client->GetCallsign();
 				if (0 == from.GetCS(4).compare("M17-"))
-					from.SetModule(d.GetModule());
+					from.SetModule(d);
 				auto ref = GetReflectorCallsign();
-				ref.SetModule(d.GetModule());
+				ref.SetModule(d);
 				g_Reflector.GetUsers()->Hearing(s, from, ref);
 				g_Reflector.ReleaseUsers();
 			}

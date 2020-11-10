@@ -55,7 +55,7 @@ $(EXE) : $(OBJS)
 	g++ $(CFLAGS) $< -o $@
 
 clean :
-	$(RM) *.o *.d $(EXE) crc-test
+	$(RM) *.o *.d $(EXE) test-all
 
 -include $(DEPS)
 

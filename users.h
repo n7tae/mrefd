@@ -44,7 +44,6 @@ public:
 	std::list<CUser>::iterator end()                { return m_Users.end(); }
 
 	// operation
-	void   Hearing(const CCallsign &, const CCallsign &);
 	void   Hearing(const CCallsign &, const CCallsign &, const CCallsign &);
 
 protected:
