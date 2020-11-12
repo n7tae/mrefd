@@ -86,10 +86,17 @@ void CM17Protocol::Task(void)
 		{
 			if (pack->GetDestCallsign().HasSameCallsign(g_Reflector.GetCallsign()))
 			{	// only if the packet has the destination set properly!
-				OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-				if (pack)                  // the packet might have been erased
-				{                          // if it needed to open a new stream, but couldn't
-					OnPacketIn(pack, ip);
+				if (g_GateKeeper.MayTransmit(pack->GetSourceCallsign(), ip))
+				{
+					OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
+					if (pack)                  // the packet might have been erased
+					{                          // if it needed to open a new stream, but couldn't
+						OnPacketIn(pack, ip);
+					}
+				}
+				else if (pack->IsLastPacket())
+				{
+					std::cout << "Blocked voice stream from " << pack->GetSourceCallsign() << " at " << ip << std::endl;
 				}
 			}
 			else
