@@ -112,11 +112,6 @@ bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &ip) const
 {
 	bool ok = IsNodeListedOk(callsign);
 
-	if ( !ok )
-	{
-		std::cout << "Gatekeeper blocking transmitting of " << callsign << " @ " << ip << std::endl;
-	}
-
 	// done
 	return ok;
 }
