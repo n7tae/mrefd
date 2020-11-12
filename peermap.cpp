@@ -79,7 +79,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 								if ( (szmods = strtok(nullptr, " ,\t")) != nullptr )
 								{
 									// create and and store
-									m_Peers[name] = CPeerMapItem(callsign, szip, ToUpper(name));
+									m_Peers[name] = CPeerMapItem(callsign, szip, ToUpper(szmods));
 								}
 								else
 								{

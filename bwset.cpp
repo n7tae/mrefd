@@ -142,7 +142,7 @@ bool CBWSet::IsMatched(const std::string &cs) const
 					return true;
 				break;
 			default:
-				if (0 == item.compare(0, pos, cs, pos))
+				if (0 == item.compare(0, pos, cs, 0, pos))
 					return true;
 				break;
 		}
