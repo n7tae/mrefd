@@ -77,7 +77,7 @@ std::unique_ptr<CPacket> CPacket::Duplicate(void) const
 
 bool CPacket::IsLastPacket() const
 {
-	return (0x8000u & m17.frame.framenumber == 0x8000u);
+	return ((0x8000u & ntohs(m17.frame.framenumber)) == 0x8000u);
 }
 
 SRefM17Frame &CPacket::GetFrame()
