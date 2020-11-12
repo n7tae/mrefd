@@ -27,8 +27,8 @@
 #include "main.h"
 #include "callsign.h"
 #include "ip.h"
-#include "callsignlist.h"
-#include "peercallsignlist.h"
+#include "bwset.h"
+#include "peermap.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -40,7 +40,7 @@ public:
 	CGateKeeper();
 
 	// destructor
-	virtual ~CGateKeeper();
+	~CGateKeeper();
 
 	// init & clode
 	bool Init(void);
@@ -48,26 +48,25 @@ public:
 
 	// authorizations
 	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
-	bool MayTransmit(const CCallsign &, const CIp &, char = ' ') const;
+	bool MayTransmit(const CCallsign &, const CIp &) const;
 
 	// peer list handeling
-	CPeerCallsignList *GetPeerList(void)    { m_PeerList.Lock(); return &m_PeerList; }
-	void ReleasePeerList(void)              { m_PeerList.Unlock(); }
+	CPeerMap *GetPeerMap(void)     { m_PeerMap.Lock(); return &m_PeerMap; }
+	void      ReleasePeerMap(void) { m_PeerMap.Unlock(); }
 
 protected:
 	// thread
 	void Thread();
 
 	// operation helpers
-	bool IsNodeListedOk(const CCallsign &, const CIp &, char = ' ') const;
-	// bool IsPeerListedOk(const CCallsign &, const CIp &, char) const;
+	bool IsNodeListedOk(const CCallsign &) const;
 	bool IsPeerListedOk(const CCallsign &, const CIp &, const char *) const;
 
 protected:
 	// data
-	CCallsignList       m_NodeWhiteList;
-	CCallsignList       m_NodeBlackList;
-	CPeerCallsignList   m_PeerList;
+	CBWSet   m_NodeWhiteSet;
+	CBWSet   m_NodeBlackSet;
+	CPeerMap m_PeerMap;
 
 	// thread
 	std::atomic<bool> keep_running;

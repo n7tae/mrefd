@@ -418,7 +418,7 @@ void CM17Protocol::HandlePeerLinks(void)
 {
 	uint8_t buf[10];
 	// get the list of peers
-	CPeerCallsignList *list = g_GateKeeper.GetPeerList();
+	CPeerMap *peermap = g_GateKeeper.GetPeerMap();
 	CPeers *peers = g_Reflector.GetPeers();
 
 	// check if all our connected peers are still listed by gatekeeper
@@ -427,7 +427,7 @@ void CM17Protocol::HandlePeerLinks(void)
 	std::shared_ptr<CPeer>peer = nullptr;
 	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
-		if ( list->FindListItem(peer->GetCallsign()) == nullptr )
+		if ( nullptr == peermap->FindMapItem(peer->GetCallsign().GetCS()) )
 		{
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, 0);
@@ -441,20 +441,19 @@ void CM17Protocol::HandlePeerLinks(void)
 	// check if all ours peers listed by gatekeeper are connected
 	// if not, connect or reconnect
 	SInterConnect connect;
-	for ( auto it=list->begin(); it!=list->end(); it++ )
+	for ( auto it=peermap->begin(); it!=peermap->end(); it++ )
 	{
-		if ( nullptr == peers->FindPeer((*it).GetCallsign()) )
+		if ( nullptr == peers->FindPeer((*it).second.GetCallsign()) )
 		{
 			// send connect packet to re-initiate peer link
-			EncodeInterlinkConnectPacket(connect, (*it).GetModules());
-			Send(connect.magic, sizeof(SInterConnect), (*it).GetIp());
-			std::cout << "Sent connect packet to M17 peer " << (*it).GetCallsign() << " @ " << (*it).GetIp() << " for module(s) " << (*it).GetModules() << std::endl;
+			EncodeInterlinkConnectPacket(connect, (*it).second.GetModules());
+			Send(connect.magic, sizeof(SInterConnect), (*it).second.GetIp());
+			std::cout << "Sent connect packet to M17 peer " << (*it).second.GetCallsign() << " @ " << (*it).second.GetIp() << " for module(s) " << (*it).second.GetModules() << std::endl;
 		}
 	}
 
-	// done
 	g_Reflector.ReleasePeers();
-	g_GateKeeper.ReleasePeerList();
+	g_GateKeeper.ReleasePeerMap();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

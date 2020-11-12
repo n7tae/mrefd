@@ -1,9 +1,8 @@
-##############################################################################
+############################################################################
 #  M17 interlink file
 #
-#  one line per entry
-#  each entry specifies a remote M17 Reflector to peer with
-#  format:
+#  One line per entry, but any reflector can only have one line.
+#  Each entry specifies a remote M17 Reflector to peer with format:
 #    <M17 callsign> <ip> <list of shared modules>
 #  example:
 #    M17-ABC 44.123.213.112 ACD
@@ -14,18 +13,8 @@
 #    reflector and M17-XYZ support IPv6.
 #
 #    These remote reflectors must list this reflector and modules
-#    in their interlink file for the link to be established
+#    exactly in their interlink file for the link to be established.
 #
 #    Every reflector in an interlink group must link to every other
-#    reflector in the group else clients in a group may not hear every
-#    client in the group.
-#
-#    A single reflector can participate in multiple groups.
-#    For example, there could be one group with four different reflectors
-#    sharing modules A, C and D and another group with three other
-#    reflectors sharing just module F.
-#
-#    Each module can only be in a single group.
-#
-#
+#    reflector in the group or clients in a group may not hear everybody.
 #############################################################################

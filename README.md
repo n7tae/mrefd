@@ -54,11 +54,9 @@ Use your favorite editor to modify each of these files. If you want a totally op
 
 The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Also group linking demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
 
-A reflector can be a member of more that one group, but you should never configure reflector module to be more than in a single group.
-
 Group adminstration will require coordination among the admins of all involved reflectors. If a group memeber drops out or if a new member wants to join a group, all other group members will need to remove or add a line to their mrefd.interlink file.
 
-Finally, if both ends of a link in a group support IPv6, that part of the group can use IPv6 while the rest of the group links can use IPv4.
+Finally, if both ends of a link in a group support IPv6, that part of the group can use IPv6 while the rest of the group can use IPv4.
 
 ### Configuring your reflector
 

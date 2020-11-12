@@ -5,8 +5,10 @@
 #  each entry is explicitely denied access (blacklisted)
 #  you can use * as last wildcard character
 #  example:
-#    *     -> deny access to  eveybody !!!
+#    *     -> deny access to  eveybody (that would be stupid!)
 #    LX*   -> deny access to all callsign starting with LX
+#             everything after the * is ignored
 #    LX3JL -> deny access to LX3JL exactly
+#             but you would generally want to use LX3JL* instead
 #
 #############################################################################

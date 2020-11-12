@@ -27,6 +27,7 @@
 #include <list>
 #include <map>
 #include <queue>
+#include <set>
 #include <chrono>
 #include <future>
 #include <mutex>
@@ -50,7 +51,7 @@
 
 #define VERSION_MAJOR                   0
 #define VERSION_MINOR                   3
-#define VERSION_REVISION                3
+#define VERSION_REVISION                4
 
 // global ------------------------------------------------------
 

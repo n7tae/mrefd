@@ -5,9 +5,10 @@
 #  each entry is explicitely authorised (whitelisted)
 #  you can use * as last wildcard character
 #  example:
-#    *     -> authorize eveybody
-#    LX*   -> authorize all callsign starting with LX
+#    LX*   -> authorize all callsign starting with LX'=
+#             anthing after the * will be ignored
 #    LX3JL -> authorize LX3JL exactly
 #
+#  no whitelist entry means everyone is allowed
+#
 #############################################################################
-*

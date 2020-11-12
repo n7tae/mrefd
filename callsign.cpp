@@ -49,15 +49,15 @@ void CCallsign::CSIn(const std::string &callsign)
 		if (pos == std::string::npos) {
 			pos = 0;
 		}
-//		cs[i] = m17_alphabet[pos];	// replace with valid character
+		cs[i] = m17_alphabet[pos];	// replace with valid character
 		coded *= 40;
 		coded += pos;
 	}
 
 	// strip trailing spaces (just to be nice!)
-//	auto len = strlen(cs);
-//	while ((' ' == cs[len-1]) && len)
-//		cs[--len] = 0;
+	auto len = strlen(cs);
+	while (len && (' ' == cs[len-1]))
+		cs[--len] = 0;
 
 }
 
