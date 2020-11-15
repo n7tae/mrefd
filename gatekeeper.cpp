@@ -84,7 +84,7 @@ void CGateKeeper::Close(void)
 
 bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, char *modules) const
 {
-	bool ok;
+	bool ok = false;
 	if (callsign.GetCS(4).compare("M17-"))
 	{
 		auto clients = g_Reflector.GetClients();
@@ -172,7 +172,7 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign) const
 
 bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const char *modules) const
 {
-	bool ok;
+	bool ok = false;
 
 	// look for an exact match in the list
 	const_cast<CPeerMap &>(m_PeerMap).Lock();
