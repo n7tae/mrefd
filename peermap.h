@@ -40,8 +40,8 @@ public:
 	virtual ~CPeerMap() {}
 
 	// locks
-	void Lock(void)   { m_Mutex.lock(); }
-	void Unlock(void) { m_Mutex.unlock(); }
+	void Lock(void)   const { m_Mutex.lock(); }
+	void Unlock(void) const { m_Mutex.unlock(); }
 
 	// file io
 	virtual bool LoadFromFile(const char *);
@@ -66,8 +66,8 @@ protected:
 	char *ToUpper(char *str);
 
 	// data
-	std::mutex  m_Mutex;
+	mutable std::mutex m_Mutex;
 	const char *m_Filename;
-	time_t      m_LastModTime;
+	time_t m_LastModTime;
 	std::unordered_map<std::string, CPeerMapItem> m_Peers;
 };
