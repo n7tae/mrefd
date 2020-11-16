@@ -139,7 +139,7 @@ ssize_t CUdpSocket::Receive(uint8_t *Buffer, CIp &Ip, int timeout)
 ssize_t CUdpSocket::ReceiveFrom(uint8_t *Buffer, CIp &ip)
 {
 	// read
-	unsigned int fromsize = sizeof(struct sockaddr_storage);
+	socklen_t fromsize = sizeof(struct sockaddr_storage);
 	return recvfrom(m_fd, Buffer, UDP_BUFFER_LENMAX, 0, ip.GetPointer(), &fromsize);
 }
 
