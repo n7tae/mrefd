@@ -28,10 +28,14 @@ DATADIR = /var/lib/m17ref
 
 CC = g++
 
+CFLAGS += -c -W -std=c++11 -MMD -MD -c
+
 ifeq ($(debug), true)
-CFLAGS = -ggdb3 -W -c -std=c++11 -MMD -MD -c
-else
-CFLAGS = -c -W -std=c++11 -MMD -MD -c
+CFLAGS += -ggdb3
+endif
+
+ifeq ("$(OS)","Windows_NT")
+CFLAGS += -D_GNU_SOURCE
 endif
 
 LDFLAGS=-pthread
