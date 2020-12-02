@@ -68,6 +68,7 @@ WriteMemFile ()
 	echo "# created on `date`"                                  > $file
 	[ -z ${callsign+x}    ] || echo    "callsign='$callsign'"  >> $file
 	[ -z ${nummod+x}      ] || echo      "nummod=$nummod"      >> $file
+	[ -z ${mclients+x}    ] || echo    "mclients=$mclients"    >> $file
 	[ -z ${ip4addr+x}     ] || echo     "ip4addr='$ip4addr'"   >> $file
 	[ -z ${ip6addr+x}     ] || echo     "ip6addr='$ip6addr'"   >> $file
 	[ -z ${dbsupport+x}   ] || echo   "dbsupport=$dbsupport"   >> $file
@@ -102,6 +103,11 @@ WriteSRCMKFile ()
 	else
 		echo "debug = $dbsupport" >> $file
 	fi
+	if [ -z ${mclients+x} ]; then
+		echo "mclients = $mclients_d" >> $file
+	else
+		ech "debug = $mclients" >> $file
+	fi
 }
 
 WriteCFGFiles ()
@@ -130,6 +136,7 @@ mrefserv='/etc/systemd/system/mrefd.service'
 # default values
 callsign_d='CHNGME'
 nummod_d=26
+mclients_d=false
 ip4addr_d='none'
 ip6addr_d='none'
 dbsupport_d=false
@@ -160,18 +167,19 @@ do
 	echo
 	echo "        Reflector Configuration, Version #201101"
 	echo
-	echo    "     ******* REFLECTOR  **********"
-	echo -n "cs : Reflector Callsign     = "; EvaluateVar callsign{,_d}
-	echo -n "nm : Number of Modules      = "; EvaluateVar nummod{,_d}
-	echo    "     ******* IP ADDRESSES ********"
+	echo    "     ************** REFLECTOR  ****************"
+	echo -n "cs : Reflector Callsign                    = "; EvaluateVar callsign{,_d}
+	echo -n "nm : Number of Modules                     = "; EvaluateVar nummod{,_d}
+	echo -n "mc : Allow multiple clients on the same IP = "; EvaluateVar mclients{,_d}
+	echo    "     ************* IP ADDRESSES ***************"
 	echo    "     You must set at least one of these addresses!"
 	echo    "     Usually, IPv4 is 0.0.0.0 and/or IPv6 is ::"
 	echo    "     but might be different in special curcumstances"
 	echo    "     where you cannot bind to the 'any' address."
-	echo -n "i4 : IPv4 Listen Address    = "; EvaluateVar ip4addr{,_d}
-	echo -n "i6 : IPv6 Listen Address    = "; EvaluateVar ip6addr{,_d}
-	echo    "     ******* DEBUGGING ***********"
-	echo -n "db : Debugging Support      = "; EvaluateVar dbsupport{,_d}
+	echo -n "i4 : IPv4 Listen Address                   = "; EvaluateVar ip4addr{,_d}
+	echo -n "i6 : IPv6 Listen Address                   = "; EvaluateVar ip6addr{,_d}
+	echo    "     *************** DEBUGGING ****************"
+	echo -n "db : Debugging Support                     = "; EvaluateVar dbsupport{,_d}
 	echo
 	if [[ "$callsign" == M17-* ]] && ( [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ] ); then
 		echo    "w  : Write configuration files (overwrites any existing files) and quit"
@@ -189,6 +197,7 @@ do
 			read -p "<Enter to continue: "
 		fi
 	elif [[ "$key" == nm* ]]; then nummod="$value"
+	elif [[ "$key" == mc* ]]; then SetBooleanValue mclients "$value"
 	elif [[ "$key" == i4* ]]; then
 		if [[ "$value" =~ ^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$ ]]; then
 			ip4addr="$value"
