@@ -122,7 +122,11 @@ std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip)
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
+#ifdef MCLIENTS
 		if ( ((*it)->GetIp() == Ip) && ((*it)->GetIp().GetPort() == Ip.GetPort()) )
+#else
+		if ((*it)->GetIp() == Ip)
+#endif
 		{
 			return *it;
 		}
@@ -147,7 +151,11 @@ std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, con
 {
 	while ( it != end() )
 	{
+#ifdef MCLIENTS
 		if ( ((*it)->GetIp() == Ip) && ((*it)->GetIp().GetPort() == Ip.GetPort()) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
+#else
+		if ( ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
+#endif
 		{
 			return *it++;
 		}

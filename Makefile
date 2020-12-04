@@ -34,6 +34,10 @@ ifeq ($(debug), true)
 CFLAGS += -ggdb3
 endif
 
+ifeq ($(mclients), true)
+CFLAGS += -DMCLIENTS
+endif
+
 ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif

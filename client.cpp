@@ -79,7 +79,9 @@ bool CClient::operator ==(const CClient &client) const
 {
 	return ((client.m_Callsign == m_Callsign) &&
 			(client.m_Ip == m_Ip) &&
+#ifdef MCLIENTS
 			(client.m_Ip.GetPort() == m_Ip.GetPort()) &&
+#endif
 			(client.m_ReflectorModule == m_ReflectorModule));
 }
 

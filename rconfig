@@ -91,6 +91,11 @@ WriteSRCHFile ()
 	if [ ! -z ${ip6addr+x} ]; then
 		echo "#define LISTEN_IPV6 \"${ip6addr}\"" >> $file
 	fi
+	if [ ! -z ${mclients+x} ]; then
+		if [[ "$mclients" == "true" ]]; then
+			echo "#define MCLIENTS" >> $file
+		fi
+	fi
 }
 
 WriteSRCMKFile ()
@@ -102,11 +107,6 @@ WriteSRCMKFile ()
 		echo "debug = $dbsupport_d" >> $file
 	else
 		echo "debug = $dbsupport" >> $file
-	fi
-	if [ -z ${mclients+x} ]; then
-		echo "mclients = $mclients_d" >> $file
-	else
-		ech "debug = $mclients" >> $file
 	fi
 }
 
@@ -165,7 +165,7 @@ while [[ "$key" != q* ]]
 do
 	clear
 	echo
-	echo "        Reflector Configuration, Version #201101"
+	echo "        Reflector Configuration, Version #201104"
 	echo
 	echo    "     ************** REFLECTOR  ****************"
 	echo -n "cs : Reflector Callsign                    = "; EvaluateVar callsign{,_d}
@@ -226,6 +226,7 @@ do
 		elif [[ "$value" == nm* ]]; then unset nummod
 		elif [[ "$value" == i4* ]]; then unset ip4addr
 		elif [[ "$value" == i6* ]]; then unset ip6addr
+		elif [[ "$value" == mc* ]]; then unset mclients
 		elif [[ "$value" == db* ]]; then unset dbsupport
 		fi
 	fi
