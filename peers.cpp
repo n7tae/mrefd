@@ -62,8 +62,17 @@ void CPeers::AddPeer(std::shared_ptr<CPeer> peer)
 		}
 	}
 
-	// if not, append to the vector
-	m_Peers.push_back(peer);
+	// if not, append to the vector (put them in alphabetical order)
+	auto pit = m_Peers.begin();
+	for ( ; pit!=m_Peers.end(); pit++)
+	{
+		if (peer->GetCallsign().GetCS().compare((*pit)->GetCallsign().GetCS()) < 0) {
+			m_Peers.insert(pit, peer);
+			break;
+		}
+	}
+	if (pit == m_Peers.end())
+		m_Peers.push_back(peer);
 	std::cout << "New peer " << peer->GetCallsign() << " at " << peer->GetIp() << " added with protocol " << peer->GetProtocolName()  << std::endl;
 	// and append all peer's client to reflector client list
 	// it is double lock safe to lock Clients list after Peers list
