@@ -82,34 +82,21 @@ void CM17Protocol::Task(void)
 	switch (len) {
 	case sizeof(SM17Frame):	// a packet from a client
 	case sizeof(SRefM17Frame):	// a packet from a peer
+		// check that the source and dest c/s is correct, including dest module
 		if ( IsValidPacket(buf, (sizeof(SM17Frame) == len) ? false : true, pack) )
 		{
-			if (pack->GetDestCallsign().HasSameCallsign(g_Reflector.GetCallsign()))
-			{	// only if the packet has the destination set properly!
-				if (g_GateKeeper.MayTransmit(pack->GetSourceCallsign(), ip))
-				{
-					OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-					if (pack)                  // the packet might have been erased
-					{                          // if it needed to open a new stream, but couldn't
-						OnPacketIn(pack, ip);
-					}
-				}
-				else if (pack->IsLastPacket())
-				{
-					std::cout << "Blocked voice stream from " << pack->GetSourceCallsign() << " at " << ip << std::endl;
-				}
-			}
-			else
+			if (g_GateKeeper.MayTransmit(pack->GetSourceCallsign(), ip))
 			{
-				CCallsign dest(buf+6);
-				std::cout << "Packet with wrong destination:" << dest.GetCS() << std::endl;
+				OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
+				if (pack)                  // the packet might have been erased
+				{                          // if it needed to open a new stream, but couldn't
+					OnPacketIn(pack, ip);
+				}
 			}
-		}
-		else
-		{
-			CCallsign d(buf+6);
-			CCallsign s(buf+12);
-			std::cout << "Rejected " << len << " byte packet to " << d << ", from " << s << std::endl;
+			else if (pack->IsLastPacket())
+			{
+				std::cout << "Blocked voice stream from " << pack->GetSourceCallsign() << " at " << ip << std::endl;
+			}
 		}
 		break;
 	case sizeof(SInterConnect):
@@ -588,6 +575,10 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 			{
 				std::cout << packet->GetSourceCallsign().GetCS() << " Source C/S FAILED RegEx test" << std::endl;
 			}
+		}
+		else
+		{
+			std::cout << "Destination " << dest << " is invalid" << std::endl;
 		}
 	}
 	return false;
