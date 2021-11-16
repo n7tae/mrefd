@@ -418,6 +418,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 {
 	// write header
 	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	xmlFile << "<Reflector " << m_Callsign << ">" << std::endl;
 
 	// software version
 	char sz[64];
@@ -465,4 +466,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// unlock
 	ReleaseUsers();
 	xmlFile << "</" << m_Callsign << " heard users>" << std::endl;
+
+	// closing tag
+	xmlFile << "</Reflector " << m_Callsign << ">" << std::endl;
 }
