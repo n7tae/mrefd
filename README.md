@@ -105,7 +105,7 @@ The blacklist, whitelist and interlink files can be modified in real time while 
 The official M17 dashboard is in another repo.
 
 ```bash
-git clone git://github.com/M17-project/ref-dash /var/www/html     # or where ever you system www root is located
+git clone https://github.com/M17-project/ref-dash /var/www/html     # or where ever you system www root is located
 ```
 
 Follow the instructions on that repo for configuring your dashboard.

@@ -53,10 +53,6 @@
 #define VERSION_MINOR                   3
 #define VERSION_REVISION                6
 
-// global ------------------------------------------------------
-
-//#define JSON_MONITOR
-
 // debug -------------------------------------------------------
 
 //#define DEBUG_NO_ERROR_ON_XML_OPEN_FAIL

@@ -102,12 +102,6 @@ void CReflector::Stop(void)
 	{
 		m_XmlReportFuture.get();
 	}
-#ifdef JSON_MONITOR
-	if ( m_JsonReportFuture.valid() )
-	{
-		m_JsonReportFuture.get();
-	}
-#endif
 
 	// stop & delete all router thread
 	for ( int i = 0; i < NB_OF_MODULES; i++ )
