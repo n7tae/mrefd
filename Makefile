@@ -26,8 +26,6 @@ BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
 DATADIR = /var/lib/m17ref
 
-CC = g++
-
 CFLAGS += -c -W -std=c++11 -MMD -MD -c
 
 ifeq ($(debug), true)
@@ -50,13 +48,13 @@ EXE=mrefd
 all : $(EXE) test-all
 
 test-all : test-all.o crc.o callsign.o
-	$(CC) $^ -o $@
+	$(CXX) $^ -o $@
 
 $(EXE) : $(OBJS)
-	$(CC) $^ -o $@ $(LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.o : %.cpp
-	g++ $(CFLAGS) $< -o $@
+	$(CXX) $(CFLAGS) $< -o $@
 
 clean :
 	$(RM) *.o *.d $(EXE) test-all
