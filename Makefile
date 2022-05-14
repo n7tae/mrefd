@@ -77,7 +77,6 @@ uninstall :
 	rm -f $(CFGDIR)/$(EXE).whitelist
 	rm -f $(CFGDIR)/$(EXE).interlink
 	systemctl stop $(EXE).service
-	rm -f $(CFGDIR)/dmrid.dat
 	systemctl disable $(EXE).service
 	rm -f /etc/systemd/system/$(EXE).service
 	systemctl daemon-reload
