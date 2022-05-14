@@ -40,6 +40,8 @@ LDFLAGS=-pthread
 
 SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp m17client.cpp m17peer.cpp m17protocol.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
+LSTS = $(addprefix config/$(EXE).,blacklist whitelist interlink)
+
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
@@ -61,23 +63,35 @@ clean :
 
 -include $(DEPS)
 
-install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink
-	ln -s $(shell pwd)/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
-	ln -s $(shell pwd)/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
-	ln -s $(shell pwd)/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
-	cp -f systemd/$(EXE).service /etc/systemd/system/
+install : $(LSTS)
+	if [ -e $(CFGDIR)/$(EXE).blacklist ]; then \
+		mv -f $(CFGDIR)/$(EXE).blacklist{,.bak}; \
+	fi
+	if [ -e $(CFGDIR)/$(EXE).whitelist ]; then \
+		mv -f $(CFGDIR)/$(EXE).whitelist{,.bak}; \
+	fi
+	if [ -e $(CFGDIR)/$(EXE).interlink ]; then \
+		mv -f $(CFGDIR)/$(EXE).interlink{,.bak}; \
+	fi
+	cp -f $(LSTS) $(CFGDIR)
 	cp -f $(EXE) $(BINDIR)
 	mkdir -p $(DATADIR)
-	systemctl enable $(EXE).service
-	systemctl daemon-reload
-	systemctl start $(EXE)
+	if [ -e /etc/systemd ]; then \
+		cp -f systemd/$(EXE).service /etc/systemd/system/; \
+		systemctl enable $(EXE).service; \
+		systemctl daemon-reload; \
+		systemctl start $(EXE).service; \
+	fi
 
 uninstall :
-	rm -f $(CFGDIR)/$(EXE).blacklist
-	rm -f $(CFGDIR)/$(EXE).whitelist
-	rm -f $(CFGDIR)/$(EXE).interlink
-	systemctl stop $(EXE).service
-	rm -f $(CFGDIR)/dmrid.dat
-	systemctl disable $(EXE).service
-	rm -f /etc/systemd/system/$(EXE).service
-	systemctl daemon-reload
+	if [ -e /etc/systemd ]; then \
+		systemctl stop $(EXE).service; \
+		systemctl disable $(EXE).service; \
+		$(RM) /etc/systemd/system/$(EXE).service; \
+		systemctl daemon-reload; \
+	fi
+	$(RM) $(BINDIR)/$(EXE)
+	$(RM) $(CFGDIR)/$(EXE).blacklist{,.bak}
+	$(RM) $(CFGDIR)/$(EXE).whitelist{,.bak}
+	$(RM) $(CFGDIR)/$(EXE).interlink{,.bak}
+	$(RM) $(CFGDIR)/dmrid.dat
