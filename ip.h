@@ -21,7 +21,6 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
-#include <thread>
 
 #include <strings.h>
 #include <netinet/in.h>

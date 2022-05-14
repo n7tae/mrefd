@@ -40,6 +40,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <thread>
 #include <arpa/inet.h>
 
 #include "configure.h"
