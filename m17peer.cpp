@@ -42,7 +42,7 @@ CM17Peer::CM17Peer(const CCallsign &cs, const CIp &ip, const char *modules) : CP
 	for (auto p=modules; *p; p++)
 	{
 		// create and append to vector
-		m_Clients.push_back(std::make_shared<CM17Client>(cs, ip, *p));
+		m_Clients.push_back(std::make_shared<CClient>(cs, ip, *p));
 	}
 }
 

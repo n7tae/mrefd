@@ -24,7 +24,7 @@
 
 #include "main.h"
 #include "m17peer.h"
-#include "m17client.h"
+#include "client.h"
 #include "m17protocol.h"
 #include "reflector.h"
 #include "gatekeeper.h"
@@ -159,7 +159,7 @@ void CM17Protocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-					g_Reflector.GetClients()->AddClient(std::make_shared<CM17Client>(cs, ip, mod));
+					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
 					g_Reflector.ReleaseClients();
 				}
 				else

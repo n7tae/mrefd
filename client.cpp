@@ -106,3 +106,11 @@ void CClient::WriteXml(std::ofstream &xmlFile)
 	}
 	xmlFile << "</NODE>" << std::endl;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// status
+
+bool CClient::IsAlive(void) const
+{
+	return (m_LastKeepaliveTime.DurationSinceNow() < M17_KEEPALIVE_TIMEOUT);
+}
