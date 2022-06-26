@@ -26,7 +26,7 @@ BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
 DATADIR = /var/lib/m17ref
 
-CFLAGS += -c -W -std=c++11 -MMD -MD -c
+CFLAGS += -c -W -std=c++17 -MMD -c
 
 ifeq ($(debug), true)
 CFLAGS += -ggdb3
@@ -36,7 +36,7 @@ ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif
 
-LDFLAGS=-pthread
+LDFLAGS=-pthread -lopendht
 
 SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp m17client.cpp m17peer.cpp m17protocol.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 

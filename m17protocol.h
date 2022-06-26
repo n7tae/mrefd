@@ -62,8 +62,6 @@ protected:
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsVaildInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
 
-	bool HasValidModule(const CCallsign &cs) const;
-
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);
 	void EncodeConnectAckPacket(uint8_t *);

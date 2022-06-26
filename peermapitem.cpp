@@ -27,6 +27,7 @@
 
 #include "main.h"
 #include "peermapitem.h"
+#include "reflector.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -43,9 +44,10 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 	{
 		if ( modules[0] == '*' )
 		{
-			for ( char i = 0; i < NB_OF_MODULES; i++ )
+			for (char c='A'; c<='Z'; c++)
 			{
-				m_Mods.append(1, 'A' + i);
+				if (g_Reflector.IsValidModule(c))
+				m_Mods.append(1, c);
 			}
 		}
 		else
@@ -55,9 +57,8 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 				// duplicates not allowed!
 				if (m_Mods.npos == (m_Mods.find(*p)))
 				{
-					int i = *p - 'A';
 					// don't add mods that aren't configured
-					if (i >= 0 && i < NB_OF_MODULES)
+					if (g_Reflector.IsValidModule(*p))
 					{
 						m_Mods.append(1, *p);
 					}

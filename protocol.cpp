@@ -133,7 +133,7 @@ void CProtocol::Close(void)
 void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 {
 	// find the stream
-	CPacketStream *stream = GetStream(packet->GetStreamId(), ip);
+	auto stream = GetStream(packet->GetStreamId(), ip);
 	if ( stream )
 	{
 		auto islast = packet->IsLastPacket(); // we'll need this after the std::move()!
@@ -151,7 +151,7 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream handle helpers
 
-CPacketStream *CProtocol::GetStream(uint16_t uiStreamId, const CIp &Ip)
+std::shared_ptr<CPacketStream> CProtocol::GetStream(uint16_t uiStreamId, const CIp &Ip)
 {
 	for ( auto it=m_Streams.begin(); it!=m_Streams.end(); it++ )
 	{

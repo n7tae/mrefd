@@ -31,15 +31,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CReflector::CReflector()
+CReflector::CReflector() : m_Callsign(CALLSIGN), m_Modules(MODULES)
 {
 	keep_running = true;
-}
-
-CReflector::CReflector(const CCallsign &callsign)
-{
-	keep_running = true;
-	m_Callsign = callsign;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -52,11 +46,11 @@ CReflector::~CReflector()
 	{
 		m_XmlReportFuture.get();
 	}
-	for ( int i = 0; i < NB_OF_MODULES; i++ )
+	for (auto &f : m_ModuleFutures)
 	{
-		if ( m_RouterFuture[i].valid() )
+		if (f.second.valid())
 		{
-			m_RouterFuture[i].get();
+			f.second.get();
 		}
 	}
 }
@@ -81,9 +75,12 @@ bool CReflector::Start(void)
 	}
 
 	// start one thread per reflector module
-	for ( int i = 0; i < NB_OF_MODULES; i++ )
+	for (const auto &m : m_Modules)
 	{
-		m_RouterFuture[i] = std::async(std::launch::async, &CReflector::RouterThread, this, &(m_Stream[i]));
+		auto stream = std::make_shared<CPacketStream>();
+		m_Streams[m] = stream;
+		m_RStreams[stream] = m;
+		m_ModuleFutures[m] = std::async(std::launch::async, &CReflector::RouterThread, this, stream);
 	}
 
 	// start the reporting threads
@@ -104,11 +101,11 @@ void CReflector::Stop(void)
 	}
 
 	// stop & delete all router thread
-	for ( int i = 0; i < NB_OF_MODULES; i++ )
+	for (auto &f : m_ModuleFutures)
 	{
-		if ( m_RouterFuture[i].valid() )
+		if (f.second.valid() )
 		{
-			m_RouterFuture[i].get();
+			f.second.get();
 		}
 	}
 
@@ -128,7 +125,7 @@ bool CReflector::IsStreaming(char module)
 }
 
 // clients MUST have been locked by the caller so we can freely access it within the fuction
-CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
+std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
 {
 	// check sid is not zero
 	if ( 0U == Header->GetStreamId() )
@@ -161,7 +158,7 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 		return nullptr;
 	}
 
-	CPacketStream *stream = GetStream(module);
+	auto stream = GetStream(module);
 	if ( stream == nullptr ) {
 		std::cerr << "Can't get stream from module '" << module << "'" << std::endl;
 		return nullptr;
@@ -192,7 +189,7 @@ CPacketStream *CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::sha
 	return stream;
 }
 
-void CReflector::CloseStream(CPacketStream *stream)
+void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 {
 	if ( stream != nullptr )
 	{
@@ -243,7 +240,7 @@ void CReflector::CloseStream(CPacketStream *stream)
 ////////////////////////////////////////////////////////////////////////////////////////
 // router threads
 
-void CReflector::RouterThread(CPacketStream *streamIn)
+void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 {
 	// get our module
 	uint8_t uiModuleId = GetStreamModule(streamIn);
@@ -365,44 +362,32 @@ void CReflector::OnStreamClose(const CCallsign &callsign)
 ////////////////////////////////////////////////////////////////////////////////////////
 // modules & queues
 
-int CReflector::GetModuleIndex(char module) const
+std::shared_ptr<CPacketStream> CReflector::GetStream(char module)
 {
-	int i = (int)module - (int)'A';
-	if ( (i < 0) || (i >= NB_OF_MODULES) )
-	{
-		i = -1;
-	}
-	return i;
-}
-
-CPacketStream *CReflector::GetStream(char module)
-{
-	int i = GetModuleIndex(module);
-	if ( i >= 0 )
-	{
-		return &(m_Stream[i]);
-	}
-	return nullptr;
+	auto it = m_Streams.find(module);
+	if (m_Streams.end() == it)
+		return nullptr;
+	else
+		return it->second;
 }
 
 bool CReflector::IsStreamOpen(const std::unique_ptr<CPacket> &DvHeader)
 {
-	for ( unsigned i = 0; i < m_Stream.size(); i++  )
+	for (auto &s : m_Streams)
 	{
-		if ( (m_Stream[i].GetPacketStreamId() == DvHeader->GetStreamId()) && (m_Stream[i].IsOpen()) )
+		if ( (s.second->GetPacketStreamId() == DvHeader->GetStreamId()) && (s.second->IsOpen()) )
 			return true;
 	}
 	return false;
 }
 
-char CReflector::GetStreamModule(CPacketStream *stream)
+char CReflector::GetStreamModule(std::shared_ptr<CPacketStream> stream)
 {
-	for ( unsigned i = 0; i < m_Stream.size(); i++ )
-	{
-		if ( &(m_Stream[i]) == stream )
-			return GetModuleLetter(i);
-	}
-	return ' ';
+	auto it = m_RStreams.find(stream);
+	if (m_RStreams.end() == it)
+		return '\0';
+	else
+		return it->second;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

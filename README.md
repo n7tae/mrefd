@@ -35,7 +35,28 @@ sudo apt install build-essential
 sudo apt install g++
 ```
 
-### Download the repository and enter the directory
+### Distributed Hash Table (OpenDHT)
+
+OpenDHT is available [here](https://github./com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Pascal support and proxy-server support (RESTinio) is not required for mvoice and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
+
+```bash
+# Install OpenDHT dependencies
+sudo apt install libncurses5-dev libreadline-dev nettle-dev libgnutls28-dev libargon2-0-dev libmsgpack-dev  libssl-dev libfmt-dev libjsoncpp-dev libhttp-parser-dev libasio-dev cmake
+
+# clone the repo
+git clone https://github.com/savoirfairelinux/opendht.git
+
+# build and install
+cd opendht
+mkdir build && cd build
+cmake -DOPENDHT_PYTHON=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+make
+sudo make install
+```
+
+Please note that there is no easy way to uninstall OpenDHT once it's been installed.
+
+### Download the *mrefd* repository and enter the directory
 
 ```bash
 git clone https://github.com/n7tae/mrefd.git
@@ -66,9 +87,9 @@ Configuring, compiling and maintaining your reflector build is easy! Start the c
 ./rconfig
 ```
 
-There are only a few things that need to be specified. Most important are, the reflector callsign and the IP addresses for the IPv4 and IPv6 listen ports. The reflector callsign must be exactly 7 characters beginning with "M17-". The remaining 3 characters can be an combination of numbers or letters. Input will automatically be capitolized by rconfig.
+There are only a few things that need to be specified. Most important are, the reflector callsign and the configured modules. The reflector callsign must be exactly 7 characters beginning with "M17-". The remaining 3 characters can be an combination of numbers or letters. Input will automatically be capitolized by rconfig. You must specify at least one module. You can specify as many as 26 modules, *e.g.*, "abcdefghijklmnopqrstuvwxyz".
 
-Dual-stack operation is enabled by specifying both an IPv4 and IPv6 address. IPv4-only single stack can be specified by leaving the IPv6 address set to `none`. It's even possible to operate in an IPv6-only configuration by leaving the IPv4 address to the default `none`.
+The binding addresses for the IPv4 and IPv6 listen ports also need to be specified. You must specify at least one address. Dual-stack operation is enabled by specifying both an IPv4 and IPv6 address. IPv4-only single stack can be specified by leaving the IPv6 address set to `none`. It's even possible to operate in an IPv6-only configuration by leaving the IPv4 address to the default `none`. Usually, the IPv4 binding address will be `0.0.0.0` and the IPv6 address would be `::`. Once specified the external IP address of an IPv4 and/or IPv6 address should also be set. These addresses are where clients will find the reflector on the DHT network. Be sure to also specify your reflector's dashboard URL.
 
 Be sure to write out the configuration files and look at the three different configration files that are created. The first file, reflector.cfg is the memory file for rconfig so that if you start that script again, it will remember how you left things. There is one `.h` file and one `.mk` file for the reflector. You should **not** modify these files by hand unless you really know exactly how they work.
 
@@ -129,9 +150,10 @@ If, after doing the `git pull`, you see that it's downloaded a new rconfig scrip
 MREFD requires the following port to be open to inbound network traffic:
 
 - UDP port 17000 for M17
+- UDP port 17171 for DHT
 - TCP port 80 for HTTP
 - TCP port 443 for HTTPS
 
 ## Copyright
 
-- Copyright © 2020 Thomas A. Early N7TAE
+- Copyright © 2020-2022 Thomas A. Early N7TAE

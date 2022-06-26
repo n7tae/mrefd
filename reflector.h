@@ -46,13 +46,11 @@ class CReflector
 public:
 	// constructor
 	CReflector();
-	CReflector(const CCallsign &);
 
 	// destructor
 	virtual ~CReflector();
 
 	// settings
-	void SetCallsign(const CCallsign &callsign)      { m_Callsign = callsign; }
 	const CCallsign &GetCallsign(void) const         { return m_Callsign; }
 
 
@@ -69,18 +67,16 @@ public:
 	void      ReleasePeers(void)                    { m_Peers.Unlock(); }
 
 	// stream opening & closing
-	CPacketStream *OpenStream(std::unique_ptr<CPacket> &, std::shared_ptr<CClient>);
+	std::shared_ptr<CPacketStream> OpenStream(std::unique_ptr<CPacket> &, std::shared_ptr<CClient>);
 	bool IsStreaming(char);
-	void CloseStream(CPacketStream *);
+	void CloseStream(std::shared_ptr<CPacketStream>);
 
 	// users
 	CUsers  *GetUsers(void)                         { m_Users.Lock(); return &m_Users; }
 	void    ReleaseUsers(void)                      { m_Users.Unlock(); }
 
 	// get
-	bool IsValidModule(char c) const                { return (GetModuleIndex(c) >= 0); }
-	int  GetModuleIndex(char) const;
-	char GetModuleLetter(int i) const               { return 'A' + (char)i; }
+	bool IsValidModule(char c) const                { return m_Modules.npos != m_Modules.find(c); }
 
 	// notifications
 	void OnPeersChanged(void);
@@ -91,19 +87,20 @@ public:
 
 protected:
 	// threads
-	void RouterThread(CPacketStream *);
+	void RouterThread(std::shared_ptr<CPacketStream>);
 	void XmlReportThread(void);
 	// streams
-	CPacketStream *GetStream(char);
-	bool           IsStreamOpen(const std::unique_ptr<CPacket> &);
-	char           GetStreamModule(CPacketStream *);
+	std::shared_ptr<CPacketStream> GetStream(char);
+	bool IsStreamOpen(const std::unique_ptr<CPacket> &);
+	char GetStreamModule(std::shared_ptr<CPacketStream>);
 
 	// xml helpers
 	void WriteXmlFile(std::ofstream &);
 
 protected:
 	// identity
-	CCallsign m_Callsign;
+	const CCallsign m_Callsign;
+	const std::string m_Modules;
 
 	// objects
 	CUsers          m_Users;            // sorted list of lastheard stations
@@ -111,11 +108,12 @@ protected:
 	CPeers          m_Peers;            // list of linked peers
 	CM17Protocol    m_Protocol;         // the only protocol
 	// queues
-	std::array<CPacketStream, NB_OF_MODULES> m_Stream;
+	std::unordered_map<char, std::shared_ptr<CPacketStream>> m_Streams;
+	std::unordered_map<std::shared_ptr<CPacketStream>, char> m_RStreams;
 
 	// threads
 	std::atomic<bool> keep_running;
-	std::array<std::future<void>, NB_OF_MODULES> m_RouterFuture;
+	std::unordered_map<char, std::future<void>> m_ModuleFutures;
 	std::future<void> m_XmlReportFuture, m_JsonReportFuture;
 
 	// notifications

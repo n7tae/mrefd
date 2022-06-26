@@ -60,15 +60,15 @@ public:
 
 protected:
 	// packet encoding helpers
-	virtual bool EncodeDvHeaderPacket(const CPacket &, uint8_t *) const         { return false; }
-	virtual bool EncodeDvFramePacket(const CPacket &, uint8_t *) const           { return false; }
-	virtual bool EncodeDvLastFramePacket(const CPacket &, uint8_t *) const   { return false; }
+	virtual bool EncodeDvHeaderPacket(const CPacket &, uint8_t *) const    { return false; }
+	virtual bool EncodeDvFramePacket(const CPacket &, uint8_t *) const     { return false; }
+	virtual bool EncodeDvLastFramePacket(const CPacket &, uint8_t *) const { return false; }
 
 	// stream helpers
 	virtual void OnPacketIn(std::unique_ptr<CPacket> &, const CIp &);
 
 	// stream handle helpers
-	CPacketStream *GetStream(uint16_t, const CIp &);
+	std::shared_ptr<CPacketStream> GetStream(uint16_t, const CIp &);
 	void CheckStreamsTimeout(void);
 
 	// queue helper
@@ -96,7 +96,7 @@ protected:
 	CUdpSocket m_Socket6;
 
 	// streams
-	std::list<CPacketStream *> m_Streams;
+	std::list<std::shared_ptr<CPacketStream>> m_Streams;
 
 	// queue
 	CPacketQueue    m_Queue;

@@ -456,7 +456,7 @@ void CM17Protocol::HandlePeerLinks(void)
 void CM17Protocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 {
 	// find the stream
-	CPacketStream *stream = GetStream(packet->GetStreamId(), ip);
+	auto stream = GetStream(packet->GetStreamId(), ip);
 	if ( stream )
 	{
 		// stream already open
@@ -546,17 +546,6 @@ bool CM17Protocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
-bool CM17Protocol::HasValidModule(const CCallsign &cs) const
-{
-	auto i = cs.GetModule() - 'A';
-	if (i >= 0)
-	{
-		if (i < NB_OF_MODULES)
-			return true;
-	}
-	return false;
-}
-
 bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_ptr<CPacket> &packet)
 {
 	if (0 == memcmp(buf, "M17 ", 4))	// we tested the size before we got here
@@ -565,7 +554,7 @@ bool CM17Protocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::uniq
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
 		auto dest = packet->GetDestCallsign();
-		if (HasValidModule(dest) && dest.HasSameCallsign(GetReflectorCallsign()))
+		if (g_Reflector.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source
