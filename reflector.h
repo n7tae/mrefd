@@ -25,7 +25,7 @@
 #include "users.h"
 #include "clients.h"
 #include "peers.h"
-#include "m17protocol.h"
+#include "protocol.h"
 #include "packetstream.h"
 #include "notificationqueue.h"
 
@@ -103,10 +103,10 @@ protected:
 	const std::string m_Modules;
 
 	// objects
-	CUsers          m_Users;            // sorted list of lastheard stations
-	CClients        m_Clients;          // list of linked repeaters/nodes/peers's modules
-	CPeers          m_Peers;            // list of linked peers
-	CM17Protocol    m_Protocol;         // the only protocol
+	CUsers    m_Users;    // sorted list of lastheard stations
+	CClients  m_Clients;  // list of linked repeaters/nodes/peers's modules
+	CPeers    m_Peers;    // list of linked peers
+	CProtocol m_Protocol; // the only protocol
 	// queues
 	std::unordered_map<char, std::shared_ptr<CPacketStream>> m_Streams;
 	std::unordered_map<std::shared_ptr<CPacketStream>, char> m_RStreams;

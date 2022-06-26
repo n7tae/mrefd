@@ -25,10 +25,12 @@
 
 #pragma once
 
+#include <regex>
 #include "udpsocket.h"
 #include "packetstream.h"
 #include "packet.h"
 #include "base.h"
+#include "crc.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -44,8 +46,8 @@ public:
 	virtual ~CProtocol();
 
 	// initialization
-	virtual bool Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6);
-	virtual void Close(void);
+	bool Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6);
+	void Close(void);
 
 	// queue
 	CPacketQueue *GetQueue(void)        { m_Queue.Lock(); return &m_Queue; }
@@ -56,26 +58,42 @@ public:
 
 	// task
 	void Thread(void);
-	virtual void Task(void) = 0;
+	void Task(void);
 
 protected:
-	// packet encoding helpers
-	virtual bool EncodeDvHeaderPacket(const CPacket &, uint8_t *) const    { return false; }
-	virtual bool EncodeDvFramePacket(const CPacket &, uint8_t *) const     { return false; }
-	virtual bool EncodeDvLastFramePacket(const CPacket &, uint8_t *) const { return false; }
+	// queue helper
+	void HandleQueue(void);
+
+	// keepalive helpers
+	void HandlePeerLinks(void);
+	void HandleKeepalives(void);
 
 	// stream helpers
-	virtual void OnPacketIn(std::unique_ptr<CPacket> &, const CIp &);
+	void OnPacketIn(std::unique_ptr<CPacket> &, const CIp &);
+	void OnFirstPacketIn(std::unique_ptr<CPacket> &, const CIp &);
+
+	// packet decoding helpers
+	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
+	bool IsValidDisconnect(const uint8_t *, CCallsign &);
+	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
+	bool IsValidPacket(const uint8_t *, bool is_internal, std::unique_ptr<CPacket> &);
+	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
+	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
+	bool IsVaildInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
+
+	// packet encoding helpers
+	void EncodeKeepAlivePacket(uint8_t *);
+	void EncodeConnectAckPacket(uint8_t *);
+	void EncodeConnectNackPacket(uint8_t *);
+	void EncodeDisconnectPacket(uint8_t *, char);
+	void EncodeDisconnectedPacket(uint8_t *);
+	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
+	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
+	void EncodeInterlinkNackPacket(uint8_t *);
 
 	// stream handle helpers
 	std::shared_ptr<CPacketStream> GetStream(uint16_t, const CIp &);
 	void CheckStreamsTimeout(void);
-
-	// queue helper
-	virtual void HandleQueue(void) = 0;
-
-	// keepalive helpers
-	virtual void HandleKeepalives(void) = 0;
 
 	// syntax helper
 	bool IsNumber(char) const;
@@ -110,4 +128,12 @@ protected:
 
 	// debug
 	CTimePoint      m_DebugTimer;
+
+	// time
+	CTimePoint m_LastKeepaliveTime;
+	CTimePoint m_LastPeersLinkTime;
+
+private:
+	std::regex clientRegEx, peerRegEx;
+	CCRC crc;
 };

@@ -38,7 +38,7 @@ endif
 
 LDFLAGS=-pthread -lopendht
 
-SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp m17protocol.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
+SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp timepoint.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
