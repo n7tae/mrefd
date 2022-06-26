@@ -59,14 +59,14 @@ public:
 	// set
 
 	// identity
-	virtual int GetProtocolRevision(void) const         { return 0; }
-	virtual const char *GetProtocolName(void) const     { return "none"; }
+	int GetProtocolRevision(const CVersion &ver) const;
+	const char *GetProtocolName(void) const     { return "M17"; }
 
 	// status
-	virtual bool IsAMaster(void) const;
-	virtual void Alive(void);
-	virtual bool IsAlive(void) const                    { return false; }
-	virtual void Heard(void)                            { m_LastHeardTime = std::time(nullptr); }
+	bool IsAMaster(void) const;
+	void Alive(void);
+	bool IsAlive(void) const;
+	void Heard(void)                            { m_LastHeardTime = std::time(nullptr); }
 
 	// clients access
 	int     GetNbClients(void) const                    { return (int)m_Clients.size(); }

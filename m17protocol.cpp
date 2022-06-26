@@ -23,12 +23,11 @@
 #include <string.h>
 
 #include "main.h"
-#include "m17peer.h"
+#include "peer.h"
 #include "client.h"
 #include "m17protocol.h"
 #include "reflector.h"
 #include "gatekeeper.h"
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -133,7 +132,7 @@ void CM17Protocol::Task(void)
 				{
 					// create the new peer
 					// this also create one client per module
-					std::shared_ptr<CPeer> peer = std::make_shared<CM17Peer>(cs, ip, mods);
+					std::shared_ptr<CPeer> peer = std::make_shared<CPeer>(cs, ip, mods);
 
 					// append the peer to reflector peer list
 					// this also add all new clients to reflector client list

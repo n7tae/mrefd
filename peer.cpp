@@ -49,6 +49,15 @@ CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules)
 	m_LastKeepaliveTime.Now();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+
+	std::cout << "Adding M17 peer " << callsign << " module(s) " << modules << std::endl;
+
+	// and construct the M17 clients
+	for (auto p=modules; *p; p++)
+	{
+		// create and append to vector
+		m_Clients.push_back(std::make_shared<CClient>(callsign, ip, *p));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -127,4 +136,25 @@ void CPeer::WriteXml(std::ofstream &xmlFile)
 		xmlFile << "\t<LastHeardTime>" << mbstr << "</LastHeardTime>" << std::endl;
 	}
 	xmlFile << "</PEER>" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// status
+
+bool CPeer::IsAlive(void) const
+{
+	for ( auto it=cbegin(); it!=cend(); it++ )
+	{
+		if (! (*it)->IsAlive())
+			return false;
+	}
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// revision helper
+
+int CPeer::GetProtocolRevision(const CVersion &version) const
+{
+	return version.GetMajor();
 }
