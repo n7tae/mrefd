@@ -15,6 +15,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+RemoveDupes () {
+	local -n s=$1
+	local i j
+	for (( i=0; i<${#s}-1; i++)); do
+		for (( j=$i+1; j<${#s}; j++)); do
+			if [[ ${s:$i:1} != "." ]]; then
+				if [[ ${s:$i:1} == ${s:$j:1} ]]; then
+					local l=$(($j + 1))
+					s="${s:0:$j}.${s:$l}"
+				fi
+			fi
+		done
+	done
+	s=${s//.}
+}
+
+CheckModules () {
+	# only A through Z
+	modules=${1//[^A-Z]}
+	RemoveDupes modules
+	if (( ${#modules} < 1 )); then
+		unset modules
+		clear
+		echo "ERROR: You must specify at least one module, A to Z!"
+		echo
+		read -p "<Enter> to continue: " ans
+		return
+	fi
+}
+
 SetBooleanValue ()
 {
 	local dvname
@@ -67,10 +97,16 @@ WriteMemFile ()
 	file="$rcfg"
 	echo "# created on `date`"                                  > $file
 	[ -z ${callsign+x}    ] || echo    "callsign='$callsign'"  >> $file
-	[ -z ${nummod+x}      ] || echo      "nummod=$nummod"      >> $file
+	[ -z ${modules+x}     ] || echo     "modules='$modules'"   >> $file
 	[ -z ${mclients+x}    ] || echo    "mclients=$mclients"    >> $file
+	[ -z ${dhtbstrap+x}   ] || echo   "dhtbstrap=$dhtbstrap"   >> $file
 	[ -z ${ip4addr+x}     ] || echo     "ip4addr='$ip4addr'"   >> $file
 	[ -z ${ip6addr+x}     ] || echo     "ip6addr='$ip6addr'"   >> $file
+	[ -z ${m17port+x}     ] || echo     "m17port='$m17port'"   >> $file
+	[ -z ${ex4addr+x}     ] || echo     "ex4addr='$ex4addr'"   >> $file
+	[ -z ${ex6addr+x}     ] || echo     "ex6addr='$ex6addr'"   >> $file
+	[ -z ${url+x}         ] || echo         "url='$url'"       >> $file
+	[ -z ${emaddr+x}      ] || echo      "emaddr='$emaddr'"    >> $file
 	[ -z ${dbsupport+x}   ] || echo   "dbsupport=$dbsupport"   >> $file
 }
 
@@ -80,16 +116,44 @@ WriteSRCHFile ()
 	file="$srch"
 	echo "// Created on `date`" > $file
 	echo "#define CALLSIGN \"${callsign}\"" >> $file
-	if [ -z ${nummod+x} ]; then
-		echo "#define NB_OF_MODULES ${nummod_d}" >> $file
+	if [ -z ${modules+x} ]; then
+		echo "#define MODULES \"${modules_d}\"" >> $file
 	else
-		echo "#define NB_OF_MODULES ${nummod}" >> $file
+		echo "#define MODULES \"${modules}\"" >> $file
+	fi
+	if [ ! -z ${dhtbstrap+x} ]; then
+		echo "#define DHT_BOOT_STRAP \"${dhtbstrap}\"" >> $file
 	fi
 	if [ ! -z ${ip4addr+x} ]; then
 		echo "#define LISTEN_IPV4 \"${ip4addr}\"" >> $file
+		if [ ! -z ${ex4addr+x} ]; then
+			echo "#define IPV4_ADDRESS \"${ex4addr}\"" >> $file
+		else
+			echo "#define IPV4_ADDRESS \"${ex4addr_d}\"" >> $file
+		fi
 	fi
 	if [ ! -z ${ip6addr+x} ]; then
 		echo "#define LISTEN_IPV6 \"${ip6addr}\"" >> $file
+		if [ ! -z ${ex6addr+x} ]; then
+			echo "#define IPV6_ADDRESS \"${ex6addr}\"" >> $file
+		else
+			echo "#define IPV6_ADDRESS \"${ex6addr_d}\"" >> $file
+		fi
+	fi
+	if [ ! -z ${m17port+x} ]; then
+		echo "#define M17_PORT $m17port" >> $file
+	else
+		echo "#define M17_PORT $m17port_d" >> $file
+	fi
+	if [ ! -z ${url+x} ]; then
+		echo "#define DASHBOARD_URL \"${url}\"" >> $file
+	else
+		echo "#define DASHBOARD_URL \"${url_d}\"" >> $file
+	fi
+	if [ ! -z ${emaddr+x} ]; then
+		echo "#define EMAIL_ADDRESS \"${emaddr}\"" >> $file
+	else
+		echo "#define EMAIL_ADDRESS \"${emaddr_d}\"" >> $file
 	fi
 	if [ ! -z ${mclients+x} ]; then
 		if [[ "$mclients" == "true" ]]; then
@@ -135,10 +199,16 @@ srcm='configure.mk'
 mrefserv='/etc/systemd/system/mrefd.service'
 # default values
 callsign_d='CHNGME'
-nummod_d=26
+modules_d='none'
 mclients_d=false
 ip4addr_d='none'
 ip6addr_d='none'
+m17port_d=17000
+dhtbstrap_d='none'
+ex4addr_d=$(curl -s -4 icanhazip.com)
+ex6addr_d=$(curl -s -6 icanhazip.com)
+url_d='https://Change_Me'
+emaddr_d='ch@nge.me'
 dbsupport_d=false
 
 if [ -e reflector.cfg ]; then
@@ -151,8 +221,7 @@ fi
 if [ -z ${expertmode+x} ]; then
 	if [ -e $mrefserv ]; then
 		echo -n "You cannot change the configuration right now beacuse there is an m17 server running."
-		echo "===========${rcfg}============="
-		cat $rcfg
+		echo "$mrefserv"
 		echo
 		echo "Please uninstall the running server before attempting to modify the configuration."
 		exit 1
@@ -165,23 +234,38 @@ while [[ "$key" != q* ]]
 do
 	clear
 	echo
-	echo "        Reflector Configuration, Version #201104"
+	echo "        M17 Reflector Configuration, Version #220523"
 	echo
 	echo    "     ************** REFLECTOR  ****************"
 	echo -n "cs : Reflector Callsign                    = "; EvaluateVar callsign{,_d}
-	echo -n "nm : Number of Modules                     = "; EvaluateVar nummod{,_d}
+	echo -n "am : Active Modules                        = "; EvaluateVar modules{,_d}
 	echo -n "mc : Allow multiple clients on the same IP = "; EvaluateVar mclients{,_d}
-	echo    "     ************* IP ADDRESSES ***************"
+	echo    "     Set the DHT bootstrap to any known DHT node, like 'm17-usa.openquad.net'"
+	echo -n "bs : DHT Bootstrap system                  = "; EvaluateVar dhtbstrap{,_d}
+	echo    "     ********** IP BIND ADDRESSES *************"
 	echo    "     You must set at least one of these addresses!"
 	echo    "     Usually, IPv4 is 0.0.0.0 and/or IPv6 is ::"
 	echo    "     but might be different in special curcumstances"
 	echo    "     where you cannot bind to the 'any' address."
-	echo -n "i4 : IPv4 Listen Address                   = "; EvaluateVar ip4addr{,_d}
-	echo -n "i6 : IPv6 Listen Address                   = "; EvaluateVar ip6addr{,_d}
+	echo -n "i4 : IPv4 Bind Address                     = "; EvaluateVar ip4addr{,_d}
+	echo -n "i6 : IPv6 Bind Address                     = "; EvaluateVar ip6addr{,_d}
+	echo -n "po : UDP Port #                            = "; EvaluateVar m17port{,_d}
+	if [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ]; then
+		echo    "     ********* External IP Addresses **********"
+	fi
+	if [ ! -z ${ip4addr+x} ]; then
+		echo -n "x4 : IPv4 External Address                 = "; EvaluateVar ex4addr{,_d}
+	fi
+	if [ ! -z ${ip6addr+x} ]; then
+		echo -n "x6 : IPv6 External Address                 = "; EvaluateVar ex6addr{,_d}
+	fi
+	echo    "     ***************** Info *******************"
+	echo -n "du : Dashboard URL                         = "; EvaluateVar url{,_d}
+	echo -n "em : Admin EMail Address                   = "; EvaluateVar emaddr{,_d}
 	echo    "     *************** DEBUGGING ****************"
 	echo -n "db : Debugging Support                     = "; EvaluateVar dbsupport{,_d}
 	echo
-	if [[ "$callsign" == M17-* ]] && ( [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ] ); then
+	if [[ "$callsign" == M17-* ]] && [ ! -z ${modules+x} ] && ( [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ] ); then
 		echo    "w  : Write configuration files (overwrites any existing files) and quit"
 	fi
 	echo    "q  : Quit without saving"
@@ -196,8 +280,9 @@ do
 			echo "${value^^} is not a valid reflector name"
 			read -p "<Enter to continue: "
 		fi
-	elif [[ "$key" == nm* ]]; then nummod="$value"
+	elif [[ "$key" == am* ]]; then CheckModules ${value^^}
 	elif [[ "$key" == mc* ]]; then SetBooleanValue mclients "$value"
+	elif [[ "$key" == bs* ]]; then dhtbstrap="$value"
 	elif [[ "$key" == i4* ]]; then
 		if [[ "$value" =~ ^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$ ]]; then
 			ip4addr="$value"
@@ -214,19 +299,55 @@ do
 			echo "$value is not a valid IPv6 address!"
 			read -p "<Enter> to continue: " garbage
 		fi
+	elif [[ "$key" == po* ]]; then
+		if [[ "$value" =~ ^[1-9][0-9]+$ ]]; then
+			m17port=$value
+		else
+			clear
+			echo "'$value' is not a valid port number"
+			read -p "<Enter> to continue: " garbage
+		fi
+	elif [[ "$key" == x4* ]]; then
+		if [[ "$value" =~ ^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$ ]]; then
+			ex4addr="$value"
+		else
+			clear
+			echo "$value is not a valid IPv4 address!"
+			read -p "<Enter> to continue: " garbage
+		fi
+	elif [[ "$key" == x6* ]]; then
+		if [[ "${value^^}" =~ ^(([0-9A-F]{1,4}:){7,7}[0-9A-F]{1,4}|([0-9A-F]{1,4}:){1,7}:|([0-9A-F]{1,4}:){1,6}(:[0-9A-F]{1,4}){1,1}|([0-9A-F]{1,4}:){1,5}(:[0-9A-F]{1,4}){1,2}|([0-9A-F]{1,4}:){1,4}(:[0-9A-F]{1,4}){1,3}|([0-9A-F]{1,4}:){1,3}(:[0-9A-F]{1,4}){1,4}|([0-9A-F]{1,4}:){1,2}(:[0-9A-F]{1,4}){1,5}|([0-9A-F]{1,4}:){1,1}(:[0-9A-F]{1,4}){1,6}|:((:[0-9A-F]{1,4}){1,7}|:))$ ]]; then
+			ex6addr="$value"
+		else
+			clear
+			echo "$value is not a valid IPv6 address!"
+			read -p "<Enter> to continue: " garbage
+		fi
+	elif [[ "$key" == du* ]]; then url="$value"
+	elif [[ "$key" == em* ]]; then emaddr="$value"
 	elif [[ "$key" == db* ]]; then SetBooleanValue dbsupport "$value"
 	elif [[ "$key" == w* ]]; then
-		if [[ "$callsign" == M17-* ]] && ( [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ] ); then
+		if [[ "$callsign" == M17-* ]] && [ ! -z ${modules+x} ] && ( [ ! -z ${ip4addr+x} ] || [ ! -z ${ip6addr+x} ] ); then
 			WriteCFGFiles
 			ListCFGFiles
 			exit 0
 		fi
 	elif [[ "$key" == u* ]]; then
 		if   [[ "$value" == cs* ]]; then unset callsign
-		elif [[ "$value" == nm* ]]; then unset nummod
-		elif [[ "$value" == i4* ]]; then unset ip4addr
-		elif [[ "$value" == i6* ]]; then unset ip6addr
+		elif [[ "$value" == am* ]]; then unset modules
+		elif [[ "$value" == bs* ]]; then unset dhtbstrap
+		elif [[ "$value" == i4* ]]; then
+			unset ip4addr ex4addr
+			ex4addr_d='none'
+		elif [[ "$value" == i6* ]]; then
+			unset ip6addr ex6addr
+			ex6addr_d='none'
+		elif [[ "$value" == po* ]]; then unset m17port
+		elif [[ "$value" == x4* ]]; then unset ex4addr
+		elif [[ "$value" == x6* ]]; then unset ex6addr
 		elif [[ "$value" == mc* ]]; then unset mclients
+		elif [[ "$value" == du* ]]; then unset url
+		elif [[ "$value" == em* ]]; then unset emaddr
 		elif [[ "$value" == db* ]]; then unset dbsupport
 		fi
 	fi
