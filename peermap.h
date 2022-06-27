@@ -56,6 +56,8 @@ public:
 	bool empty() const { return m_Peers.empty(); }
 	std::unordered_map<std::string, CPeerMapItem>::iterator begin() { return m_Peers.begin(); }
 	std::unordered_map<std::string, CPeerMapItem>::iterator end()   { return m_Peers.end(); }
+	std::unordered_map<std::string, CPeerMapItem>::const_iterator cbegin() { return m_Peers.cbegin(); }
+	std::unordered_map<std::string, CPeerMapItem>::const_iterator cend()   { return m_Peers.cend(); }
 
 	// find
 	CPeerMapItem *FindMapItem(const std::string &);

@@ -1,9 +1,6 @@
-//
-//  cgatekeeper.h
-//  M17Refd
-//
-//  Created by Jean-Luc Deltombe (LX3JL) on 07/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//
+//  Copyright © 2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of M17Refd.
@@ -24,16 +21,32 @@
 
 #pragma once
 
+#include <opendht.h>
+
 #include "main.h"
 #include "callsign.h"
 #include "ip.h"
 #include "bwset.h"
 #include "peermap.h"
+#include "base.h"
+
+struct SReflectorData
+{
+	std::string cs;
+	std::string ipv4;
+	std::string ipv6;
+	std::string modules;
+	std::string url;
+	std::string email;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
+	MSGPACK_DEFINE(cs, ipv4, ipv6, modules, url, email, port, peers);
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CGateKeeper
+class CGateKeeper : public CBase
 {
 public:
 	// constructor
@@ -45,6 +58,9 @@ public:
 	// init & clode
 	bool Init(void);
 	void Close(void);
+
+	// DHT publish
+	void PutDHTInfo();
 
 	// authorizations
 	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
@@ -62,7 +78,6 @@ protected:
 	bool IsNodeListedOk(const CCallsign &) const;
 	bool IsPeerListedOk(const CCallsign &, const CIp &, const char *) const;
 
-protected:
 	// data
 	CBWSet   m_NodeWhiteSet;
 	CBWSet   m_NodeBlackSet;
@@ -71,4 +86,9 @@ protected:
 	// thread
 	std::atomic<bool> keep_running;
 	std::future<void> m_Future;
+
+	// Distributed Hash Table
+	dht::DhtRunner node;
+	dht::crypto::Identity refID;
+	dht::crypto::PrivateKey privateKey;
 };

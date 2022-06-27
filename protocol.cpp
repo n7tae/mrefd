@@ -690,6 +690,7 @@ void CProtocol::HandleKeepalives(void)
 
 void CProtocol::HandlePeerLinks(void)
 {
+	static bool publish = true;
 	uint8_t buf[10];
 	// get the list of peers
 	CPeerMap *peermap = g_GateKeeper.GetPeerMap();
@@ -703,10 +704,11 @@ void CProtocol::HandlePeerLinks(void)
 	{
 		if ( nullptr == peermap->FindMapItem(peer->GetCallsign().GetCS()) )
 		{
+			publish = true;
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
-			std::cout << "Sending disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
+			std::cout << "Sent disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 			// remove client
 			peers->RemovePeer(peer);
 		}
@@ -719,6 +721,7 @@ void CProtocol::HandlePeerLinks(void)
 	{
 		if ( nullptr == peers->FindPeer((*it).second.GetCallsign()) )
 		{
+			publish = true;
 			// send connect packet to re-initiate peer link
 			EncodeInterlinkConnectPacket(connect, (*it).second.GetModules());
 			Send(connect.magic, sizeof(SInterConnect), (*it).second.GetIp());
@@ -728,6 +731,12 @@ void CProtocol::HandlePeerLinks(void)
 
 	g_Reflector.ReleasePeers();
 	g_GateKeeper.ReleasePeerMap();
+
+	if (publish)
+	{
+		g_GateKeeper.PutDHTInfo();
+		publish = false;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

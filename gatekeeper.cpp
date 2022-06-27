@@ -54,6 +54,39 @@ CGateKeeper::~CGateKeeper()
 
 bool CGateKeeper::Init(void)
 {
+	// start the dht instance
+	refID = dht::crypto::generateIdentity(g_Reflector.GetCallsign().GetCS());
+	privateKey = dht::crypto::PrivateKey::generate();
+	node.run(17171, refID, true);
+
+#ifdef USE_SAVED_DHT_STATE
+	// bootstrap the DHT from either saved nodes from a previous run,
+	// or from the configured node
+	std::string path(BOOTFILE);
+	// Try to import nodes from binary file
+	std::ifstream myfile(path, std::ios::binary|std::ios::ate);
+	if (myfile.is_open())
+	{
+		msgpack::unpacker pac;
+		auto size = myfile.tellg();
+		myfile.seekg (0, std::ios::beg);
+		pac.reserve_buffer(size);
+		myfile.read (pac.buffer(), size);
+		pac.buffer_consumed(size);
+		// Import nodes
+		msgpack::object_handle oh;
+		while (pac.next(oh)) {
+			auto imported_nodes = oh.get().as<std::vector<dht::NodeExport>>();
+			std::cout << "Importing " << imported_nodes.size() << " nodes" << std::endl;
+			node.bootstrap(imported_nodes);
+		}
+		myfile.close();
+	}
+	else
+#endif
+	{
+		node.bootstrap(DHT_BOOT_STRAP, "17171");
+	}
 
 	// load lists from files
 	m_NodeWhiteSet.LoadFromFile(WHITELIST_PATH);
@@ -71,12 +104,76 @@ bool CGateKeeper::Init(void)
 
 void CGateKeeper::Close(void)
 {
+	// kill the DHT
+	node.shutdown({}, true);
+	node.join();
+
 	// kill threads
 	keep_running = false;
 	if ( m_Future.valid() )
 	{
 		m_Future.get();
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// DHT publish
+
+void CGateKeeper::PutDHTInfo()
+{
+	const std::string cs(CALLSIGN);
+	SReflectorData rd;
+	rd.cs.assign(cs);
+#ifdef IPV4_ADDRESS
+	rd.ipv4.assign(IPV4_ADDRESS);
+#endif
+#ifdef IPV6_ADDRESS
+	rd.ipv6.assign(IPV6_ADDRESS);
+#endif
+	rd.modules.assign(MODULES);
+	rd.url.assign(DASHBOARD_URL);
+	rd.port = M17_PORT;
+	rd.email.assign(EMAIL_ADDRESS);
+
+	auto peermap = GetPeerMap();
+	for (auto pit=peermap->cbegin(); peermap->cend()!=pit; pit++)
+	{
+		const std::string modules(pit->second.GetModules());
+		rd.peers.push_back(std::make_pair(pit->second.GetCallsign().GetCS(), modules));
+	}
+	ReleasePeerMap();
+
+	auto nv = std::make_shared<dht::Value>(rd);
+	Dump("My dht::Value =", nv->data.data(), nv->data.size());
+	nv->user_type.assign("reflector-mrefd-0");
+	nv->sign(privateKey);
+
+	if (node.isRunning())
+	{
+		std::cout << "Attempting a putSigned()" << std::endl;
+	}
+	else
+	{
+		std::cout << "Waiting for node" << std::flush;
+
+		unsigned count = 30u;
+		for (; count > 0 && not node.isRunning(); count--)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout << '.' << std::flush;
+		}
+		if (count)
+			std::cout << "done" << std::endl;
+		else
+			std::cout << "Error waiting!" << std::endl;
+	}
+
+	node.putSigned(
+		dht::InfoHash::get(cs),
+		nv,
+		[](bool success){ std::cout << "PutDHTInfo() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		true
+	);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
