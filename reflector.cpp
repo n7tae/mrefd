@@ -170,7 +170,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 	{
 		// stream open, mark client as master
 		// so that it can't be deleted
-		client->IsTransmittingOnModule(module);
+		client->SetTXModule(module);
 
 		// update last heard time
 		client->Heard();
@@ -216,7 +216,7 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 		if ( client != nullptr )
 		{
 			// client no longer a master
-			client->StoppedTransmitting();
+			client->ClearTX();
 
 			// notify
 			OnStreamClose(stream->GetUserCallsign());
