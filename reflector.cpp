@@ -141,7 +141,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		return nullptr;
 	}
 
-	if ( client->IsAMaster() )
+	if ( client->IsTransmitting() )
 	{
 		std::cerr << "Client " << client->GetCallsign() << " is already a Master" << std::endl;
 		return nullptr;
@@ -170,7 +170,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 	{
 		// stream open, mark client as master
 		// so that it can't be deleted
-		client->SetMasterOfModule(module);
+		client->IsTransmittingOnModule(module);
 
 		// update last heard time
 		client->Heard();
@@ -216,7 +216,7 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 		if ( client != nullptr )
 		{
 			// client no longer a master
-			client->NotAMaster();
+			client->StoppedTransmitting();
 
 			// notify
 			OnStreamClose(stream->GetUserCallsign());

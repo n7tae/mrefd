@@ -64,10 +64,10 @@ public:
 	// status
 	void Alive(void);
 	bool IsAlive(void) const;
-	bool IsAMaster(void) const               { return (m_ModuleMastered != ' '); }
-	void SetMasterOfModule(char c)           { m_ModuleMastered = c; }
-	void NotAMaster(void)                    { m_ModuleMastered = ' '; }
-	void Heard(void)                         { m_LastHeardTime = std::time(nullptr); }
+	bool IsTransmitting(void) const     { return (m_TXOnModule != ' '); }
+	void IsTransmittingOnModule(char c) { m_TXOnModule = c; }
+	void StoppedTransmitting(void)      { m_TXOnModule = ' '; }
+	void Heard(void)                    { m_LastHeardTime = std::time(nullptr); }
 
 	// reporting
 	void WriteXml(std::ofstream &);
@@ -81,7 +81,7 @@ protected:
 	char        m_ReflectorModule;
 
 	// status
-	char        m_ModuleMastered;
+	char        m_TXOnModule;
 	CTimer		m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;

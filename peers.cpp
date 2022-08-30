@@ -93,7 +93,7 @@ void CPeers::RemovePeer(std::shared_ptr<CPeer> peer)
 	for ( auto pit=begin(); pit!=end(); /*increment done in body */ )
 	{
 		// compare object pointers
-		if (( *pit == peer ) && ( !(*pit)->IsAMaster() ))
+		if (( *pit == peer ) && ( !(*pit)->IsTransmitting() ))
 		{
 			// remove all clients from reflector client list
 			// it is double lock safe to lock Clients list after Peers list

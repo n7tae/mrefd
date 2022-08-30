@@ -35,7 +35,7 @@
 CClient::CClient()
 {
 	m_ReflectorModule = ' ';
-	m_ModuleMastered = ' ';
+	m_TXOnModule = ' ';
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
@@ -46,7 +46,7 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
 	m_ReflectorModule = reflectorModule;
 	m_Callsign = callsign;
 	m_Ip = ip;
-	m_ModuleMastered = ' ';
+	m_TXOnModule = ' ';
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
@@ -57,7 +57,7 @@ CClient::CClient(const CClient &client)
 	m_Callsign = client.m_Callsign;
 	m_Ip = client.m_Ip;
 	m_ReflectorModule = client.m_ReflectorModule;
-	m_ModuleMastered = client.m_ModuleMastered;
+	m_TXOnModule = client.m_TXOnModule;
 	m_LastKeepaliveTime = client.m_LastKeepaliveTime;
 	m_ConnectTime = client.m_ConnectTime;
 	m_LastHeardTime = client.m_LastHeardTime;

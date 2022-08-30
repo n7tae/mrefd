@@ -573,7 +573,7 @@ void CProtocol::HandleQueue(void)
 		while (nullptr != (client = clients->FindNextClient(it)))
 		{
 			// is this client busy ?
-			if ( !client->IsAMaster() && (client->GetReflectorModule() == packet->GetDestModule()) )
+			if ( !client->IsTransmitting() && (client->GetReflectorModule() == packet->GetDestModule()) )
 			{
 				auto cs = client->GetCallsign();
 
@@ -623,7 +623,7 @@ void CProtocol::HandleKeepalives(void)
 		Send(keepalive, 10, client->GetIp());
 
 		// client busy ?
-		if ( client->IsAMaster() )
+		if ( client->IsTransmitting() )
 		{
 			// yes, just tickle it
 			client->Alive();
@@ -664,7 +664,7 @@ void CProtocol::HandleKeepalives(void)
 		Send(keepalive, 10, peer->GetIp());
 
 		// client busy ?
-		if ( peer->IsAMaster() )
+		if ( peer->IsTransmitting() )
 		{
 			// yes, just tickle it
 			peer->Alive();

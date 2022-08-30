@@ -86,7 +86,7 @@ void CClients::RemoveClient(std::shared_ptr<CClient> client)
 		if ( *it == client )
 		{
 			// found it !
-			if ( !(*it)->IsAMaster() )
+			if ( !(*it)->IsTransmitting() )
 			{
 				// remove it
 				std::cout << "Client " << (*it)->GetCallsign() << " at " << (*it)->GetIp() << " removed with protocol " << (*it)->GetProtocolName();

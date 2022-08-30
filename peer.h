@@ -63,7 +63,7 @@ public:
 	const char *GetProtocolName(void) const     { return "M17"; }
 
 	// status
-	bool IsAMaster(void) const;
+	bool IsTransmitting(void) const;
 	void Alive(void);
 	bool IsAlive(void) const;
 	void Heard(void)                            { m_LastHeardTime = std::time(nullptr); }

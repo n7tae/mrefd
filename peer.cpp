@@ -97,11 +97,11 @@ bool CPeer::operator ==(const CPeer &peer) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // status
 
-bool CPeer::IsAMaster(void) const
+bool CPeer::IsTransmitting(void) const
 {
 	for ( auto it=cbegin(); it!=cend(); it++ )
 	{
-		if ((*it)->IsAMaster())
+		if ((*it)->IsTransmitting())
 			return true;
 	}
 	return false;
