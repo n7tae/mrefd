@@ -23,7 +23,7 @@
 // ----------------------------------------------------------------------------
 
 #include "main.h"
-#include "timepoint.h"
+#include "timer.h"
 #include "reflector.h"
 #include "gatekeeper.h"
 
@@ -219,7 +219,7 @@ void CGateKeeper::Thread()
 	{
 		// Wait 30 seconds
 		for (int i=0; i<15 && keep_running; i++)
-			CTimePoint::TaskSleepFor(2000);
+			std::this_thread::sleep_for(std::chrono::microseconds(2000));
 
 		// have lists files changed ?
 		if ( m_NodeWhiteSet.NeedReload() )

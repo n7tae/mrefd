@@ -26,7 +26,7 @@
 #pragma once
 
 #include "version.h"
-#include "timepoint.h"
+#include "timer.h"
 #include "ip.h"
 #include "callsign.h"
 #include "client.h"
@@ -89,7 +89,7 @@ protected:
 	std::list<std::shared_ptr<CClient>> m_Clients;
 
 	// status
-	CTimePoint            m_LastKeepaliveTime;
+	CTimer            m_LastKeepaliveTime;
 	std::time_t           m_ConnectTime;
 	std::time_t           m_LastHeardTime;
 };

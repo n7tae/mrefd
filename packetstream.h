@@ -23,7 +23,7 @@
 #pragma once
 
 #include "packetqueue.h"
-#include "timepoint.h"
+#include "timer.h"
 #include "packet.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -46,13 +46,13 @@ public:
 
 	// push & pop
 	void Push(std::unique_ptr<CPacket> packet);
-	void Tickle(void)                               { m_LastPacketTime.Now(); }
+	void Tickle(void)                               { m_LastPacketTime.Start(); }
 	bool IsEmpty(void) const;
 
 	// get
 	std::shared_ptr<CClient> GetOwnerClient(void)   { return m_OwnerClient; }
 	const CIp       *GetOwnerIp(void);
-	bool             IsExpired(void) const          { return (m_LastPacketTime.DurationSinceNow() > STREAM_TIMEOUT); }
+	bool             IsExpired(void) const          { return (m_LastPacketTime.Time() > STREAM_TIMEOUT); }
 	bool             IsOpen(void) const             { return m_bOpen; }
 	uint16_t         GetPacketStreamId(void) const  { return m_uiStreamId; }
 	const CCallsign &GetUserCallsign(void) const    { return m_Header.GetDestCallsign(); }
@@ -61,7 +61,7 @@ protected:
 	// data
 	bool                     m_bOpen;
 	uint16_t                 m_uiStreamId;
-	CTimePoint               m_LastPacketTime;
+	CTimer               m_LastPacketTime;
 	CPacket                  m_Header;
 	std::shared_ptr<CClient> m_OwnerClient;
 };

@@ -1,9 +1,7 @@
 //
-//  ctimepoint.cpp
-//  m17ref
-//
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//  Copyright © 2020 Thomas A. Early N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -22,32 +20,30 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
-#include "timepoint.h"
+#pragma once
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructor
+#include <ctime>
+#include <chrono>
 
-CTimePoint::CTimePoint()
+class CTimer
 {
-	m_TimePoint = std::chrono::steady_clock::now();
-}
+public:
+	CTimer()
+	{
+		Start();
+	}
 
-////////////////////////////////////////////////////////////////////////////////////////
-// operation
+	void Start()
+	{
+		starttime = std::chrono::steady_clock::now();
+	}
 
-double CTimePoint::DurationSinceNow(void) const
-{
-	std::chrono::steady_clock::time_point Now = std::chrono::steady_clock::now();
-	std::chrono::steady_clock::duration time_span = (Now - m_TimePoint);
-	return double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
-}
+	double Time() const
+	{
+		std::chrono::duration<double> elapsed(std::chrono::steady_clock::now() - starttime);
+		return elapsed.count();
+	}
 
-////////////////////////////////////////////////////////////////////////////////////////
-// task
-
-void CTimePoint::TaskSleepFor(uint32_t ms)
-{
-	std::chrono::milliseconds timespan(ms);
-	std::this_thread::sleep_for(timespan);
-}
+private:
+	std::chrono::steady_clock::time_point starttime;
+};

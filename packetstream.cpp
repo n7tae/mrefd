@@ -50,7 +50,7 @@ bool CPacketStream::OpenPacketStream(const CPacket &Header, std::shared_ptr<CCli
 		m_uiStreamId = Header.GetStreamId();
 		m_Header = Header;
 		m_OwnerClient = client;
-		m_LastPacketTime.Now();
+		m_LastPacketTime.Start();
 		ok = true;
 	}
 	return ok;
@@ -70,7 +70,7 @@ void CPacketStream::ClosePacketStream(void)
 void CPacketStream::Push(std::unique_ptr<CPacket> Packet)
 {
 	// update stream dependent packet data
-	m_LastPacketTime.Now();
+	m_LastPacketTime.Start();
 	push(Packet);
 }
 

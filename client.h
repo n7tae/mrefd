@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "timepoint.h"
+#include "timer.h"
 #include "ip.h"
 #include "callsign.h"
 
@@ -60,9 +60,6 @@ public:
 	// identity
 	const char *GetProtocolName(void) const  { return "M17"; }
 	bool IsNode(void) const                  { return true; }
-	bool IsPeer(void) const                  { return false; }
-	bool IsDextraDongle(void) const          { return false; }
-	void SetDextraDongle(void)               { }
 
 	// status
 	void Alive(void);
@@ -85,7 +82,7 @@ protected:
 
 	// status
 	char        m_ModuleMastered;
-	CTimePoint  m_LastKeepaliveTime;
+	CTimer		m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;
 };

@@ -109,8 +109,8 @@ bool CProtocol::Initialize(const uint16_t port, const bool has_ipv4, const bool 
 	}
 
 	// update time
-	m_LastKeepaliveTime.Now();
-	m_LastPeersLinkTime.Now();
+	m_LastKeepaliveTime.Start();
+	m_LastPeersLinkTime.Start();
 
 	// done
 	return true;
@@ -323,23 +323,23 @@ void CProtocol::Task(void)
 	HandleQueue();
 
 	// keep alive
-	if ( m_LastKeepaliveTime.DurationSinceNow() > M17_KEEPALIVE_PERIOD )
+	if ( m_LastKeepaliveTime.Time() > M17_KEEPALIVE_PERIOD )
 	{
 		// handle keep alives
 		HandleKeepalives();
 
 		// update time
-		m_LastKeepaliveTime.Now();
+		m_LastKeepaliveTime.Start();
 	}
 
 	// peer connections
-	if ( m_LastPeersLinkTime.DurationSinceNow() > M17_RECONNECT_PERIOD )
+	if ( m_LastPeersLinkTime.Time() > M17_RECONNECT_PERIOD )
 	{
 		// handle remote peers connections
 		HandlePeerLinks();
 
 		// update time
-		m_LastPeersLinkTime.Now();
+		m_LastPeersLinkTime.Start();
 	}
 }
 

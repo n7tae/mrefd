@@ -36,7 +36,7 @@ CClient::CClient()
 {
 	m_ReflectorModule = ' ';
 	m_ModuleMastered = ' ';
-	m_LastKeepaliveTime.Now();
+	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
 }
@@ -47,7 +47,7 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
 	m_Callsign = callsign;
 	m_Ip = ip;
 	m_ModuleMastered = ' ';
-	m_LastKeepaliveTime.Now();
+	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
 }
@@ -68,7 +68,7 @@ CClient::CClient(const CClient &client)
 
 void CClient::Alive(void)
 {
-	m_LastKeepaliveTime.Now();
+	m_LastKeepaliveTime.Start();
 }
 
 
@@ -112,5 +112,5 @@ void CClient::WriteXml(std::ofstream &xmlFile)
 
 bool CClient::IsAlive(void) const
 {
-	return (m_LastKeepaliveTime.DurationSinceNow() < M17_KEEPALIVE_TIMEOUT);
+	return (m_LastKeepaliveTime.Time() < M17_KEEPALIVE_TIMEOUT);
 }

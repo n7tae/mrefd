@@ -204,7 +204,7 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 			bEmpty = stream->empty();
 			stream->Unlock();
 			if ( !bEmpty )
-				CTimePoint::TaskSleepFor(10);
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 		while (!bEmpty);
 
@@ -277,7 +277,7 @@ void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 		}
 		else
 		{
-			CTimePoint::TaskSleepFor(10);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 }
@@ -307,7 +307,7 @@ void CReflector::XmlReportThread()
 
 		// and wait a bit
 		for (int i=0; i< XML_UPDATE_PERIOD && keep_running; i++)
-			CTimePoint::TaskSleepFor(1000);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
 

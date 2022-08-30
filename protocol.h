@@ -127,11 +127,11 @@ protected:
 	CCallsign       m_ReflectorCallsign;
 
 	// debug
-	CTimePoint      m_DebugTimer;
+	CTimer      m_DebugTimer;
 
 	// time
-	CTimePoint m_LastKeepaliveTime;
-	CTimePoint m_LastPeersLinkTime;
+	CTimer m_LastKeepaliveTime;
+	CTimer m_LastPeersLinkTime;
 
 private:
 	std::regex clientRegEx, peerRegEx;

@@ -46,7 +46,7 @@ CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules)
 	m_Ip = ip;
 	::memset(m_ReflectorModules, 0, sizeof(m_ReflectorModules));
 	::strncpy(m_ReflectorModules, modules, sizeof(m_ReflectorModules)-1);
-	m_LastKeepaliveTime.Now();
+	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
 
@@ -109,7 +109,7 @@ bool CPeer::IsAMaster(void) const
 
 void CPeer::Alive(void)
 {
-	m_LastKeepaliveTime.Now();
+	m_LastKeepaliveTime.Start();
 	for ( auto it=begin(); it!=end(); it++ )
 	{
 		(*it)->Alive();
