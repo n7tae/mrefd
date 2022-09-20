@@ -237,7 +237,7 @@ do
 	echo "        M17 Reflector Configuration, Version #220523"
 	echo
 	echo    "     ************** REFLECTOR  ****************"
-	echo -n "cs : Reflector Callsign                    = "; EvaluateVar callsign{,_d}
+	echo -n "cs : Reflector Name                        = "; EvaluateVar callsign{,_d}
 	echo -n "am : Active Modules                        = "; EvaluateVar modules{,_d}
 	echo -n "mc : Allow multiple clients on the same IP = "; EvaluateVar mclients{,_d}
 	echo    "     Set the DHT bootstrap to any known DHT node, like 'm17-usa.openquad.net'"
