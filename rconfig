@@ -197,6 +197,12 @@ rcfg='reflector.cfg'
 srch='configure.h'
 srcm='configure.mk'
 mrefserv='/etc/systemd/system/mrefd.service'
+
+# expert mode
+if [[ "$1" == ex* ]]; then
+	expertmode="expertMode"
+fi
+
 # default values
 callsign_d='CHNGME'
 modules_d='none'
@@ -234,7 +240,7 @@ while [[ "$key" != q* ]]
 do
 	clear
 	echo
-	echo "        M17 Reflector Configuration, Version #220523"
+	echo "        M17 Reflector Configuration, Version #220922"
 	echo
 	echo    "     ************** REFLECTOR  ****************"
 	echo -n "cs : Reflector Name                        = "; EvaluateVar callsign{,_d}
