@@ -402,9 +402,12 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	char sz[64];
 	::sprintf(sz, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	xmlFile << "<Version>" << sz << "</Version>" << std::endl;
+	
+	// reflector callsign
+	xmlFile << "<Reflector>" << m_Callsign << "</Reflector>" << std:endl;
 
 	// linked peers
-	xmlFile << "<" << m_Callsign << " linked peers>" << std::endl;
+	xmlFile << "<PEERS>" << std::endl;
 	// lock
 	CPeers *peers = GetPeers();
 	// iterate on peers
@@ -414,10 +417,10 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleasePeers();
-	xmlFile << "</" << m_Callsign << " linked peers>" << std::endl;
+	xmlFile << "</PEERS>" << std::endl;
 
 	// linked nodes
-	xmlFile << "<" << m_Callsign << " linked nodes>" << std::endl;
+	xmlFile << "<NODES>" << std::endl;
 	// lock
 	CClients *clients = GetClients();
 	// iterate on clients
@@ -430,10 +433,10 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleaseClients();
-	xmlFile << "</" << m_Callsign << " linked nodes>" << std::endl;
+	xmlFile << "</NODES>" << std::endl;
 
 	// last heard users
-	xmlFile << "<" << m_Callsign << " heard users>" << std::endl;
+	xmlFile << "<STATIONS>" << std::endl;
 	// lock
 	CUsers *users = GetUsers();
 	// iterate on users
@@ -443,5 +446,5 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleaseUsers();
-	xmlFile << "</" << m_Callsign << " heard users>" << std::endl;
+	xmlFile << "</STATIONS>" << std::endl;
 }
