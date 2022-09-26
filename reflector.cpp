@@ -401,10 +401,10 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// software version
 	char sz[64];
 	::sprintf(sz, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
-	xmlFile << "<Version>" << sz << "</Version>" << std::endl;
+	xmlFile << "<VERSION>" << sz << "</VERSION>" << std::endl;
 	
 	// reflector callsign
-	xmlFile << "<Reflector>" << m_Callsign << "</Reflector>" << std:endl;
+	xmlFile << "<REFLECTOR>" << m_Callsign << "</REFLECTOR>" << std:endl;
 
 	// linked peers
 	xmlFile << "<PEERS>" << std::endl;
