@@ -398,6 +398,9 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// write header
 	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
 
+	// reflector start
+	xmlFile << "<REFLECTOR CALLSIGN=\">" << m_Callsign << "\">" << std:endl;
+	
 	// software version
 	char sz[64];
 	::sprintf(sz, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
@@ -447,4 +450,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// unlock
 	ReleaseUsers();
 	xmlFile << "</STATIONS>" << std::endl;
+	
+	// reflector end
+	xmlFile << "</REFLECTOR>" << std:endl;
 }
