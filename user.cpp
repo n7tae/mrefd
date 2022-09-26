@@ -76,7 +76,7 @@ void CUser::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "\t<VIAPEER>" << m_Reflector.GetCS(7) << "</VIAPEER>" << std::endl;
 
 	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&m_LastHeardTime)))
+	if (std::strftime(mbstr, sizeof(mbstr), "%c", std::localtime(&m_LastHeardTime)))
 	{
 		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
 	}
