@@ -399,7 +399,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
 
 	// reflector start
-	xmlFile << "<REFLECTOR CALLSIGN=\">" << m_Callsign << "\">" << std:endl;
+	xmlFile << "<REFLECTOR CALLSIGN=\">" << m_Callsign << "\">" << std::endl;
 	
 	// software version
 	char sz[64];
@@ -449,5 +449,5 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "</STATIONS>" << std::endl;
 	
 	// reflector end
-	xmlFile << "</REFLECTOR>" << std:endl;
+	xmlFile << "</REFLECTOR>" << std::endl;
 }
