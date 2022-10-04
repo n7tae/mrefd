@@ -1,9 +1,5 @@
 //
-//  main.cpp
-//  m17ref
-//
-//  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
-//  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//  Copyright © 2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
