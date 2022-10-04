@@ -127,11 +127,11 @@ void CPeer::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "\t<LINKEDMODULE>" << m_ReflectorModules << "</LINKEDMODULE>" << std::endl;
 	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
 	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%c", std::localtime(&m_ConnectTime)))
+	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ00:00", std::gmtime(&m_ConnectTime)))
 	{
 		xmlFile << "\t<CONNECTTIME>" << mbstr << "</CONNECTTIME>" << std::endl;
 	}
-	if (std::strftime(mbstr, sizeof(mbstr), "%c", std::localtime(&m_LastHeardTime)))
+	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ00:00", std::gmtime(&m_LastHeardTime)))
 	{
 		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
 	}
