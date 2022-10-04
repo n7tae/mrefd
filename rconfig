@@ -99,7 +99,7 @@ WriteMemFile ()
 	[ -z ${callsign+x}    ] || echo    "callsign='$callsign'"  >> $file
 	[ -z ${modules+x}     ] || echo     "modules='$modules'"   >> $file
 	[ -z ${mclients+x}    ] || echo    "mclients=$mclients"    >> $file
-	[ -z ${dhtbstrap+x}   ] || echo   "dhtbstrap=$dhtbstrap"   >> $file
+	[ -z ${dhtbstrap+x}   ] || echo   "dhtbstrap='$dhtbstrap'" >> $file
 	[ -z ${ip4addr+x}     ] || echo     "ip4addr='$ip4addr'"   >> $file
 	[ -z ${ip6addr+x}     ] || echo     "ip6addr='$ip6addr'"   >> $file
 	[ -z ${m17port+x}     ] || echo     "m17port='$m17port'"   >> $file
@@ -240,7 +240,7 @@ while [[ "$key" != q* ]]
 do
 	clear
 	echo
-	echo "        M17 Reflector Configuration, Version #220922"
+	echo "        M17 Reflector Configuration, Version #220923"
 	echo
 	echo    "     ************** REFLECTOR  ****************"
 	echo -n "cs : Reflector Name                        = "; EvaluateVar callsign{,_d}

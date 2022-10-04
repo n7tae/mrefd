@@ -62,7 +62,6 @@
 // protocols ---------------------------------------------------
 
 // M17
-#define M17_PORT                        17000
 #define M17_KEEPALIVE_PERIOD			3
 #define M17_KEEPALIVE_TIMEOUT           (M17_KEEPALIVE_PERIOD*10)
 #define M17_RECONNECT_PERIOD            5
@@ -78,22 +77,6 @@
 #define BLACKLIST_PATH                  "/usr/local/etc/mrefd.blacklist"
 #define INTERLINKLIST_PATH              "/usr/local/etc/mrefd.interlink"
 #define PIDFILE_PATH                    "/var/run/mrefd.pid"
-
-////////////////////////////////////////////////////////////////////////////////////////
-// typedefs
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-// macros
-
-#define MIN(a,b) 				(int(a) < int(b))?(a):(b)
-#define MAX(a,b) 				(int(a) > int(b))?(a):(b)
-#define MAKEWORD(low, high)		((uint16_t)(((uint8_t)(low)) | (((uint16_t)((uint8_t)(high))) << 8)))
-#define MAKEDWORD(low, high)	((uint32_t)(((uint16_t)(low)) | (((uint32_t)((uint16_t)(high))) << 16)))
-#define LOBYTE(w)				((uint8_t)(uint16_t)(w & 0x00FF))
-#define HIBYTE(w)				((uint8_t)((((uint16_t)(w)) >> 8) & 0xFF))
-#define LOWORD(dw)				((uint16_t)(uint32_t)(dw & 0x0000FFFF))
-#define HIWORD(dw)				((uint16_t)((((uint32_t)(dw)) >> 16) & 0xFFFF))
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // global objects
