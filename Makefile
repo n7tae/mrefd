@@ -1,4 +1,4 @@
-# Copyright (c) 2020 by Thomas A. Early N7TAE
+# Copyright (c) 2022 by Thomas A. Early N7TAE
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,14 @@
 # if you change these locations, make sure the sgs.service file is updated!
 # you will also break hard coded paths in the dashboard file, index.php.
 
-include configure.mk
-
 # if you make changed in these two variable, you'll need to change things
 # in the main.h file as well as the systemd service file.
 BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
-DATADIR = /var/lib/m17ref
 
 CFLAGS += -c -W -std=c++17 -MMD -c
 
-ifeq ($(debug), true)
+ifneq (,$(wildcard debug))
 CFLAGS += -ggdb3
 endif
 
@@ -38,7 +35,7 @@ endif
 
 LDFLAGS=-pthread -lopendht
 
-SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp crc.cpp gatekeeper.cpp ip.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
+SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.cpp gatekeeper.cpp ip.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
@@ -61,13 +58,13 @@ clean :
 
 -include $(DEPS)
 
-install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink
+install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink $(EXE).cfg
 	ln -s $(shell pwd)/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
 	ln -s $(shell pwd)/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
 	ln -s $(shell pwd)/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
+	ln -s $(shell pwd)/$(EXE).cfg $(CFGDIR)/$(EXE).cfg
 	cp -f systemd/$(EXE).service /etc/systemd/system/
 	cp -f $(EXE) $(BINDIR)
-	mkdir -p $(DATADIR)
 	systemctl enable $(EXE).service
 	systemctl daemon-reload
 	systemctl start $(EXE)
@@ -76,6 +73,7 @@ uninstall :
 	rm -f $(CFGDIR)/$(EXE).blacklist
 	rm -f $(CFGDIR)/$(EXE).whitelist
 	rm -f $(CFGDIR)/$(EXE).interlink
+	rm -f $(CFGDIR)/$(EXE).cfg
 	systemctl stop $(EXE).service
 	systemctl disable $(EXE).service
 	rm -f /etc/systemd/system/$(EXE).service

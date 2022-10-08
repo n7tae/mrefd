@@ -81,19 +81,13 @@ Finally, if both ends of a link in a group support IPv6, that part of the group 
 
 ### Configuring your reflector
 
-Configuring, compiling and maintaining your reflector build is easy! Start the configuration script in the base directory of you cloned repo:
+Configuring, compiling and maintaining your reflector build is easy! Start by copying the configuration example:
 
 ```bash
-./rconfig
+cp example.cfg mrefd.cfg
 ```
 
-There are only a few things that need to be specified. Most important are, the reflector callsign and the configured modules. The reflector callsign must be exactly 7 characters beginning with "M17-". The remaining 3 characters can be an combination of numbers or letters. Input will automatically be capitolized by rconfig. You must specify at least one module. You can specify as many as 26 modules, *e.g.*, "abcdefghijklmnopqrstuvwxyz".
-
-The binding addresses for the IPv4 and IPv6 listen ports also need to be specified. You must specify at least one address. Dual-stack operation is enabled by specifying both an IPv4 and IPv6 address. IPv4-only single stack can be specified by leaving the IPv6 address set to `none`. It's even possible to operate in an IPv6-only configuration by leaving the IPv4 address to the default `none`. Usually, the IPv4 binding address will be `0.0.0.0` and the IPv6 address would be `::`. Once specified the external IP address of an IPv4 and/or IPv6 address should also be set. These addresses are where clients will find the reflector on the DHT network. Be sure to also specify your reflector's dashboard URL.
-
-You can configure your reflector to accept multiple clients from the same IP. This is generally safe to do, but it does allow an inexperienced user to create a unintentional transmission loop if they attempt to link multiple hot-spots to the same module that happen to be using the same RF frequency. If you've enabled this multiple clients option and someone has created a loop, you can either block their transmission using the blacklist or block their IP at the reflector's firewall. If you have this option disabled, any attempt to link by a second client at an existing IP will result in an message from the Gatekeeper that the link attempt was blocked.
-
-Be sure to write out the configuration files and look at the three different configration files that are created. The first file, reflector.cfg is the memory file for rconfig so that if you start that script again, it will remember how you left things. There is one `.h` file and one `.mk` file for the reflector. You should **not** modify these files by hand unless you really know exactly how they work.
+Use your favorite editor to edit mrefd.cfg. This file contains comments so it should be obvious what values need changing.
 
 ### Compling and installing your system
 
@@ -145,7 +139,19 @@ make
 sudo make install
 ```
 
-If, after doing the `git pull`, you see that it's downloaded a new rconfig script, it would probably be a good idea to run it before doing a `make`. There may be new build options of which you might want to take advantage.
+If, after doing the `git pull`, you see that it's downloaded a new example.cfg file, it would probably be a good idea to remake your mrefd.cfg file. There may be new options of which you might want to take advantage.
+
+## Other possibilities
+
+It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to me aware of:
+
+- The reflector executable name is defined in the Makefile at the line "EXE=mrefd".
+- The configuration file is read at start-up and defined in mrefd.service file. Each instance would require a different service file.
+- Each instance will need its own support files with unique paths to those files.
+- Each instance will need a unique url so that each will have its own webpage.
+- It might even be possible to interlink different instances by using the loopback address, 127.0.0.1.
+
+This is **not** a task for a beginner!
 
 ## Firewall settings
 

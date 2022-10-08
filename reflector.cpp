@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of M17Refd.
@@ -27,11 +27,14 @@
 #include <string.h>
 #include "reflector.h"
 #include "gatekeeper.h"
+#include "configure.h"
+
+CReflector g_Reflector;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CReflector::CReflector() : m_Callsign(CALLSIGN), m_Modules(MODULES)
+CReflector::CReflector() : m_Callsign(g_CFG.GetCallsign()), m_Modules(g_CFG.GetModules())
 {
 	keep_running = true;
 }
@@ -59,8 +62,10 @@ CReflector::~CReflector()
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation
 
-bool CReflector::Start(void)
+bool CReflector::Start(const char *cfgfilename)
 {
+	if (g_CFG.ReadData(cfgfilename))
+		return true;
 	// let's go!
 	keep_running = true;
 
@@ -68,10 +73,10 @@ bool CReflector::Start(void)
 	g_GateKeeper.Init();
 
 	// create protocols
-	if (! m_Protocol.Initialize(M17_PORT, true, true))
+	if (! m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
 	{
 		m_Protocol.Close();
-		return false;
+		return true;
 	}
 
 	// start one thread per reflector module
@@ -86,7 +91,7 @@ bool CReflector::Start(void)
 	// start the reporting threads
 	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
 
-	return true;
+	return false;
 }
 
 void CReflector::Stop(void)
@@ -289,9 +294,10 @@ void CReflector::XmlReportThread()
 {
 	while (keep_running)
 	{
+		const std::string xmlfilepath(g_CFG.GetXmlPath());
 		// report to xml file
 		std::ofstream xmlFile;
-		xmlFile.open(XML_PATH, std::ios::out | std::ios::trunc);
+		xmlFile.open(xmlfilepath, std::ios::out | std::ios::trunc);
 		if ( xmlFile.is_open() )
 		{
 			// write xml file
@@ -302,7 +308,7 @@ void CReflector::XmlReportThread()
 		}
 		else
 		{
-			std::cout << "Failed to open " << XML_PATH  << std::endl;
+			std::cout << "Failed to open " << xmlfilepath << std::endl;
 		}
 
 		// and wait a bit

@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 10/12/2016.
 //  Copyright © 2016 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of M17Refd.
@@ -83,13 +83,13 @@ public:
 
 protected:
 	// data
-	CCallsign             m_Callsign;
-	CIp                   m_Ip;
-	char                  m_ReflectorModules[27];
+	CCallsign m_Callsign;
+	CIp       m_Ip;
+	char      m_ReflectorModules[27];
 	std::list<std::shared_ptr<CClient>> m_Clients;
 
 	// status
-	CTimer            m_LastKeepaliveTime;
-	std::time_t           m_ConnectTime;
-	std::time_t           m_LastHeardTime;
+	CTimer      m_LastKeepaliveTime;
+	std::time_t m_ConnectTime;
+	std::time_t m_LastHeardTime;
 };

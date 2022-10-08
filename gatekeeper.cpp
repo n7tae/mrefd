@@ -5,15 +5,17 @@
 //  Created by Jean-Luc Deltombe (LX3JL) on 07/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
 //
-// ----------------------------------------------------------------------------
-//    This file is part of M17Refd.
+//  Copyright © 2022 Thomas A. Early N7TAE. All rights reserved.
 //
-//    M17Refd is free software: you can redistribute it and/or modify
+// ----------------------------------------------------------------------------
+//    This file is part of mrefd.
+//
+//    mrefd is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    M17Refd is distributed in the hope that it will be useful,
+//    mrefd is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -26,6 +28,7 @@
 #include "timer.h"
 #include "reflector.h"
 #include "gatekeeper.h"
+#include "configure.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -85,13 +88,13 @@ bool CGateKeeper::Init(void)
 	else
 #endif
 	{
-		node.bootstrap(DHT_BOOT_STRAP, "17171");
+		node.bootstrap(g_CFG.GetBootstrap(), "17171");
 	}
 
 	// load lists from files
-	m_NodeWhiteSet.LoadFromFile(WHITELIST_PATH);
-	m_NodeBlackSet.LoadFromFile(BLACKLIST_PATH);
-	m_PeerMap.LoadFromFile(INTERLINKLIST_PATH);
+	m_NodeWhiteSet.LoadFromFile(g_CFG.GetWhitePath().c_str());
+	m_NodeBlackSet.LoadFromFile(g_CFG.GetBlackPath().c_str());
+	m_PeerMap.LoadFromFile(g_CFG.GetInterlinkPath().c_str());
 
 	// reset run flag
 	keep_running = true;
@@ -121,19 +124,21 @@ void CGateKeeper::Close(void)
 
 void CGateKeeper::PutDHTInfo()
 {
-	const std::string cs(CALLSIGN);
+	const std::string cs(g_CFG.GetCallsign());
 	SReflectorData rd;
 	rd.cs.assign(cs);
-#ifdef IPV4_ADDRESS
-	rd.ipv4.assign(IPV4_ADDRESS);
-#endif
-#ifdef IPV6_ADDRESS
-	rd.ipv6.assign(IPV6_ADDRESS);
-#endif
-	rd.modules.assign(MODULES);
-	rd.url.assign(DASHBOARD_URL);
-	rd.port = M17_PORT;
-	rd.email.assign(EMAIL_ADDRESS);
+	if (! g_CFG.GetIPv4BindAddr().empty())
+	{
+		rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
+	}
+	if (! g_CFG.GetIPv6BindAddr().empty())
+	{
+		rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
+	}
+	rd.modules.assign(g_CFG.GetModules());
+	rd.url.assign(g_CFG.GetURL());
+	rd.port = (unsigned short)g_CFG.GetPort();
+	rd.email.assign(g_CFG.GetEmailAddr());
 
 	auto peermap = GetPeerMap();
 	for (auto pit=peermap->cbegin(); peermap->cend()!=pit; pit++)

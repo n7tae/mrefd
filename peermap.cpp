@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 30/12/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 
 #include "main.h"
+#include "configure.h"
 #include "peermap.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 				// 1st token is callsign
 				if ( (name = strtok(name, " ,\t")) != nullptr )
 				{
-					if (strcmp(name, CALLSIGN))
+					if (strcmp(name, g_CFG.GetCallsign().c_str()))
 					{
 						if (m_Peers.end() == m_Peers.find(name))
 						{
