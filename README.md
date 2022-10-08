@@ -141,7 +141,7 @@ sudo make install
 
 If, after doing the `git pull`, you see that it's downloaded a new example.cfg file, it would probably be a good idea to remake your mrefd.cfg file. There may be new options of which you might want to take advantage.
 
-## Other possibilities
+## Running multiple instances
 
 It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to me aware of:
 
@@ -149,7 +149,7 @@ It should be fairly straightforward to install multiple mrefd instances on a sin
 - The configuration file is read at start-up and defined in mrefd.service file. Each instance would require a different service file.
 - Each instance will need its own support files with unique paths to those files.
 - Each instance will need a unique url so that each will have its own webpage.
-- It might even be possible to interlink different instances by using the loopback address, 127.0.0.1.
+- Need to add unix sockets for interlinking between instances.
 
 This is **not** a task for a beginner!
 
