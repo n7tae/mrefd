@@ -180,7 +180,7 @@ bool CConfigure::ReadData(const std::string &path)
 		auto RefRegEx = std::regex("^M17-([A-Z0-9]){3,3}$", std::regex::extended);
 		if (std::regex_match(data.callsign, RefRegEx))
 		{
-			std::cout << "Callsign: '" << data.callsign << "'" << std::endl;
+			std::cout << "Callsign='" << data.callsign << "'" << std::endl;
 		}
 		else
 		{
@@ -193,6 +193,10 @@ bool CConfigure::ReadData(const std::string &path)
 	{
 		std::cout << "ERROR - no modules defined" << std::endl;
 		rval = true;
+	}
+	else
+	{
+		std::cout << "Modules='" << data.modules << "'" << std::endl;
 	}
 
 	if (data.ipv4bindaddr.empty())
@@ -218,7 +222,7 @@ bool CConfigure::ReadData(const std::string &path)
 				// there's an external address
 				if (std::regex_match(data.ipv4extaddr, IPv4RegEx))
 				{
-					std::cout << "IPv4 Bind: '" << data.ipv4bindaddr << "; External: '" << data.ipv4extaddr << "'" << std::endl;
+					std::cout << "IPv4 Bind='" << data.ipv4bindaddr << "; External='" << data.ipv4extaddr << "'" << std::endl;
 				}
 				else
 				{
@@ -261,7 +265,7 @@ bool CConfigure::ReadData(const std::string &path)
 				// there's an external address
 				if (std::regex_match(data.ipv6extaddr, IPv6RegEx))
 				{
-					std::cout << "IPv6 Bind: '" << data.ipv6bindaddr << "; External: '" << data.ipv6extaddr << "'" << std::endl;
+					std::cout << "IPv6 Bind='" << data.ipv6bindaddr << "; External='" << data.ipv6extaddr << "'" << std::endl;
 				}
 				else
 				{
@@ -298,7 +302,7 @@ bool CConfigure::ReadData(const std::string &path)
 		auto URLRegEx = std::regex("^https?://.+$", std::regex::extended);
 		if (std::regex_match(data.url, URLRegEx))
 		{
-			std::cout << "DashboardURL: '" << data.url << "'" << std::endl;
+			std::cout << "DashboardURL='" << data.url << "'" << std::endl;
 		}
 		else
 		{
@@ -314,7 +318,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "EmailAddr: '" << data.emailaddr << "'" << std::endl;
+		std::cout << "EmailAddr='" << data.emailaddr << "'" << std::endl;
 	}
 
 	if (data.bootstrap.empty())
@@ -324,7 +328,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "Bootstrap: '" << data.bootstrap << "'" << std::endl;
+		std::cout << "Bootstrap='" << data.bootstrap << "'" << std::endl;
 	}
 
 	if (data.xmlpath.empty())
@@ -334,7 +338,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "XmlPath: '" << data.xmlpath << "'" << std::endl;
+		std::cout << "XmlPath='" << data.xmlpath << "'" << std::endl;
 	}
 
 	if (data.pidpath.empty())
@@ -344,7 +348,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "PidPath: '" << data.pidpath << "'" << std::endl;
+		std::cout << "PidPath='" << data.pidpath << "'" << std::endl;
 	}
 
 	if (data.whitepath.empty())
@@ -354,7 +358,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "WhitelistPath: '" << data.whitepath << "'" << std::endl;
+		std::cout << "WhitelistPath='" << data.whitepath << "'" << std::endl;
 	}
 
 	if (data.blackpath.empty())
@@ -364,7 +368,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "BlacklistPath: '" << data.blackpath << "'" << std::endl;
+		std::cout << "BlacklistPath='" << data.blackpath << "'" << std::endl;
 	}
 
 	if (data.interlinkpath.empty())
@@ -374,7 +378,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "InterlinkPath: '" << data.interlinkpath << "'" << std::endl;
+		std::cout << "InterlinkPath='" << data.interlinkpath << "'" << std::endl;
 	}
 
 	if (49000U < data.port || data.port < 4096U)
@@ -384,10 +388,10 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "Port: " << data.port << std::endl;
+		std::cout << "Port=" << data.port << std::endl;
 	}
 
-	std::cout << "MultiClient: " << (data.mcclients ? "true" : "false") << std::endl;
+	std::cout << "MultiClient=" << (data.mcclients ? "true" : "false") << std::endl;
 
 	return rval;
 }
