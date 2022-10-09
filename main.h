@@ -1,7 +1,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Eary, N7TAE
+//  Copyright © 2022 Thomas A. Eary, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -43,15 +43,13 @@
 #include <thread>
 #include <arpa/inet.h>
 
-#include "configure.h"
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // defines
 
 // version -----------------------------------------------------
 
 #define VERSION_MAJOR                   0
-#define VERSION_MINOR                   4
+#define VERSION_MINOR                   5
 #define VERSION_REVISION                0
 
 // debug -------------------------------------------------------
@@ -71,13 +69,6 @@
 #define LASTHEARD_USERS_MAX_SIZE        100
 #define XML_UPDATE_PERIOD               10                              // in seconds
 
-// system paths -------------------------------------------------
-#define XML_PATH                        "/var/log/mrefd.xml"
-#define WHITELIST_PATH                  "/usr/local/etc/mrefd.whitelist"
-#define BLACKLIST_PATH                  "/usr/local/etc/mrefd.blacklist"
-#define INTERLINKLIST_PATH              "/usr/local/etc/mrefd.interlink"
-#define PIDFILE_PATH                    "/var/run/mrefd.pid"
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // global objects
 
@@ -86,3 +77,6 @@ extern CReflector  g_Reflector;
 
 class CGateKeeper;
 extern CGateKeeper g_GateKeeper;
+
+class CConfigure;
+extern CConfigure g_CFG;

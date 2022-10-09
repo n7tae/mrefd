@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -26,7 +26,7 @@
 #include "main.h"
 #include "reflector.h"
 #include "clients.h"
-
+#include "configure.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -119,19 +119,18 @@ bool CClients::IsClient(std::shared_ptr<CClient> client) const
 
 std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip)
 {
+	const bool mcclient = g_CFG.GetMCClients();
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-#ifdef MCLIENTS
-		if ( ((*it)->GetIp() == Ip) && ((*it)->GetIp().GetPort() == Ip.GetPort()) )
-#else
-		if ((*it)->GetIp() == Ip)
-#endif
+		auto b = (*it)->GetIp() == Ip;
+		if (mcclient)
 		{
-			return *it;
+			b = b && ((*it)->GetIp().GetPort() == Ip.GetPort());
 		}
+		if (b)
+			return *it;
 	}
-
 	// done
 	return nullptr;
 }
@@ -149,16 +148,16 @@ std::shared_ptr<CClient> CClients::FindNextClient(std::list<std::shared_ptr<CCli
 
 std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, const CIp &Ip, std::list<std::shared_ptr<CClient>>::iterator &it)
 {
+	const auto mcclient = g_CFG.GetMCClients();
 	while ( it != end() )
 	{
-#ifdef MCLIENTS
-		if ( ((*it)->GetIp() == Ip) && ((*it)->GetIp().GetPort() == Ip.GetPort()) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
-#else
-		if ( ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign) )
-#endif
+		auto b = ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign);
+		if (mcclient)
 		{
-			return *it++;
+			b = b && ((*it)->GetIp().GetPort() == Ip.GetPort());
 		}
+		if (b)
+			return *it++;
 		it++;
 	}
 	return nullptr;

@@ -4,8 +4,7 @@
 *.blacklist
 *.whitelist
 *.interlink
-configure.mk
-configure.h
-reflector.cfg
+debug
+mrefd.cfg
 mrefd
 test-all

@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/01/2016.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early N7TAE
+//  Copyright © 2020,2022 Thomas A. Early N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "main.h"
+#include "configure.h"
 #include "peermapitem.h"
 #include "reflector.h"
 
@@ -38,7 +39,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 {
 	m_Callsign.CSIn(callsign.GetCS());
 	m_Ip = ip;
-	m_Ip.SetPort(M17_PORT);
+	m_Ip.SetPort(g_CFG.GetPort());
 	m_Mods.clear();
 	if ( modules != nullptr )
 	{
@@ -46,7 +47,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 		{
 			for (char c='A'; c<='Z'; c++)
 			{
-				if (g_Reflector.IsValidModule(c))
+				if (g_CFG.IsValidModule(c))
 				m_Mods.append(1, c);
 			}
 		}
@@ -58,7 +59,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 				if (m_Mods.npos == (m_Mods.find(*p)))
 				{
 					// don't add mods that aren't configured
-					if (g_Reflector.IsValidModule(*p))
+					if (g_CFG.IsValidModule(*p))
 					{
 						m_Mods.append(1, *p);
 					}
@@ -80,7 +81,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const char *url, const char *modules)
 {
 	m_Callsign.CSIn(callsign.GetCS());
-	m_Ip = CIp(strchr(url, ':') ? AF_INET6 : AF_INET, M17_PORT, url);
+	m_Ip = CIp(strchr(url, ':') ? AF_INET6 : AF_INET, g_CFG.GetPort(), url);
 	m_Mods.assign(modules);
 }
 

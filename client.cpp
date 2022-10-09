@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early N7TAE
+//  Copyright © 2020,2022 Thomas A. Early N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "client.h"
+#include "configure.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -77,12 +78,10 @@ void CClient::Alive(void)
 
 bool CClient::operator ==(const CClient &client) const
 {
-	return ((client.m_Callsign == m_Callsign) &&
-			(client.m_Ip == m_Ip) &&
-#ifdef MCLIENTS
-			(client.m_Ip.GetPort() == m_Ip.GetPort()) &&
-#endif
-			(client.m_ReflectorModule == m_ReflectorModule));
+	auto rval = (client.m_Callsign == m_Callsign) && (client.m_Ip == m_Ip) && (client.m_ReflectorModule == m_ReflectorModule);
+	if (g_CFG.GetMCClients())
+		rval = rval && (client.m_Ip.GetPort() == m_Ip.GetPort());
+	return rval;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

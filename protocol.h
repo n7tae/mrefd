@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 01/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -46,7 +46,7 @@ public:
 	virtual ~CProtocol();
 
 	// initialization
-	bool Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6);
+	bool Initialize(const uint16_t port, const std::string &ipv4bind, const std::string &ipv6bind);
 	void Close(void);
 
 	// queue
@@ -103,6 +103,7 @@ protected:
 	ssize_t Receive6(uint8_t *buf, CIp &Ip, int time_ms);
 	ssize_t Receive4(uint8_t *buf, CIp &Ip, int time_ms);
 	ssize_t ReceiveDS(uint8_t *buf, CIp &Ip, int time_ms);
+	ssize_t (CProtocol::*Receive)(uint8_t *buf, CIp &Ip, int time_ms);
 
 	void Send(const char    *buf, const CIp &Ip) const;
 	void Send(const uint8_t *buf, size_t size, const CIp &Ip) const;

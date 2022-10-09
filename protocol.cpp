@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 01/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -28,6 +28,7 @@
 #include "clients.h"
 #include "reflector.h"
 #include "gatekeeper.h"
+#include "configure.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -59,19 +60,18 @@ CProtocol::~CProtocol()
 ////////////////////////////////////////////////////////////////////////////////////////
 // initialization
 
-bool CProtocol::Initialize(const uint16_t port, const bool has_ipv4, const bool has_ipv6)
+bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
 {
 	// init reflector apparent callsign
-	m_ReflectorCallsign = g_Reflector.GetCallsign();
+	m_ReflectorCallsign = g_CFG.GetCallsign();
 
 	// reset stop flag
 	keep_running = true;
 
 	// create our sockets
-#ifdef LISTEN_IPV4
-	if (has_ipv4)
+	if (! strIPv4.empty())
 	{
-		CIp ip4(AF_INET, port, LISTEN_IPV4);
+		CIp ip4(AF_INET, port, strIPv4.c_str());
 		if ( ip4.IsSet() )
 		{
 			if (! m_Socket4.Open(ip4))
@@ -79,12 +79,10 @@ bool CProtocol::Initialize(const uint16_t port, const bool has_ipv4, const bool 
 		}
 		std::cout << "Listening on " << ip4 << std::endl;
 	}
-#endif
 
-#ifdef LISTEN_IPV6
-	if (has_ipv6)
+	if (! strIPv6.empty())
 	{
-		CIp ip6(AF_INET6, port, LISTEN_IPV6);
+		CIp ip6(AF_INET6, port, strIPv6.c_str());
 		if ( ip6.IsSet() )
 		{
 			if (! m_Socket6.Open(ip6))
@@ -95,7 +93,23 @@ bool CProtocol::Initialize(const uint16_t port, const bool has_ipv4, const bool 
 			std::cout << "Listening on " << ip6 << std::endl;
 		}
 	}
-#endif
+
+	// set up the Receive function pointer
+	if (strIPv4.empty())
+	{
+		Receive = &CProtocol::Receive6;
+	}
+	else
+	{
+		if (strIPv6.empty())
+		{
+			Receive = &CProtocol::Receive4;
+		}
+		else
+		{
+			Receive = &CProtocol::ReceiveDS;
+		}
+	}
 
 	try {
 		m_Future = std::async(std::launch::async, &CProtocol::Thread, this);
@@ -138,15 +152,7 @@ void CProtocol::Task(void)
 	std::unique_ptr<CPacket> pack;
 
 	// any incoming packet ?
-#ifdef LISTEN_IPV6
-#ifdef LISTEN_IPV4
-	auto len = ReceiveDS(buf, ip, 20);
-#else
-	auto len = Receive6(buf, ip, 20);
-#endif
-#else
-	auto len = Receive4(buf, ip, 20);
-#endif
+	auto len = (*this.*Receive)(buf, ip, 20);
 	//if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
 	switch (len) {
 	case sizeof(SM17Frame):	// a packet from a client
@@ -221,7 +227,7 @@ void CProtocol::Task(void)
 			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				// valid module ?
-				if ( g_Reflector.IsValidModule(mod) )
+				if ( g_CFG.IsValidModule(mod) )
 				{
 					// acknowledge a normal request from a repeater/hot-spot/mvoice
 					EncodeConnectAckPacket(buf);
@@ -843,7 +849,7 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
 		auto dest = packet->GetDestCallsign();
-		if (g_Reflector.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
+		if (g_CFG.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source
