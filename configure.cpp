@@ -77,88 +77,85 @@ bool CConfigure::ReadData(const std::string &path)
 			continue;	// skip comments
 		std::vector<std::string> tokens;
 		split(line, '=', tokens);
-		if (2 != tokens.size())
-		{
-
-		}
 
 		rtrim(tokens[0]);
 		ltrim(tokens[1]);
 		const std::string key(tokens[0]);
 		const std::string value(tokens[1]);
-		if (0==key.size() || 0==value.size())
+		if (key.empty() || value.empty())
 		{
+			std::cout << "WARNING - missing key or value: '" << line << "'" << std::endl;
 			continue;
 		}
 
-		if (0 == 0==key.compare("Callsign"))
+		if (0 == key.compare("Callsign"))
 		{
 			data.callsign.assign(value);
 		}
-		else if (0==key.compare("Modules"))
+		else if (0 == key.compare("Modules"))
 		{
 			for (auto cit=value.begin(); cit!=value.end(); cit++)
 			{
 				auto c = *cit;
 				if (std::islower(c))
 					c = std::toupper(c);
-				if (! data.modules.find(c))
+				if (std::string::npos == data.modules.find(c))
 					data.modules.append(1, c);
 			}
 		}
-		else if (0==key.compare("IPv4BindAddr"))
+		else if (0 == key.compare("IPv4BindAddr"))
 		{
 			data.ipv4bindaddr.assign(value);
 		}
-		else if (0==key.compare("IPv4ExtAddr"))
+		else if (0 == key.compare("IPv4ExtAddr"))
 		{
 			data.ipv4extaddr.assign(value);
 		}
-		else if (0==key.compare("IPv6BindAddr"))
+		else if (0 == key.compare("IPv6BindAddr"))
 		{
 			data.ipv6bindaddr.assign(value);
 		}
-		else if (0==key.compare("IPv6ExtAddr"))
+		else if (0 == key.compare("IPv6ExtAddr"))
 		{
 			data.ipv6extaddr.assign(value);
 		}
-		else if (0==key.compare("DashboardURL"))
+		else if (0 == key.compare("DashboardURL"))
 		{
 			data.url.assign(value);
 		}
-		else if (0==key.compare("EmailAddr"))
+		else if (0 == key.compare("EmailAddr"))
 		{
 			data.emailaddr.assign(value);
 		}
-		else if (0==key.compare("Bootstrap"))
+		else if (0 == key.compare("Bootstrap"))
 		{
 			data.bootstrap.assign(value);
 		}
-		else if (0==key.compare("XmlPath"))
+		else if (0 == key.compare("XmlPath"))
 		{
 			data.xmlpath.assign(value);
 		}
-		else if (0==key.compare("PidPath"))
+		else if (0 == key.compare("PidPath"))
 		{
 			data.pidpath.assign(value);
 		}
-		else if (0==key.compare("WhitelistPath"))
+		else if (0 == key.compare("WhitelistPath"))
 		{
 			data.whitepath.assign(value);
 		}
-		else if (0==key.compare("BlacklistPath"))
+		else if (0 == key.compare("BlacklistPath"))
 		{
 			data.blackpath.assign(value);
 		}
-		else if (0==key.compare("InterlinkPath"))
+		else if (0 == key.compare("InterlinkPath"))
 		{
 			data.interlinkpath.assign(value);
 		}
-		else if (0==key.compare("Port"))
+		else if (0 == key.compare("Port"))
 		{
 			data.port = std::stoul(value);
 		}
-		else if (0==key.compare("MultiClient"))
+		else if (0 == key.compare("MultiClient"))
 		{
 			data.mcclients = IS_TRUE(value[0]);
 		}
@@ -308,16 +305,6 @@ bool CConfigure::ReadData(const std::string &path)
 			std::cerr << "ERROR - DashboaardURL malformed" << std::endl;
 			rval = true;
 		}
-	}
-
-	if (data.url.empty())
-	{
-		std::cerr << "ERROR - no dashboard URL" << std::endl;
-		rval = true;
-	}
-	else
-	{
-		std::cout << "DashboardURL: '" << data.url << "'" << std::endl;
 	}
 
 	if (data.emailaddr.empty())
