@@ -89,6 +89,12 @@ cp example.cfg mrefd.cfg
 
 Use your favorite editor to edit mrefd.cfg. This file contains comments so it should be obvious what values need changing.
 
+### Debugging support
+
+You can build mrefd with debugging support simply by creating an empty file, `touch debug`.
+
+Turn off debugging support with `rm debug`. Debugging support is a compiled feature, so if you turn it off or on, you need to do a `make clean` and `make` after changing this feature. If mrefd is running, you also need to uninstall/reinstall mrefd.
+
 ### Compling and installing your system
 
 After you have written your configutation files, you can build and install your system:
