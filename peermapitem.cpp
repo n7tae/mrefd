@@ -47,7 +47,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 		{
 			for (char c='A'; c<='Z'; c++)
 			{
-				if (g_Reflector.IsValidModule(c))
+				if (g_CFG.IsValidModule(c))
 				m_Mods.append(1, c);
 			}
 		}
@@ -59,7 +59,7 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 				if (m_Mods.npos == (m_Mods.find(*p)))
 				{
 					// don't add mods that aren't configured
-					if (g_Reflector.IsValidModule(*p))
+					if (g_CFG.IsValidModule(*p))
 					{
 						m_Mods.append(1, *p);
 					}

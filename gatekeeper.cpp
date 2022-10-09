@@ -58,7 +58,7 @@ CGateKeeper::~CGateKeeper()
 bool CGateKeeper::Init(void)
 {
 	// start the dht instance
-	refID = dht::crypto::generateIdentity(g_Reflector.GetCallsign().GetCS());
+	refID = dht::crypto::generateIdentity(g_CFG.GetCallsign());
 	privateKey = dht::crypto::PrivateKey::generate();
 	node.run(17171, refID, true);
 

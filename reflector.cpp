@@ -34,7 +34,7 @@ CReflector g_Reflector;
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CReflector::CReflector() : m_Callsign(g_CFG.GetCallsign()), m_Modules(g_CFG.GetModules())
+CReflector::CReflector()
 {
 	keep_running = true;
 }
@@ -80,7 +80,7 @@ bool CReflector::Start(const char *cfgfilename)
 	}
 
 	// start one thread per reflector module
-	for (const auto &m : m_Modules)
+	for (const auto &m : g_CFG.GetModules())
 	{
 		auto stream = std::make_shared<CPacketStream>();
 		m_Streams[m] = stream;
@@ -401,6 +401,7 @@ char CReflector::GetStreamModule(std::shared_ptr<CPacketStream> stream)
 
 void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 {
+	const std::string Callsign(g_CFG.GetCallsign());
 	// write header
 	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
 
@@ -410,7 +411,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "<Version>" << sz << "</Version>" << std::endl;
 
 	// linked peers
-	xmlFile << "<" << m_Callsign << " linked peers>" << std::endl;
+	xmlFile << "<" << Callsign << " linked peers>" << std::endl;
 	// lock
 	CPeers *peers = GetPeers();
 	// iterate on peers
@@ -420,10 +421,10 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleasePeers();
-	xmlFile << "</" << m_Callsign << " linked peers>" << std::endl;
+	xmlFile << "</" << Callsign << " linked peers>" << std::endl;
 
 	// linked nodes
-	xmlFile << "<" << m_Callsign << " linked nodes>" << std::endl;
+	xmlFile << "<" << Callsign << " linked nodes>" << std::endl;
 	// lock
 	CClients *clients = GetClients();
 	// iterate on clients
@@ -436,10 +437,10 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleaseClients();
-	xmlFile << "</" << m_Callsign << " linked nodes>" << std::endl;
+	xmlFile << "</" << Callsign << " linked nodes>" << std::endl;
 
 	// last heard users
-	xmlFile << "<" << m_Callsign << " heard users>" << std::endl;
+	xmlFile << "<" << Callsign << " heard users>" << std::endl;
 	// lock
 	CUsers *users = GetUsers();
 	// iterate on users
@@ -449,5 +450,5 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	}
 	// unlock
 	ReleaseUsers();
-	xmlFile << "</" << m_Callsign << " heard users>" << std::endl;
+	xmlFile << "</" << Callsign << " heard users>" << std::endl;
 }

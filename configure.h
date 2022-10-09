@@ -37,6 +37,7 @@ class CConfigure
 public:
 	CConfigure() {}
 	bool ReadData(const std::string &path);
+	bool IsValidModule(char c) const { return std::string::npos != data.modules.find(c); }
 
 	const std::string &GetCallsign()      const { return data.callsign;      }
 	const std::string &GetModules()       const { return data.modules;       }

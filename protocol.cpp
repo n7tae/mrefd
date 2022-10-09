@@ -28,6 +28,7 @@
 #include "clients.h"
 #include "reflector.h"
 #include "gatekeeper.h"
+#include "configure.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -62,7 +63,7 @@ CProtocol::~CProtocol()
 bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
 {
 	// init reflector apparent callsign
-	m_ReflectorCallsign = g_Reflector.GetCallsign();
+	m_ReflectorCallsign = g_CFG.GetCallsign();
 
 	// reset stop flag
 	keep_running = true;
@@ -226,7 +227,7 @@ void CProtocol::Task(void)
 			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				// valid module ?
-				if ( g_Reflector.IsValidModule(mod) )
+				if ( g_CFG.IsValidModule(mod) )
 				{
 					// acknowledge a normal request from a repeater/hot-spot/mvoice
 					EncodeConnectAckPacket(buf);
@@ -848,7 +849,7 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_
 		packet = std::unique_ptr<CPacket>(new CPacket(buf, is_internal));
 		// check validity of packet
 		auto dest = packet->GetDestCallsign();
-		if (g_Reflector.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
+		if (g_CFG.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source

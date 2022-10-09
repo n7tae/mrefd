@@ -50,10 +50,6 @@ public:
 	// destructor
 	virtual ~CReflector();
 
-	// settings
-	const CCallsign &GetCallsign(void) const         { return m_Callsign; }
-
-
 	// operation
 	bool Start(const char *cfgfilename);
 	void Stop(void);
@@ -75,9 +71,6 @@ public:
 	CUsers  *GetUsers(void)                         { m_Users.Lock(); return &m_Users; }
 	void    ReleaseUsers(void)                      { m_Users.Unlock(); }
 
-	// get
-	bool IsValidModule(char c) const                { return m_Modules.npos != m_Modules.find(c); }
-
 	// notifications
 	void OnPeersChanged(void);
 	void OnClientsChanged(void);
@@ -98,10 +91,6 @@ protected:
 	void WriteXmlFile(std::ofstream &);
 
 protected:
-	// identity
-	const CCallsign m_Callsign;
-	const std::string m_Modules;
-
 	// objects
 	CUsers    m_Users;    // sorted list of lastheard stations
 	CClients  m_Clients;  // list of linked repeaters/nodes/peers's modules

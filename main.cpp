@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 		std::cout << "Error starting reflector" << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Reflector " << g_Reflector.GetCallsign()  << " started and listening" << std::endl;
+	std::cout << "Reflector " << g_CFG.GetCallsign()  << " started and listening" << std::endl;
 
 	// write new pid file
 	std::ofstream ofs(g_CFG.GetPidPath(), std::ofstream::out);
