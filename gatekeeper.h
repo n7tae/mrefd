@@ -21,7 +21,9 @@
 
 #pragma once
 
+#ifndef NO_DHT
 #include <opendht.h>
+#endif
 
 #include "main.h"
 #include "callsign.h"
@@ -30,6 +32,7 @@
 #include "peermap.h"
 #include "base.h"
 
+#ifndef NO_DHT
 struct SReflectorData
 {
 	std::string cs;
@@ -42,6 +45,7 @@ struct SReflectorData
 	std::vector<std::pair<std::string, std::string>> peers;
 	MSGPACK_DEFINE(cs, ipv4, ipv6, modules, url, email, port, peers);
 };
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -60,7 +64,9 @@ public:
 	void Close(void);
 
 	// DHT publish
+#ifndef NO_DHT
 	void PutDHTInfo();
+#endif
 
 	// authorizations
 	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
@@ -88,7 +94,9 @@ protected:
 	std::future<void> m_Future;
 
 	// Distributed Hash Table
+#ifndef NO_DHT
 	dht::DhtRunner node;
 	dht::crypto::Identity refID;
 	dht::crypto::PrivateKey privateKey;
+#endif
 };

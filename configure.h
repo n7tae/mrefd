@@ -16,6 +16,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define NO_DHT
+
 #pragma once
 
 #include <string>
@@ -25,8 +27,10 @@
 using CFGDATA = struct CFGData_struct {
 	std::string callsign, modules;
 	std::string ipv4bindaddr, ipv6bindaddr;
+#ifndef NO_DHT
 	std::string ipv4extaddr, ipv6extaddr;
 	std::string url, emailaddr, bootstrap;
+#endif
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
 	bool mcclients;
@@ -42,12 +46,14 @@ public:
 	const std::string &GetCallsign()      const { return data.callsign;      }
 	const std::string &GetModules()       const { return data.modules;       }
 	const std::string &GetIPv4BindAddr()  const { return data.ipv4bindaddr;  }
-	const std::string &GetIPv4ExtAddr()   const { return data.ipv4extaddr;   }
 	const std::string &GetIPv6BindAddr()  const { return data.ipv6bindaddr;  }
+#ifndef NO_DHT
+	const std::string &GetIPv4ExtAddr()   const { return data.ipv4extaddr;   }
 	const std::string &GetIPv6ExtAddr()   const { return data.ipv6extaddr;   }
 	const std::string &GetURL()           const { return data.url;           }
 	const std::string &GetEmailAddr()     const { return data.emailaddr;     }
 	const std::string &GetBootstrap()     const { return data.bootstrap;     }
+#endif
 	const std::string &GetXmlPath()       const { return data.xmlpath;       }
 	const std::string &GetPidPath()       const { return data.pidpath;       }
 	const std::string &GetWhitePath()     const { return data.whitepath;     }

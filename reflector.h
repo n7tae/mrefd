@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "users.h"
 #include "clients.h"
 #include "peers.h"

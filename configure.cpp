@@ -107,13 +107,14 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.ipv4bindaddr.assign(value);
 		}
-		else if (0 == key.compare("IPv4ExtAddr"))
-		{
-			data.ipv4extaddr.assign(value);
-		}
 		else if (0 == key.compare("IPv6BindAddr"))
 		{
 			data.ipv6bindaddr.assign(value);
+		}
+#ifndef NO_DHT
+		else if (0 == key.compare("IPv4ExtAddr"))
+		{
+			data.ipv4extaddr.assign(value);
 		}
 		else if (0 == key.compare("IPv6ExtAddr"))
 		{
@@ -131,6 +132,7 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.bootstrap.assign(value);
 		}
+#endif
 		else if (0 == key.compare("XmlPath"))
 		{
 			data.xmlpath.assign(value);
@@ -199,14 +201,19 @@ bool CConfigure::ReadData(const std::string &path)
 		std::cout << "Modules='" << data.modules << "'" << std::endl;
 	}
 
+#ifndef NO_DHT
 	if (data.ipv4bindaddr.empty())
 	{
 		data.ipv4extaddr.clear();
 	}
 	else
+#else
+	if (! data.ipv4bindaddr.empty())
+#endif
 	{
 		auto IPv4RegEx = std::regex("^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$", std::regex::extended);
 
+#ifndef NO_DHT
 		// there's a binding address
 		if (std::regex_match(data.ipv4bindaddr, IPv4RegEx))
 		{
@@ -234,22 +241,32 @@ bool CConfigure::ReadData(const std::string &path)
 			}
 		}
 		else
+#else
+		if (! std::regex_match(data.ipv4bindaddr, IPv4RegEx))
+#endif
 		{
 			// the binding address is bad
 			std::cerr << "ERROR - Malformed IPv4BindAddr: '" << data.ipv4bindaddr << "'" << std::endl;
 			data.ipv4bindaddr.clear();
+#ifndef NO_DHT
 			data.ipv4extaddr.clear();
+#endif
 		}
 	}
 
+#ifndef NO_DHT
 	if (data.ipv6bindaddr.empty())
 	{
 		data.ipv6extaddr.clear();
 	}
 	else
+#else
+	if (! data.ipv6bindaddr.empty())
+#endif
 	{
 		auto IPv6RegEx = std::regex("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}(:[0-9a-fA-F]{1,4}){1,1}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|([0-9a-fA-F]{1,4}:){1,1}(:[0-9a-fA-F]{1,4}){1,6}|:((:[0-9a-fA-F]{1,4}){1,7}|:))$", std::regex::extended);
 
+#ifndef NO_DHT
 		// there's a binding address
 		if (std::regex_match(data.ipv6bindaddr, IPv6RegEx))
 		{
@@ -277,11 +294,16 @@ bool CConfigure::ReadData(const std::string &path)
 			}
 		}
 		else
+#else
+		if (! std::regex_match(data.ipv6bindaddr, IPv6RegEx))
+#endif
 		{
 			// the binding address is bad
 			std::cerr << "ERROR - Malformed IPv6BindAddr: '" << data.ipv6bindaddr << "'" << std::endl;
 			data.ipv6bindaddr.clear();
+#ifndef NO_DHT
 			data.ipv6extaddr.clear();
+#endif
 		}
 	}
 
@@ -292,6 +314,7 @@ bool CConfigure::ReadData(const std::string &path)
 		rval = true;
 	}
 
+#ifndef NO_DHT
 	if (data.url.empty())
 	{
 		std::cerr << "ERROR - no dashboard URL" << std::endl;
@@ -330,6 +353,7 @@ bool CConfigure::ReadData(const std::string &path)
 	{
 		std::cout << "Bootstrap='" << data.bootstrap << "'" << std::endl;
 	}
+#endif
 
 	if (data.xmlpath.empty())
 	{

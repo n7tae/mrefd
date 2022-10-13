@@ -30,10 +30,11 @@ sudo apt upgrade
 
 ```bash
 sudo apt install git
-sudo apt install apache2 php5
 sudo apt install build-essential
 sudo apt install g++
 ```
+
+OpenDHT and gomrefdash both have their own requirements.
 
 ### Distributed Hash Table (OpenDHT)
 
@@ -89,11 +90,14 @@ cp example.cfg mrefd.cfg
 
 Use your favorite editor to edit mrefd.cfg. This file contains comments so it should be obvious what values need changing.
 
-### Debugging support
+### Compile-time options
 
-You can build mrefd with debugging support simply by creating an empty file, `touch debug`.
+There are two compile-time options:
 
-Turn off debugging support with `rm debug`. Debugging support is a compiled feature, so if you turn it off or on, you need to do a `make clean` and `make` after changing this feature. If mrefd is running, you also need to uninstall/reinstall mrefd.
+1. You can build mrefd with debugging support simply by creating an empty file, `touch debug`. Turn off debugging support with `rm debug`.
+2. You can build mrefd wihtout DHT support by creating an empty file, `touch nodht`. Enable DHT with `rm nodht`. Of course, you don't need to build the OpenDHT library if you aren't going to use it. Keep in mind that registering your reflector with the M17 project will require DHT support.
+
+If you turn one of these compile-time features off or on, you need to do a `make clean` and `make` after changing this feature. If mrefd is running, you also need to uninstall/reinstall mrefd.
 
 ### Compling and installing your system
 
@@ -123,15 +127,15 @@ sudo journalctl -u mrefd -f
 
 The blacklist, whitelist and interlink files can be modified in real time while xrfd is executing and the reflector will update itself within a few seconds. Edit the files in build directory. While mrefd accesses the configuration files in /usr/local/etc, these files are symbolically linked back to your build directory.
 
-### Copy dashboard to /var/www
+### Install the Dashboard
 
 The official M17 dashboard is in another repo.
 
 ```bash
-git clone https://github.com/M17-project/ref-dash /var/www/html     # or where ever you system www root is located
+git clone https://github.com/kc1awv/gomrefdash.git
 ```
 
-Follow the instructions on that repo for configuring your dashboard.
+This a a dashboard based on the `go` programming language. If you don't have it, you will need to install it first. Follow the instructions on that repo for getting your dashboard up and running.
 
 ## Updating mrefd
 

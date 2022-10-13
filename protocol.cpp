@@ -740,7 +740,9 @@ void CProtocol::HandlePeerLinks(void)
 
 	if (publish)
 	{
+#ifndef NO_DHT
 		g_GateKeeper.PutDHTInfo();
+#endif
 		publish = false;
 	}
 }

@@ -33,7 +33,13 @@ ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif
 
-LDFLAGS=-pthread -lopendht
+LDFLAGS=-pthread
+
+ifneq (,$(wildcard nodht))
+CFLAGS += -DNO_DHT
+else
+LDFLAGS += -lopendht
+endif
 
 SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.cpp gatekeeper.cpp ip.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 

@@ -57,10 +57,12 @@ CGateKeeper::~CGateKeeper()
 
 bool CGateKeeper::Init(void)
 {
+#ifndef NO_DHT
 	// start the dht instance
 	refID = dht::crypto::generateIdentity(g_CFG.GetCallsign());
 	privateKey = dht::crypto::PrivateKey::generate();
 	node.run(17171, refID, true);
+#endif
 
 #ifdef USE_SAVED_DHT_STATE
 	// bootstrap the DHT from either saved nodes from a previous run,
@@ -87,9 +89,11 @@ bool CGateKeeper::Init(void)
 	}
 	else
 #endif
+#ifndef NO_DHT
 	{
 		node.bootstrap(g_CFG.GetBootstrap(), "17171");
 	}
+#endif
 
 	// load lists from files
 	m_NodeWhiteSet.LoadFromFile(g_CFG.GetWhitePath().c_str());
@@ -107,9 +111,11 @@ bool CGateKeeper::Init(void)
 
 void CGateKeeper::Close(void)
 {
+#ifndef NO_DHT
 	// kill the DHT
 	node.shutdown({}, true);
 	node.join();
+#endif
 
 	// kill threads
 	keep_running = false;
@@ -122,6 +128,7 @@ void CGateKeeper::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // DHT publish
 
+#ifndef NO_DHT
 void CGateKeeper::PutDHTInfo()
 {
 	const std::string cs(g_CFG.GetCallsign());
@@ -180,6 +187,7 @@ void CGateKeeper::PutDHTInfo()
 		true
 	);
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // authorizations

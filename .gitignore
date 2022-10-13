@@ -5,6 +5,7 @@
 *.whitelist
 *.interlink
 debug
+nodht
 mrefd.cfg
 mrefd
 test-all
