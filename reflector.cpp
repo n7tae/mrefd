@@ -411,9 +411,9 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// software version
 	char sz[64];
 #ifdef NO_DHT
-	::sprintf(sz, "%d.%d.%d-dht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	::sprintf(sz, "%d.%d.%d-nodht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 #else
-	::sprintf(sz, "%d.%d.%d+dht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	::sprintf(sz, "%d.%d.%d-dht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 #endif
 	xmlFile << "<VERSION>" << sz << "</VERSION>" << std::endl;
 
