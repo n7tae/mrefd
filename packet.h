@@ -68,11 +68,13 @@ public:
 	char GetDestModule() const;
 	const CCallsign &GetSourceCallsign() const;
 	uint16_t GetStreamId() const;
+	uint16_t GetFrameType() const;
 	uint16_t GetCRC() const;
 	void SetCRC(uint16_t crc);
 	void SetRelay(bool state);
 	bool GetRelay() const;
 	std::unique_ptr<CPacket> Duplicate(void) const;
+	bool IsFirstPacket() const;
 	bool IsLastPacket() const;
 	SRefM17Frame &GetFrame();
 

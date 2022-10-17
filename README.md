@@ -82,22 +82,14 @@ Finally, if both ends of a link in a group support IPv6, that part of the group 
 
 ### Configuring your reflector
 
-Configuring, compiling and maintaining your reflector build is easy! Start by copying the configuration example:
+Configuring, compiling and maintaining your reflector build is easy! Start by copying the configuration example files:
 
 ```bash
-cp example.cfg mrefd.cfg
+cp example.mk mrefd.mk     # this  file  sets the compile-time configuration
+cp example.cfg mrefd.cfg   # while this file sets the run-time configuration
 ```
 
-Use your favorite editor to edit mrefd.cfg. This file contains comments so it should be obvious what values need changing.
-
-### Compile-time options
-
-There are two compile-time options:
-
-1. You can build mrefd with debugging support simply by creating an empty file, `touch debug`. Turn off debugging support with `rm debug`.
-2. You can build mrefd wihtout DHT support by creating an empty file, `touch nodht`. Enable DHT with `rm nodht`. Of course, you don't need to build the OpenDHT library if you aren't going to use it. Keep in mind that registering your reflector with the M17 project will require DHT support.
-
-If you turn one of these compile-time features off or on, you need to do a `make clean` and `make` after changing this feature. If mrefd is running, you also need to uninstall/reinstall mrefd.
+Use your favorite editor to edit mrefd.mk and mrefd.cfg. These file contains comments so it should be obvious what values need changing.
 
 ### Compling and installing your system
 

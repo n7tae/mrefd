@@ -20,33 +20,35 @@
 
 # if you make changed in these two variable, you'll need to change things
 # in the main.h file as well as the systemd service file.
+
+include mrefd.mk
+
+EXE = mrefd
+
 BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
 
 CFLAGS += -c -W -std=c++17 -MMD -c
+LDFLAGS=-pthread
 
-ifneq (,$(wildcard debug))
+ifeq ($(debug), true)
 CFLAGS += -ggdb3
+endif
+
+ifeq ($(dht), true)
+LDFLAGS += -lopendht
+else
+CFLAGS += -DNO_DHT
 endif
 
 ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif
 
-LDFLAGS=-pthread
-
-ifneq (,$(wildcard nodht))
-CFLAGS += -DNO_DHT
-else
-LDFLAGS += -lopendht
-endif
-
 SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.cpp gatekeeper.cpp ip.cpp notification.cpp packet.cpp packetstream.cpp peer.cpp peermap.cpp peermapitem.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
-
-EXE=mrefd
 
 all : $(EXE) test-all
 

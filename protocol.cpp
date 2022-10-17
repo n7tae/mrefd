@@ -855,7 +855,22 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_
 		{
 			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
 			{	// looks like a valid source
-				return true;
+				if (0x18U & packet->GetFrameType())
+				{	// looks like this packet is encrypted
+					if (g_CFG.IsEncyrptionAllowed(dest.GetModule()))
+					{
+						return true;
+					}
+					else
+					{
+						if (packet->IsFirstPacket())	// we only log this once
+							std::cout << "Blocking " << packet->GetSourceCallsign().GetCS() << " to module " << dest.GetModule() << " because it is encrypted!" << std::endl;
+					}
+				}
+				else
+				{
+					return true;
+				}
 			}
 			else
 			{

@@ -50,6 +50,11 @@ uint16_t CPacket::GetStreamId() const
 	return ntohs(m17.frame.streamid);
 }
 
+uint16_t CPacket::GetFrameType() const
+{
+	return ntohs(m17.frame.lich.frametype);
+}
+
 uint16_t CPacket::GetCRC() const
 {
 	return ntohs(m17.frame.crc);
@@ -78,6 +83,12 @@ std::unique_ptr<CPacket> CPacket::Duplicate(void) const
 bool CPacket::IsLastPacket() const
 {
 	return ((0x8000u & ntohs(m17.frame.framenumber)) == 0x8000u);
+}
+
+bool CPacket::IsFirstPacket() const
+{
+	// we don't need ntohs() because we are testing for zero
+	return 0x0U == m17.frame.framenumber;
 }
 
 SRefM17Frame &CPacket::GetFrame()

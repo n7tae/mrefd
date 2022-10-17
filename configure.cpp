@@ -103,6 +103,17 @@ bool CConfigure::ReadData(const std::string &path)
 					data.modules.append(1, c);
 			}
 		}
+		else if (0 == key.compare("EncryptionAllowed"))
+		{
+			for (auto cit=value.begin(); cit!=value.end(); cit++)
+			{
+				auto c = *cit;
+				if (std::islower(c))
+					c = std::toupper(c);
+				if (std::string::npos == data.encryption_allowed.find(c))
+					data.encryption_allowed.append(1, c);
+			}
+		}
 		else if (0 == key.compare("IPv4BindAddr"))
 		{
 			data.ipv4bindaddr.assign(value);
@@ -200,6 +211,8 @@ bool CConfigure::ReadData(const std::string &path)
 	{
 		std::cout << "Modules='" << data.modules << "'" << std::endl;
 	}
+
+	std::cout << "EncryptionAllowed='" << data.encryption_allowed << "'" << std::endl;
 
 #ifndef NO_DHT
 	if (data.ipv4bindaddr.empty())
@@ -418,4 +431,12 @@ bool CConfigure::ReadData(const std::string &path)
 	std::cout << "MultiClient=" << (data.mcclients ? "true" : "false") << std::endl;
 
 	return rval;
+}
+
+bool CConfigure::IsEncyrptionAllowed(const char mod)
+{
+	 if (std::string::npos != data.encryption_allowed.find(mod))
+	 	return true;
+	else
+		return false;
 }

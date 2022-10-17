@@ -23,7 +23,7 @@
 #define IS_TRUE(a) ((a)=='t' || (a)=='T' || (a)=='1')
 
 using CFGDATA = struct CFGData_struct {
-	std::string callsign, modules;
+	std::string callsign, modules, encryption_allowed;
 	std::string ipv4bindaddr, ipv6bindaddr;
 #ifndef NO_DHT
 	std::string ipv4extaddr, ipv6extaddr;
@@ -59,6 +59,8 @@ public:
 	const std::string &GetInterlinkPath() const { return data.interlinkpath; }
 	unsigned long      GetPort()          const { return data.port;          }
 	bool               GetMCClients()     const { return data.mcclients;     }
+
+	bool IsEncyrptionAllowed(const char mod);
 
 private:
 	CFGDATA data;
