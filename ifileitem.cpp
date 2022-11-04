@@ -27,15 +27,15 @@
 
 #include "main.h"
 #include "configure.h"
-#include "peermapitem.h"
+#include "ifileitem.h"
 #include "reflector.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CPeerMapItem::CPeerMapItem() {}
+CIFileItem::CIFileItem() {}
 
-CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char *modules)
+CIFileItem::CIFileItem(const CCallsign &callsign, const CIp &ip, const char *modules)
 {
 	m_Callsign.CSIn(callsign.GetCS());
 	m_Ip = ip;
@@ -78,21 +78,21 @@ CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const CIp &ip, const char 
 	}
 }
 
-CPeerMapItem::CPeerMapItem(const CCallsign &callsign, const char *url, const char *modules)
+CIFileItem::CIFileItem(const CCallsign &callsign, const char *url, const char *modules)
 {
 	m_Callsign.CSIn(callsign.GetCS());
 	m_Ip = CIp(strchr(url, ':') ? AF_INET6 : AF_INET, g_CFG.GetPort(), url);
 	m_Mods.assign(modules);
 }
 
-CPeerMapItem::CPeerMapItem(const CPeerMapItem &item)
+CIFileItem::CIFileItem(const CIFileItem &item)
 {
 	m_Callsign.CSIn(item.m_Callsign.GetCS());
 	m_Ip = item.m_Ip;
 	m_Mods.assign(item.m_Mods);
 }
 
-void CPeerMapItem::operator=(const CPeerMapItem &rhs)
+void CIFileItem::operator=(const CIFileItem &rhs)
 {
 	m_Callsign.CSIn(rhs.m_Callsign.GetCS());
 	m_Ip = rhs.m_Ip;
@@ -102,22 +102,22 @@ void CPeerMapItem::operator=(const CPeerMapItem &rhs)
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
-bool CPeerMapItem::HasSameCallsign(const CCallsign &callsign) const
+bool CIFileItem::HasSameCallsign(const CCallsign &callsign) const
 {
 	return m_Callsign.HasSameCallsign(callsign);
 }
 
-bool CPeerMapItem::HasModuleListed(char module) const
+bool CIFileItem::HasModuleListed(char module) const
 {
 	return m_Mods.npos != m_Mods.find(module);
 }
 
-bool CPeerMapItem::HasSameIp(const CIp &ip)
+bool CIFileItem::HasSameIp(const CIp &ip)
 {
 	return ip == m_Ip;
 }
 
-bool CPeerMapItem::CheckListedModules(const char *mods) const
+bool CIFileItem::CheckListedModules(const char *mods) const
 {
 	if (mods == nullptr)
 		return false;

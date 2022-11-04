@@ -29,22 +29,31 @@
 #include "callsign.h"
 #include "ip.h"
 #include "bwset.h"
-#include "peermap.h"
 #include "base.h"
 
 #ifndef NO_DHT
-struct SReflectorData
+// the possible DHT formats
+
+struct SReflectorData0
 {
-	std::string cs;
-	std::string ipv4;
-	std::string ipv6;
-	std::string modules;
-	std::string url;
-	std::string email;
+	std::string cs, ipv4;
+	std::string ipv6, mods, url, email;
 	uint16_t port;
 	std::vector<std::pair<std::string, std::string>> peers;
-	MSGPACK_DEFINE(cs, ipv4, ipv6, modules, url, email, port, peers);
+
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, url, email, port, peers);
 };
+
+struct SReflectorData1
+{
+	std::string cs, ipv4;
+	std::string ipv6, mods, encryptmods, url, email;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
+
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, encryptmods, url, email, port, peers);
+};
+
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -72,10 +81,6 @@ public:
 	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
 	bool MayTransmit(const CCallsign &, const CIp &) const;
 
-	// peer list handeling
-	CPeerMap *GetPeerMap(void)     { m_PeerMap.Lock(); return &m_PeerMap; }
-	void      ReleasePeerMap(void) { m_PeerMap.Unlock(); }
-
 protected:
 	// thread
 	void Thread();
@@ -87,7 +92,6 @@ protected:
 	// data
 	CBWSet   m_NodeWhiteSet;
 	CBWSet   m_NodeBlackSet;
-	CPeerMap m_PeerMap;
 
 	// thread
 	std::atomic<bool> keep_running;

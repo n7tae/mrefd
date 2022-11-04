@@ -29,11 +29,12 @@
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
+#include "ifile.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CProtocol::CProtocol() : keep_running(true)
+CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}(($)|( [A-Z]$))", std::regex::extended);
 	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}(($)|([ ]*[A-Z]?$)|([-/\\.][A-Z0-9]+$))", std::regex::extended);
@@ -213,6 +214,7 @@ void CProtocol::Task(void)
 					// append the peer to reflector peer list
 					// this also add all new clients to reflector client list
 					peers->AddPeer(peer);
+					publish = true;
 				}
 				g_Reflector.ReleasePeers();
 			}
@@ -696,10 +698,9 @@ void CProtocol::HandleKeepalives(void)
 
 void CProtocol::HandlePeerLinks(void)
 {
-	static bool publish = true;
 	uint8_t buf[10];
 	// get the list of peers
-	CPeerMap *peermap = g_GateKeeper.GetPeerMap();
+	g_IFile.Lock();
 	CPeers *peers = g_Reflector.GetPeers();
 
 	// check if all our connected peers are still listed by gatekeeper
@@ -708,26 +709,25 @@ void CProtocol::HandlePeerLinks(void)
 	std::shared_ptr<CPeer>peer = nullptr;
 	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
-		if ( nullptr == peermap->FindMapItem(peer->GetCallsign().GetCS()) )
+		if ( nullptr == g_IFile.FindMapItem(peer->GetCallsign().GetCS()) )
 		{
-			publish = true;
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
 			std::cout << "Sent disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
 			// remove client
 			peers->RemovePeer(peer);
+			publish = true;
 		}
 	}
 
 	// check if all ours peers listed by gatekeeper are connected
 	// if not, connect or reconnect
 	SInterConnect connect;
-	for ( auto it=peermap->begin(); it!=peermap->end(); it++ )
+	for ( auto it=g_IFile.begin(); it!=g_IFile.end(); it++ )
 	{
 		if ( nullptr == peers->FindPeer((*it).second.GetCallsign()) )
 		{
-			publish = true;
 			// send connect packet to re-initiate peer link
 			EncodeInterlinkConnectPacket(connect, (*it).second.GetModules());
 			Send(connect.magic, sizeof(SInterConnect), (*it).second.GetIp());
@@ -736,7 +736,7 @@ void CProtocol::HandlePeerLinks(void)
 	}
 
 	g_Reflector.ReleasePeers();
-	g_GateKeeper.ReleasePeerMap();
+	g_IFile.Unlock();
 
 	if (publish)
 	{

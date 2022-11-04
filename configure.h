@@ -23,7 +23,7 @@
 #define IS_TRUE(a) ((a)=='t' || (a)=='T' || (a)=='1')
 
 using CFGDATA = struct CFGData_struct {
-	std::string callsign, modules, encryption_allowed;
+	std::string callsign, mods, encryptedmods;
 	std::string ipv4bindaddr, ipv6bindaddr;
 #ifndef NO_DHT
 	std::string ipv4extaddr, ipv6extaddr;
@@ -39,10 +39,12 @@ class CConfigure
 public:
 	CConfigure() {}
 	bool ReadData(const std::string &path);
-	bool IsValidModule(char c) const { return std::string::npos != data.modules.find(c); }
+	bool IsValidModule(char c) const { return std::string::npos != data.mods.find(c); }
+	bool IsEncyrptionAllowed(const char mod);
 
 	const std::string &GetCallsign()      const { return data.callsign;      }
-	const std::string &GetModules()       const { return data.modules;       }
+	const std::string &GetModules()       const { return data.mods;          }
+	const std::string &GetEncryptedMods() const { return data.encryptedmods; }
 	const std::string &GetIPv4BindAddr()  const { return data.ipv4bindaddr;  }
 	const std::string &GetIPv6BindAddr()  const { return data.ipv6bindaddr;  }
 #ifndef NO_DHT
@@ -59,8 +61,6 @@ public:
 	const std::string &GetInterlinkPath() const { return data.interlinkpath; }
 	unsigned long      GetPort()          const { return data.port;          }
 	bool               GetMCClients()     const { return data.mcclients;     }
-
-	bool IsEncyrptionAllowed(const char mod);
 
 private:
 	CFGDATA data;

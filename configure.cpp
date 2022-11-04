@@ -99,8 +99,8 @@ bool CConfigure::ReadData(const std::string &path)
 				auto c = *cit;
 				if (std::islower(c))
 					c = std::toupper(c);
-				if (std::string::npos == data.modules.find(c))
-					data.modules.append(1, c);
+				if (std::string::npos == data.mods.find(c))
+					data.mods.append(1, c);
 			}
 		}
 		else if (0 == key.compare("EncryptionAllowed"))
@@ -110,8 +110,8 @@ bool CConfigure::ReadData(const std::string &path)
 				auto c = *cit;
 				if (std::islower(c))
 					c = std::toupper(c);
-				if (std::string::npos == data.encryption_allowed.find(c))
-					data.encryption_allowed.append(1, c);
+				if (std::string::npos == data.encryptedmods.find(c))
+					data.encryptedmods.append(1, c);
 			}
 		}
 		else if (0 == key.compare("IPv4BindAddr"))
@@ -202,17 +202,17 @@ bool CConfigure::ReadData(const std::string &path)
 		}
 	}
 
-	if (data.modules.empty())
+	if (data.mods.empty())
 	{
 		std::cout << "ERROR - no modules defined" << std::endl;
 		rval = true;
 	}
 	else
 	{
-		std::cout << "Modules='" << data.modules << "'" << std::endl;
+		std::cout << "Modules='" << data.mods << "'" << std::endl;
 	}
 
-	std::cout << "EncryptionAllowed='" << data.encryption_allowed << "'" << std::endl;
+	std::cout << "EncryptionAllowed='" << data.encryptedmods << "'" << std::endl;
 
 #ifndef NO_DHT
 	if (data.ipv4bindaddr.empty())
@@ -435,7 +435,7 @@ bool CConfigure::ReadData(const std::string &path)
 
 bool CConfigure::IsEncyrptionAllowed(const char mod)
 {
-	 if (std::string::npos != data.encryption_allowed.find(mod))
+	 if (std::string::npos != data.encryptedmods.find(mod))
 	 	return true;
 	else
 		return false;

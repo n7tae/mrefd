@@ -218,22 +218,6 @@ std::ostream &operator<<(std::ostream &stream, const CIp &Ip)
 	return stream;
 }
 
-uint32_t CIp::GetAddr() const
-{
-	if (AF_INET6 == addr.ss_family)
-	{
-		auto addr6 = (struct sockaddr_in6 *)&addr;
-		// hash the results
-		auto *a = (const uint32_t *)&(addr6->sin6_addr.s6_addr);
-		return a[0] ^ a[1] ^ a[2] ^ a[3];
-	}
-	else
-	{
-		auto addr4 = (struct sockaddr_in *)&addr;
-		return addr4->sin_addr.s_addr;
-	}
-}
-
 int CIp::GetFamily() const
 {
 	return addr.ss_family;

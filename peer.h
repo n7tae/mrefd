@@ -52,9 +52,9 @@ public:
 	bool operator ==(const CPeer &) const;
 
 	// get
-	const CCallsign &GetCallsign(void) const            { return m_Callsign; }
-	const CIp &GetIp(void) const                        { return m_Ip; }
-	char *GetReflectorModules(void)                     { return m_ReflectorModules; }
+	const CCallsign &GetCallsign(void) const     { return m_Callsign; }
+	const CIp &GetIp(void) const                 { return m_Ip; }
+	const std::string &GetReflectorModules(void) { return m_ReflectorModules; }
 
 	// set
 
@@ -85,7 +85,7 @@ protected:
 	// data
 	CCallsign m_Callsign;
 	CIp       m_Ip;
-	char      m_ReflectorModules[27];
+	std::string m_ReflectorModules;
 	std::list<std::shared_ptr<CClient>> m_Clients;
 
 	// status

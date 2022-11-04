@@ -49,7 +49,7 @@
 // version -----------------------------------------------------
 
 #define VERSION_MAJOR                   0
-#define VERSION_MINOR                   7
+#define VERSION_MINOR                   8
 #define VERSION_REVISION                0
 
 // debug -------------------------------------------------------
@@ -80,3 +80,6 @@ extern CGateKeeper g_GateKeeper;
 
 class CConfigure;
 extern CConfigure g_CFG;
+
+class CIFileMap;
+extern CIFileMap g_IFile;

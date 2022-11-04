@@ -29,6 +29,7 @@
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
+#include "ifile.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +99,7 @@ bool CGateKeeper::Init(void)
 	// load lists from files
 	m_NodeWhiteSet.LoadFromFile(g_CFG.GetWhitePath().c_str());
 	m_NodeBlackSet.LoadFromFile(g_CFG.GetBlackPath().c_str());
-	m_PeerMap.LoadFromFile(g_CFG.GetInterlinkPath().c_str());
+	g_IFile.LoadFromFile(g_CFG.GetInterlinkPath().c_str());
 
 	// reset run flag
 	keep_running = true;
@@ -132,7 +133,7 @@ void CGateKeeper::Close(void)
 void CGateKeeper::PutDHTInfo()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SReflectorData rd;
+	SReflectorData1 rd;
 	rd.cs.assign(cs);
 	if (! g_CFG.GetIPv4BindAddr().empty())
 	{
@@ -142,18 +143,18 @@ void CGateKeeper::PutDHTInfo()
 	{
 		rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
 	}
-	rd.modules.assign(g_CFG.GetModules());
+	rd.mods.assign(g_CFG.GetModules());
 	rd.url.assign(g_CFG.GetURL());
 	rd.port = (unsigned short)g_CFG.GetPort();
 	rd.email.assign(g_CFG.GetEmailAddr());
 
-	auto peermap = GetPeerMap();
-	for (auto pit=peermap->cbegin(); peermap->cend()!=pit; pit++)
+	auto peers = g_Reflector.GetPeers();
+	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
-		const std::string modules(pit->second.GetModules());
-		rd.peers.push_back(std::make_pair(pit->second.GetCallsign().GetCS(), modules));
+		const auto modules((*pit)->GetReflectorModules());
+		rd.peers.emplace_back(std::pair<std::string,std::string>((*pit)->GetCallsign().GetCS(), modules));
 	}
-	ReleasePeerMap();
+	g_Reflector.ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(rd);
 	Dump("My dht::Value =", nv->data.data(), nv->data.size());
@@ -243,9 +244,9 @@ void CGateKeeper::Thread()
 		{
 			m_NodeBlackSet.ReloadFromFile();
 		}
-		if ( m_PeerMap.NeedReload() )
+		if ( g_IFile.NeedReload() )
 		{
-			m_PeerMap.ReloadFromFile();
+			g_IFile.ReloadFromFile();
 		}
 	}
 }
@@ -282,13 +283,13 @@ bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const
 	bool ok = false;
 
 	// look for an exact match in the list
-	m_PeerMap.Lock();
-	if ( ! m_PeerMap.empty() )
+	g_IFile.Lock();
+	if ( ! g_IFile.empty() )
 	{
 		// find an exact match
-		ok = m_PeerMap.IsCallsignListed(callsign, ip, modules);
+		ok = g_IFile.IsCallsignListed(callsign, ip, modules);
 	}
-	m_PeerMap.Unlock();
+	g_IFile.Unlock();
 
 	// done
 	return ok;

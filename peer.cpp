@@ -35,7 +35,6 @@
 
 CPeer::CPeer()
 {
-	::memset(m_ReflectorModules, 0, sizeof(m_ReflectorModules));
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
 }
@@ -44,8 +43,7 @@ CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules)
 {
 	m_Callsign = callsign;
 	m_Ip = ip;
-	::memset(m_ReflectorModules, 0, sizeof(m_ReflectorModules));
-	::strncpy(m_ReflectorModules, modules, sizeof(m_ReflectorModules)-1);
+	m_ReflectorModules.assign(modules);
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);

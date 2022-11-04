@@ -25,19 +25,19 @@
 #include <unordered_map>
 
 #include "main.h"
-#include "peermapitem.h"
+#include "ifileitem.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CPeerMap
+class CIFileMap
 {
 public:
 	// constructor
-	CPeerMap();
+	CIFileMap();
 
 	// destructor
-	virtual ~CPeerMap() {}
+	virtual ~CIFileMap() {}
 
 	// locks
 	void Lock(void)   const { m_Mutex.lock(); }
@@ -53,14 +53,14 @@ public:
 	bool IsCallsignListed(const CCallsign &, const CIp &ip, const char*) const;
 
 	// pass-thru
-	bool empty() const { return m_Peers.empty(); }
-	std::unordered_map<std::string, CPeerMapItem>::iterator begin() { return m_Peers.begin(); }
-	std::unordered_map<std::string, CPeerMapItem>::iterator end()   { return m_Peers.end(); }
-	std::unordered_map<std::string, CPeerMapItem>::const_iterator cbegin() { return m_Peers.cbegin(); }
-	std::unordered_map<std::string, CPeerMapItem>::const_iterator cend()   { return m_Peers.cend(); }
+	bool empty() const { return m_InterlinkMap.empty(); }
+	std::unordered_map<std::string, CIFileItem>::iterator begin() { return m_InterlinkMap.begin(); }
+	std::unordered_map<std::string, CIFileItem>::iterator end()   { return m_InterlinkMap.end(); }
+	std::unordered_map<std::string, CIFileItem>::const_iterator cbegin() { return m_InterlinkMap.cbegin(); }
+	std::unordered_map<std::string, CIFileItem>::const_iterator cend()   { return m_InterlinkMap.cend(); }
 
 	// find
-	CPeerMapItem *FindMapItem(const std::string &);
+	CIFileItem *FindMapItem(const std::string &);
 
 protected:
 	bool GetLastModTime(time_t *);
@@ -71,5 +71,5 @@ protected:
 	mutable std::mutex m_Mutex;
 	const char *m_Filename;
 	time_t m_LastModTime;
-	std::unordered_map<std::string, CPeerMapItem> m_Peers;
+	std::unordered_map<std::string, CIFileItem> m_InterlinkMap;
 };

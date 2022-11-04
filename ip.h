@@ -54,7 +54,6 @@ public:
 	int GetFamily() const;
 	uint16_t GetPort() const;
 	size_t GetSize() const;
-	uint32_t GetAddr() const;
 
 	// modifiers
 	void SetPort(const uint16_t newport);

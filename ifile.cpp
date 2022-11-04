@@ -29,21 +29,18 @@
 
 #include "main.h"
 #include "configure.h"
-#include "peermap.h"
+#include "ifile.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructors
+// the global object
+CIFileMap g_IFile;
 
-CPeerMap::CPeerMap()
+CIFileMap::CIFileMap()
 {
 	m_Filename = nullptr;
 	::memset(&m_LastModTime, 0, sizeof(time_t));
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// file io
-
-bool CPeerMap::LoadFromFile(const char *filename)
+bool CIFileMap::LoadFromFile(const char *filename)
 {
 	bool ok = false;
 	char line[256];
@@ -55,7 +52,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 		Lock();
 
 		// empty list
-		m_Peers.clear();
+		m_InterlinkMap.clear();
 		// fill with file content
 		while ( file.getline(line, sizeof(line)).good()  )
 		{
@@ -69,7 +66,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 				{
 					if (strcmp(name, g_CFG.GetCallsign().c_str()))
 					{
-						if (m_Peers.end() == m_Peers.find(name))
+						if (m_InterlinkMap.end() == m_InterlinkMap.find(name))
 						{
 							CCallsign callsign(ToUpper(name));
 							// 2nd token is ip
@@ -80,7 +77,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 								if ( (szmods = strtok(nullptr, " ,\t")) != nullptr )
 								{
 									// create and and store
-									m_Peers[name] = CPeerMapItem(callsign, szip, ToUpper(szmods));
+									m_InterlinkMap[name] = CIFileItem(callsign, szip, ToUpper(szmods));
 								}
 								else
 								{
@@ -104,6 +101,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 				}
 			}
 		}
+		Unlock();
 		// close file
 		file.close();
 
@@ -114,9 +112,8 @@ bool CPeerMap::LoadFromFile(const char *filename)
 		GetLastModTime(&m_LastModTime);
 
 		// and done
-		Unlock();
 		ok = true;
-		std::cout << "Gatekeeper loaded " << m_Peers.size() << " lines from " << filename <<  std::endl;
+		std::cout << "Gatekeeper loaded " << m_InterlinkMap.size() << " lines from " << filename <<  std::endl;
 	}
 	else
 	{
@@ -126,7 +123,7 @@ bool CPeerMap::LoadFromFile(const char *filename)
 	return ok;
 }
 
-bool CPeerMap::ReloadFromFile(void)
+bool CIFileMap::ReloadFromFile(void)
 {
 	bool ok = false;
 
@@ -137,7 +134,7 @@ bool CPeerMap::ReloadFromFile(void)
 	return ok;
 }
 
-bool CPeerMap::NeedReload(void)
+bool CIFileMap::NeedReload(void)
 {
 	bool needReload = false;
 
@@ -149,12 +146,9 @@ bool CPeerMap::NeedReload(void)
 	return needReload;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// compare
-
-bool CPeerMap::IsCallsignListed(const CCallsign &callsign, char module) const
+bool CIFileMap::IsCallsignListed(const CCallsign &callsign, char module) const
 {
-	for ( const auto &item : m_Peers )
+	for ( const auto &item : m_InterlinkMap )
 	{
 		if (item.second.HasSameCallsign(callsign) && item.second.HasModuleListed(module))
 			return true;
@@ -163,9 +157,9 @@ bool CPeerMap::IsCallsignListed(const CCallsign &callsign, char module) const
 	return false;
 }
 
-bool CPeerMap::IsCallsignListed(const CCallsign &callsign, const CIp &ip, const char *modules) const
+bool CIFileMap::IsCallsignListed(const CCallsign &callsign, const CIp &ip, const char *modules) const
 {
-	for ( const auto &item : m_Peers )
+	for ( const auto &item : m_InterlinkMap )
 	{
 		if ( item.second.HasSameCallsign(callsign) )
 		{
@@ -182,21 +176,15 @@ bool CPeerMap::IsCallsignListed(const CCallsign &callsign, const CIp &ip, const 
 	return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// find
-
-CPeerMapItem *CPeerMap::FindMapItem(const std::string &cs)
+CIFileItem *CIFileMap::FindMapItem(const std::string &cs)
 {
-	auto it = m_Peers.find(cs);
-	if (m_Peers.end() == it)
+	auto it = m_InterlinkMap.find(cs);
+	if (m_InterlinkMap.end() == it)
 		return nullptr;
 	return &it->second;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// helpers
-
-char *CPeerMap::TrimWhiteSpaces(char *str)
+char *CIFileMap::TrimWhiteSpaces(char *str)
 {
 	char *end;
 
@@ -217,7 +205,7 @@ char *CPeerMap::TrimWhiteSpaces(char *str)
 	return str;
 }
 
-bool CPeerMap::GetLastModTime(time_t *time)
+bool CIFileMap::GetLastModTime(time_t *time)
 {
 	bool ok = false;
 
@@ -233,7 +221,7 @@ bool CPeerMap::GetLastModTime(time_t *time)
 	return ok;
 }
 
-char *CPeerMap::ToUpper(char *str)
+char *CIFileMap::ToUpper(char *str)
 {
 	constexpr auto diff = 'a' - 'A';
 	for (char *p=str; *p; p++)

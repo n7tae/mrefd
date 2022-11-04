@@ -34,17 +34,17 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CPeerMapItem
+class CIFileItem
 {
 public:
 	// constructor
-	CPeerMapItem();
-	CPeerMapItem(const CCallsign &, const CIp &, const char *);
-	CPeerMapItem(const CCallsign &, const char *, const char *);
-	CPeerMapItem(const CPeerMapItem &);
+	CIFileItem();
+	CIFileItem(const CCallsign &, const CIp &, const char *);
+	CIFileItem(const CCallsign &, const char *, const char *);
+	CIFileItem(const CIFileItem &);
 
 	// assignment
-	void operator=(const CPeerMapItem &rhs);
+	void operator=(const CIFileItem &rhs);
 
 	// compare
 	bool HasSameCallsign(const CCallsign &) const;
