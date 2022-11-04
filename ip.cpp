@@ -77,7 +77,7 @@ void CIp::Initialize(const int family, const uint16_t port, const char *address)
 			{
 				if (1 > inet_pton(AF_INET, address, &(addr4->sin_addr)))
 				{
-					std::cerr << "Address Initialization Error: '" << address << "' is not a valdid IPV4 address!" << std::endl;
+					std::cerr << "Address Initialization Error: '" << address << "' is not a valid IPV4 address!" << std::endl;
 					is_set = false;
 				}
 			}

@@ -135,18 +135,13 @@ void CGateKeeper::PutDHTInfo()
 	const std::string cs(g_CFG.GetCallsign());
 	SReflectorData1 rd;
 	rd.cs.assign(cs);
-	if (! g_CFG.GetIPv4BindAddr().empty())
-	{
-		rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
-	}
-	if (! g_CFG.GetIPv6BindAddr().empty())
-	{
-		rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
-	}
+	rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
+	rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
 	rd.mods.assign(g_CFG.GetModules());
+	rd.encryptmods.assign(g_CFG.GetEncryptedMods());
 	rd.url.assign(g_CFG.GetURL());
-	rd.port = (unsigned short)g_CFG.GetPort();
 	rd.email.assign(g_CFG.GetEmailAddr());
+	rd.port = (unsigned short)g_CFG.GetPort();
 
 	auto peers = g_Reflector.GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
@@ -158,7 +153,7 @@ void CGateKeeper::PutDHTInfo()
 
 	auto nv = std::make_shared<dht::Value>(rd);
 	Dump("My dht::Value =", nv->data.data(), nv->data.size());
-	nv->user_type.assign("reflector-mrefd-0");
+	nv->user_type.assign("reflector-mrefd-1");
 	nv->sign(privateKey);
 
 	if (node.isRunning())
