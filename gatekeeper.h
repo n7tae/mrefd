@@ -72,7 +72,7 @@ public:
 	bool Init(void);
 	void Close(void);
 
-	// DHT publish
+	// Publish DHT
 #ifndef NO_DHT
 	void PutDHTInfo();
 #endif

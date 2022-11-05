@@ -127,7 +127,7 @@ void CGateKeeper::Close(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// DHT publish
+// Publish DHT
 
 #ifndef NO_DHT
 void CGateKeeper::PutDHTInfo()
@@ -156,11 +156,7 @@ void CGateKeeper::PutDHTInfo()
 	nv->user_type.assign("reflector-mrefd-1");
 	nv->sign(privateKey);
 
-	if (node.isRunning())
-	{
-		std::cout << "Attempting a putSigned()" << std::endl;
-	}
-	else
+	if (! node.isRunning())
 	{
 		std::cout << "Waiting for node" << std::flush;
 
