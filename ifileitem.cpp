@@ -35,69 +35,24 @@
 
 CIFileItem::CIFileItem() {}
 
-CIFileItem::CIFileItem(const CCallsign &callsign, const CIp &ip, const char *modules)
+CIFileItem::CIFileItem(const CCallsign &cs, const char *mods)
 {
-	m_Callsign.CSIn(callsign.GetCS());
-	m_Ip = ip;
-	m_Ip.SetPort(g_CFG.GetPort());
-	m_Mods.clear();
-	if ( modules != nullptr )
-	{
-		if ( modules[0] == '*' )
-		{
-			for (char c='A'; c<='Z'; c++)
-			{
-				if (g_CFG.IsValidModule(c))
-				m_Mods.append(1, c);
-			}
-		}
-		else
-		{
-			for (const char *p=modules; *p; p++)
-			{
-				// duplicates not allowed!
-				if (m_Mods.npos == (m_Mods.find(*p)))
-				{
-					// don't add mods that aren't configured
-					if (g_CFG.IsValidModule(*p))
-					{
-						m_Mods.append(1, *p);
-					}
-					else
-					{
-						std::cerr << "Peer module " << *p << " is not configured!" << std::endl;
-					}
-				}
-				else
-				{
-					std::cout << "Warning: Module " << *p << " is listed multiple times!" << std::endl;
-				}
-
-			}
-		}
-	}
+	m_Callsign.CSIn(cs.GetCS());
+	m_Mods.assign(mods);
 }
 
-CIFileItem::CIFileItem(const CCallsign &callsign, const char *url, const char *modules)
+CIFileItem::CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port) : CIFileItem(cs, mods)
 {
-	m_Callsign.CSIn(callsign.GetCS());
-	m_Ip = CIp(strchr(url, ':') ? AF_INET6 : AF_INET, g_CFG.GetPort(), url);
-	m_Mods.assign(modules);
+	m_Ip.Initialize(strchr(addr, ':') ? AF_INET6 : AF_INET, port, addr);
 }
 
-CIFileItem::CIFileItem(const CIFileItem &item)
+// set
+
+void CIFileItem::SetIP(const char *addr, uint16_t port)
 {
-	m_Callsign.CSIn(item.m_Callsign.GetCS());
-	m_Ip = item.m_Ip;
-	m_Mods.assign(item.m_Mods);
+	m_Ip.Initialize(strchr(addr, ':') ? AF_INET6 : AF_INET, port, addr);
 }
 
-void CIFileItem::operator=(const CIFileItem &rhs)
-{
-	m_Callsign.CSIn(rhs.m_Callsign.GetCS());
-	m_Ip = rhs.m_Ip;
-	m_Mods.assign(rhs.m_Mods);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare

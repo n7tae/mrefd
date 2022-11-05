@@ -39,12 +39,11 @@ class CIFileItem
 public:
 	// constructor
 	CIFileItem();
-	CIFileItem(const CCallsign &, const CIp &, const char *);
-	CIFileItem(const CCallsign &, const char *, const char *);
-	CIFileItem(const CIFileItem &);
+	CIFileItem(const CCallsign &cs, const char *mods);
+	CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port);
 
-	// assignment
-	void operator=(const CIFileItem &rhs);
+	// set
+	void SetIP(const char *addr, uint16_t port);
 
 	// compare
 	bool HasSameCallsign(const CCallsign &) const;

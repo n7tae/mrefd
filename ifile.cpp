@@ -54,54 +54,70 @@ bool CIFileMap::LoadFromFile(const char *filename)
 		// empty list
 		m_InterlinkMap.clear();
 		// fill with file content
-		while ( file.getline(line, sizeof(line)).good()  )
+		while ( file.getline(line, sizeof(line)).good() )
 		{
+			char *token[4];
 			// remove leading & trailing spaces
-			auto name = TrimWhiteSpaces(line);
+			token[0] = ToUpper(TrimWhiteSpaces(line));
 			// crack it
-			if ( (strlen(name) > 0) && (name[0] != '#') )
+			if ( (strlen(token[0]) > 0) && (token[0][0] != '#') )
 			{
+				const char *delim = " \t\r";
 				// 1st token is callsign
-				if ( (name = strtok(name, " ,\t")) != nullptr )
+				if ( (token[0] = strtok(token[0], delim)) != nullptr )
 				{
-					if (strcmp(name, g_CFG.GetCallsign().c_str()))
+					if (strcmp(token[0], g_CFG.GetCallsign().c_str()))
 					{
-						if (m_InterlinkMap.end() == m_InterlinkMap.find(name))
+						if (m_InterlinkMap.end() == m_InterlinkMap.find(token[0]))
 						{
-							CCallsign callsign(ToUpper(name));
-							// 2nd token is ip
-							char *szip, *szmods;
-							if ( (szip = strtok(nullptr, " ,\t")) != nullptr )
+							CCallsign callsign(token[0]);
+							// read remaining tokens
+							for (int i=1; i<4; i++)
 							{
-								// 3rd token is modules list
-								if ( (szmods = strtok(nullptr, " ,\t")) != nullptr )
+								token[i] = strtok(nullptr, delim);
+							}
+
+							if (token[2])
+							{
+								int port = 17000;
+								if (token[3])
 								{
-									// create and and store
-									m_InterlinkMap[name] = CIFileItem(callsign, szip, ToUpper(szmods));
+									port = std::atoi(token[2]);
+									if (port < 1024 || port > 49000)
+									{
+										std::cout << token[0] << " Port " << port << " is out of range, resetting to 17000." << std::endl;
+										port = 17000;
+									}
+									m_InterlinkMap[token[0]] = CIFileItem(callsign, token[1], token[3], (uint16_t)port);
 								}
 								else
 								{
-									std::cerr << "No modules defined for peeer " << name << std::endl;
+									m_InterlinkMap[token[0]] = CIFileItem(callsign, token[1], token[2], (uint16_t)port);
 								}
 							}
+#ifndef NO_DHT
+							else if (token[1])
+							{
+								m_InterlinkMap[token[0]] = CIFileItem(callsign, token[1]);
+							}
+#endif
 							else
 							{
-								std::cerr << "No IP address defined for peer " << name << std::endl;
+								std::cout << token[0] << " has insufficient parameters!" << std::endl;
 							}
 						}
 						else
 						{
-							std::cerr << "Duplicate found: " << name << " in " << filename << std::endl;
+							std::cerr << "Duplicate found: " << token[0] << " in " << filename << std::endl;
 						}
 					}
 					else
 					{
-						std::cerr << "Self linking is not allowed! You cannot use " << name << " in " << filename << std::endl;
+						std::cerr << "Self linking is not allowed! You cannot use " << token[0] << " in " << filename << std::endl;
 					}
 				}
 			}
 		}
-		Unlock();
 		// close file
 		file.close();
 
@@ -112,6 +128,7 @@ bool CIFileMap::LoadFromFile(const char *filename)
 		GetLastModTime(&m_LastModTime);
 
 		// and done
+		Unlock();
 		ok = true;
 		std::cout << "Gatekeeper loaded " << m_InterlinkMap.size() << " lines from " << filename <<  std::endl;
 	}
