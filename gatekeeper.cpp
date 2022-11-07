@@ -285,3 +285,49 @@ bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const
 	// done
 	return ok;
 }
+
+// DHT
+#ifndef NO_DHT
+void CGateKeeper::Listen(const std::string &cs)
+{
+	auto item = g_IFile.FindMapItem(cs);
+	if (nullptr == item)
+	{
+		std::cerr << "Can't Listen() for " << cs << " because it doesn't exist" << std::endl;
+		return;
+	}
+	std::cout << "Listening for changes at " << cs << std::endl;
+	item->m_Future = node.listen(
+		dht::InfoHash::get(cs),
+		[](const std::vector<std::shared_ptr<dht::Value>> &values, bool expired) {
+			for (const auto &v : values)
+			{
+				if (0 == v->user_type.compare("reflector-mrefd-0"))
+				{
+					auto rdat = dht::Value::unpack<SReflectorData0>(*v);
+					g_IFile.Update(rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port);
+				}
+				else if (0 == v->user_type.compare("reflector-mrefd-1"))
+				{
+					auto rdat = dht::Value::unpack<SReflectorData1>(*v);
+					g_IFile.Update(rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, rdat.encryptmods);
+				}
+				else
+				{
+					std::cerr << "Listen() returned unknown user_type: '" << v->user_type << "'" << std::endl;
+				}
+			}
+			return true;
+		}
+	);
+}
+
+void CGateKeeper::CancelListen(const std::string &cs)
+{
+	auto item = g_IFile.FindMapItem(cs);
+	if (nullptr != item)
+	{
+		node.cancelListen(dht::InfoHash::get(cs), std::move(item->m_Future));
+	}
+}
+#endif

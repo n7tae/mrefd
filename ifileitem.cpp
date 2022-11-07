@@ -33,9 +33,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CIFileItem::CIFileItem() {}
+CIFileItem::CIFileItem() : m_Updated(false) {}
 
-CIFileItem::CIFileItem(const CCallsign &cs, const char *mods)
+CIFileItem::CIFileItem(const CCallsign &cs, const char *mods) : CIFileItem()
 {
 	m_Callsign.CSIn(cs.GetCS());
 	m_Mods.assign(mods);

@@ -1,20 +1,35 @@
 ############################################################################
-#  M17 interlink file
+# M17 interlink file
 #
-#  One line per entry, but any reflector can only have one line.
-#  Each entry specifies a remote M17 Reflector to peer with format:
-#    <M17 callsign> <ip> <list of shared modules>
-#  example:
-#    M17-ABC 44.123.213.112 ACD
+# One line per entry, and a reflector can only have one line.
+# Each entry specifies a remote M17 Reflector to peer with format:
+#    <M17 callsign> <ip> <port> <list of shared modules>
+# The port is optional and defaults to 17000.
+# Example:
+#    M17-ABC 44.123.213.112 17001 ACD
 #    M17-XYZ 2600:400:bc03::100 ACD
 #
-#    In the above example, this reflector would link modules A, C and D
-#    with both M17-ABC and M17-XYZ. This example implies both this
-#    reflector and M17-XYZ support IPv6.
+# In the above example, this reflector would link modules A, C and D
+# with both M17-ABC and M17-XYZ. Reflector ABC is using the non-standard
+# port of 17001. This example implies both this reflector and M17-XYZ
+# support IPv6.
 #
-#    These remote reflectors must list this reflector and modules
-#    exactly in their interlink file for the link to be established.
+# These remote reflectors must list this reflector and modules
+# exactly in their interlink file for the link to be established.
 #
-#    Every reflector in an interlink group must link to every other
-#    reflector in the group or clients in a group may not hear everybody.
+# Every reflector in an interlink group must link to every other
+# reflector in the group or clients in a group may not hear everybody.
+#
+# If your reflector and the target reflector are both configured for
+# DHT, you don't need to supply the IP address or the port. They will be
+# retrieved from the DHT network:
+#
+# Example if every system is using DHT:
+#    M17-ABC ACD
+#    M17-XYZ ACD
+#
+# If both ends of the interlink support IPv6, then the interlink will
+# use IPv6. Otherwise, IPv4 will be used. The interlink will fail if
+# one end is an IPv4-only reflector and the other end is an IPv6-only
+# reflector.
 #############################################################################

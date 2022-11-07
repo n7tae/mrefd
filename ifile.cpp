@@ -248,3 +248,36 @@ char *CIFileMap::ToUpper(char *str)
 	}
 	return str;
 }
+
+void CIFileMap::Update(const std::string &cs, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &encryptedmods)
+{
+	auto it = m_InterlinkMap.find(cs);
+	if (m_InterlinkMap.end() == it)
+	{
+		std::cerr << "Can't Update ListenMap item '" << cs << "' because it doesn't exist!";
+	}
+	else
+	{
+		auto &item = it->second;
+		if (item.m_IPv4.compare(ipv4))
+		{
+			item.m_IPv4.assign(ipv4);
+			item.m_Updated = true;
+		}
+		if (item.m_IPv6.compare(ipv6))
+		{
+			item.m_IPv6.assign(ipv6);
+			item.m_Updated = true;
+		}
+		if (item.m_Port != port)
+		{
+			item.m_Port = port;
+			item.m_Updated = true;
+		}
+		if (item.m_EncryptedMods.compare(encryptedmods))
+		{
+			item.m_EncryptedMods.assign(encryptedmods);
+			item.m_Updated = true;
+		}
+	}
+}

@@ -22,17 +22,13 @@
 
 #pragma once
 
+#include <string>
+#include <future>
+
 #include "main.h"
 #include "callsign.h"
 #include "ip.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-// define
-
-#define URL_MAXLEN          256
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
 
 class CIFileItem
 {
@@ -52,13 +48,18 @@ public:
 	bool CheckListedModules(const char*) const;
 
 	// get
-	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	const CIp &GetIp(void) const              { return m_Ip; }
+	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	const std::string &GetModules(void) const { return m_Mods; }
 
-protected:
 	// data
 	CCallsign   m_Callsign;
 	CIp         m_Ip;
 	std::string m_Mods;
+	uint16_t    m_Port;
+#ifndef NO_DHT
+	bool m_Updated;
+	std::string m_IPv4, m_IPv6, m_EncryptedMods;
+	mutable std::future<size_t> m_Future;
+#endif
 };

@@ -453,7 +453,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// iterate on users
 	for ( auto it=users->begin(); it!=users->end(); it++ )
 	{
-		(*it).WriteXml(xmlFile);
+		it->WriteXml(xmlFile);
 	}
 	// unlock
 	ReleaseUsers();

@@ -48,6 +48,9 @@ public:
 	bool ReloadFromFile(void);
 	bool NeedReload(void);
 
+	// item manipulation
+	void Update(const std::string &cs, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &encryptedmods = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+
 	// compare
 	bool IsCallsignListed(const CCallsign &, const char) const;
 	bool IsCallsignListed(const CCallsign &, const CIp &ip, const char*) const;

@@ -698,53 +698,84 @@ void CProtocol::HandleKeepalives(void)
 
 void CProtocol::HandlePeerLinks(void)
 {
-	uint8_t buf[10];
 	// get the list of peers
 	g_IFile.Lock();
 	CPeers *peers = g_Reflector.GetPeers();
 
-	// check if all our connected peers are still listed by gatekeeper
+	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
 	auto pit = peers->begin();
 	std::shared_ptr<CPeer>peer = nullptr;
 	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
-		if ( nullptr == g_IFile.FindMapItem(peer->GetCallsign().GetCS()) )
+		const auto cs = peer->GetCallsign().GetCS();
+		if ( nullptr == g_IFile.FindMapItem(cs) )
 		{
+			uint8_t buf[10];
 			// send disconnect packet
 			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
-			std::cout << "Sent disconnect packet to M17 peer " << peer->GetCallsign() << " at " << peer->GetIp() << std::endl;
+			std::cout << "Sent disconnect packet to M17 peer " << cs << " at " << peer->GetIp() << std::endl;
+#ifndef NO_DTH
+			g_GateKeeper.CancelListen(cs);
+#endif
 			// remove client
 			peers->RemovePeer(peer);
 			publish = true;
 		}
 	}
 
-	// check if all ours peers listed by gatekeeper are connected
+	// check if all ours peers listed in mrefd.interlink are connected
 	// if not, connect or reconnect
-	SInterConnect connect;
 	for ( auto it=g_IFile.begin(); it!=g_IFile.end(); it++ )
 	{
-		if ( nullptr == peers->FindPeer((*it).second.GetCallsign()) )
+		auto &item = it->second;
+		if ( nullptr == peers->FindPeer(item.GetCallsign()) )
 		{
-			// send connect packet to re-initiate peer link
-			EncodeInterlinkConnectPacket(connect, (*it).second.GetModules());
-			Send(connect.magic, sizeof(SInterConnect), (*it).second.GetIp());
-			std::cout << "Sent connect packet to M17 peer " << (*it).second.GetCallsign() << " @ " << (*it).second.GetIp() << " for module(s) " << (*it).second.GetModules() << std::endl;
+#ifndef NO_DTH
+			if (item.m_Updated)
+			{
+				if (! item.m_IPv6.empty() && ! g_CFG.GetIPv6ExtAddr().empty())
+					item.SetIP(item.m_IPv6.c_str(), item.m_Port);
+				else
+					item.SetIP(item.m_IPv4.c_str(), item.m_Port);
+				item.m_Updated = false;
+			}
+#endif
+			if (item.GetIp().IsSet())
+			{
+				SInterConnect connect;
+				// send connect packet to re-initiate peer link
+				EncodeInterlinkConnectPacket(connect, item.GetModules());
+				Send(connect.magic, sizeof(SInterConnect), item.GetIp());
+				std::cout << "Sent connect packet to M17 peer " << item.GetCallsign() << " @ " << item.GetIp() << " for module(s) " << item.GetModules() << std::endl;
+			}
+#ifndef NO_DTH
+			else
+			{
+				if (item.m_Future.valid())
+				{
+					std::cout << "Waiting for DHT data for " << item.GetCallsign() << std::endl;
+				}
+				else
+				{
+					g_GateKeeper.Listen(item.GetCallsign().GetCS());
+				}
+			}
+#endif
 		}
 	}
 
 	g_Reflector.ReleasePeers();
 	g_IFile.Unlock();
 
+#ifndef NO_DHT
 	if (publish)
 	{
-#ifndef NO_DHT
 		g_GateKeeper.PutDHTInfo();
-#endif
 		publish = false;
 	}
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
