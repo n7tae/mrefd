@@ -741,17 +741,17 @@ void CProtocol::HandlePeerLinks(void)
 				for (auto &c : item.GetModules())
 				{
 					if (std::string::npos == g_CFG.GetModules().find(c))
-					{	// is the local module config'ed?
+					{	// is the local module not config'ed?
 						ok = false;
 						std::cerr << "This reflector has no module '" << c << "'" << std::endl;
 					}
 					else if (std::string::npos == item.GetCMods().find(c))
-					{	// is the remote module config'ed?
+					{	// is the remote module not config'ed?
 						ok = false;
 						std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
 					}
 					else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
-					{	// does the encyption states on both sides match?
+					{	// are the encyption states on both sides mismatched?
 						ok = false;
 						std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
 					}
@@ -768,9 +768,9 @@ void CProtocol::HandlePeerLinks(void)
 #ifndef NO_DHT
 				}
 			}
-			else
+			else // m_Ip is not set!
 			{
-				if (item.IsUsingDHT())
+				if (item.m_Future.valid())
 				{
 					std::cout << "Waiting for DHT data for " << item.GetCallsign() << std::endl;
 				}

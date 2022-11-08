@@ -59,7 +59,6 @@ public:
 	const std::string &GetEMods(void) const   { return m_EMods; }
 	const std::string &GetCMods(void) const   { return m_CMods; }
 	uint16_t GetPort(void) const              { return m_Port; }
-	bool IsUsingDHT(void) const               { return m_IsUsingDHT; }
 
 	// listen future (it won't be used if there is no DHT support)
 #ifndef NO_DHT
@@ -72,7 +71,6 @@ private:
 	CIp         m_Ip;
 	std::string m_Mods;
 	uint16_t    m_Port;
-	bool        m_IsUsingDHT;
 
 #ifndef NO_DHT
 	bool m_Updated;
