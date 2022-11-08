@@ -716,7 +716,7 @@ void CProtocol::HandlePeerLinks(void)
 			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
 			std::cout << "Sent disconnect packet to M17 peer " << cs << " at " << peer->GetIp() << std::endl;
-#ifndef NO_DTH
+#ifndef NO_DHT
 			g_GateKeeper.CancelListen(cs);
 #endif
 			// remove client
@@ -732,28 +732,45 @@ void CProtocol::HandlePeerLinks(void)
 		auto &item = it->second;
 		if ( nullptr == peers->FindPeer(item.GetCallsign()) )
 		{
-#ifndef NO_DTH
-			if (item.m_Updated)
-			{
-				if (! item.m_IPv6.empty() && ! g_CFG.GetIPv6ExtAddr().empty())
-					item.SetIP(item.m_IPv6.c_str(), item.m_Port);
-				else
-					item.SetIP(item.m_IPv4.c_str(), item.m_Port);
-				item.m_Updated = false;
-			}
-#endif
+#ifndef NO_DHT
+			item.UpdateIP(g_CFG.GetIPv6ExtAddr().empty());
 			if (item.GetIp().IsSet())
 			{
-				SInterConnect connect;
-				// send connect packet to re-initiate peer link
-				EncodeInterlinkConnectPacket(connect, item.GetModules());
-				Send(connect.magic, sizeof(SInterConnect), item.GetIp());
-				std::cout << "Sent connect packet to M17 peer " << item.GetCallsign() << " @ " << item.GetIp() << " for module(s) " << item.GetModules() << std::endl;
+				bool ok = true;
+				// does everything match up?
+				for (auto &c : item.GetModules())
+				{
+					if (std::string::npos == g_CFG.GetModules().find(c))
+					{	// is the local module config'ed?
+						ok = false;
+						std::cerr << "This reflector has no module '" << c << "'" << std::endl;
+					}
+					else if (std::string::npos == item.GetCMods().find(c))
+					{	// is the remote module config'ed?
+						ok = false;
+						std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
+					}
+					else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
+					{	// does the encyption states on both sides match?
+						ok = false;
+						std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
+					}
+				}
+				if (ok)
+				{
+
+#endif
+					// send connect packet to re-initiate peer link
+					SInterConnect connect;
+					EncodeInterlinkConnectPacket(connect, item.GetModules());
+					Send(connect.magic, sizeof(SInterConnect), item.GetIp());
+					std::cout << "Sent connect packet to M17 peer " << item.GetCallsign() << " @ " << item.GetIp() << " for module(s) " << item.GetModules() << std::endl;
+#ifndef NO_DHT
+				}
 			}
-#ifndef NO_DTH
 			else
 			{
-				if (item.m_Future.valid())
+				if (item.IsUsingDHT())
 				{
 					std::cout << "Waiting for DHT data for " << item.GetCallsign() << std::endl;
 				}

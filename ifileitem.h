@@ -38,8 +38,11 @@ public:
 	CIFileItem(const CCallsign &cs, const char *mods);
 	CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port);
 
-	// set
-	void SetIP(const char *addr, uint16_t port);
+	// Update things
+	void UpdateIP(bool IPv6NotConfigured);
+#ifndef NO_DHT
+	void Update(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods);
+#endif
 
 	// compare
 	bool HasSameCallsign(const CCallsign &) const;
@@ -51,15 +54,28 @@ public:
 	const CIp &GetIp(void) const              { return m_Ip; }
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	const std::string &GetModules(void) const { return m_Mods; }
+	const std::string &GetIPv4(void) const    { return m_IPv4; }
+	const std::string &GetIPv6(void) const    { return m_IPv6; }
+	const std::string &GetEMods(void) const   { return m_EMods; }
+	const std::string &GetCMods(void) const   { return m_CMods; }
+	uint16_t GetPort(void) const              { return m_Port; }
+	bool IsUsingDHT(void) const               { return m_IsUsingDHT; }
 
+	// listen future (it won't be used if there is no DHT support)
+#ifndef NO_DHT
+	mutable std::future<size_t> m_Future;
+#endif
+
+private:
 	// data
 	CCallsign   m_Callsign;
 	CIp         m_Ip;
 	std::string m_Mods;
 	uint16_t    m_Port;
+	bool        m_IsUsingDHT;
+
 #ifndef NO_DHT
 	bool m_Updated;
-	std::string m_IPv4, m_IPv6, m_EncryptedMods;
-	mutable std::future<size_t> m_Future;
+	std::string m_CMods, m_IPv4, m_IPv6, m_EMods;
 #endif
 };

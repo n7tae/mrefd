@@ -48,9 +48,17 @@ CIFileItem::CIFileItem(const CCallsign &cs, const char *addr, const char *mods, 
 
 // set
 
-void CIFileItem::SetIP(const char *addr, uint16_t port)
+void CIFileItem::UpdateIP(bool IPv6NotConfigured)
 {
-	m_Ip.Initialize(strchr(addr, ':') ? AF_INET6 : AF_INET, port, addr);
+	if (m_Updated)
+	{
+		if (IPv6NotConfigured || m_IPv6.empty())
+			m_Ip.Initialize(AF_INET,  m_Port, m_IPv4.c_str());
+		else
+			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
+
+		m_Updated = false;
+	}
 }
 
 
@@ -97,3 +105,34 @@ bool CIFileItem::CheckListedModules(const char *mods) const
 	}
 	return true;
 }
+
+#ifndef NO_DHT
+void CIFileItem::Update(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods)
+{
+	if (m_CMods.compare(cmods))
+	{
+		m_CMods.assign(cmods);
+		m_Updated = true;
+	}
+	if (m_IPv4.compare(ipv4))
+	{
+		m_IPv4.assign(ipv4);
+		m_Updated = true;
+	}
+	if (m_IPv6.compare(ipv6))
+	{
+		m_IPv6.assign(ipv6);
+		m_Updated = true;
+	}
+	if (m_Port != port)
+	{
+		m_Port = port;
+		m_Updated = true;
+	}
+	if (m_EMods.compare(emods))
+	{
+		m_EMods.assign(emods);
+		m_Updated = true;
+	}
+}
+#endif

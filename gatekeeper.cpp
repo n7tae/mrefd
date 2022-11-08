@@ -138,7 +138,7 @@ void CGateKeeper::PutDHTInfo()
 	rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
 	rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
 	rd.mods.assign(g_CFG.GetModules());
-	rd.encryptmods.assign(g_CFG.GetEncryptedMods());
+	rd.emods.assign(g_CFG.GetEncryptedMods());
 	rd.url.assign(g_CFG.GetURL());
 	rd.email.assign(g_CFG.GetEmailAddr());
 	rd.port = (unsigned short)g_CFG.GetPort();
@@ -305,12 +305,12 @@ void CGateKeeper::Listen(const std::string &cs)
 				if (0 == v->user_type.compare("reflector-mrefd-0"))
 				{
 					auto rdat = dht::Value::unpack<SReflectorData0>(*v);
-					g_IFile.Update(rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port);
+					g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port);
 				}
 				else if (0 == v->user_type.compare("reflector-mrefd-1"))
 				{
 					auto rdat = dht::Value::unpack<SReflectorData1>(*v);
-					g_IFile.Update(rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, rdat.encryptmods);
+					g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
 				}
 				else
 				{
