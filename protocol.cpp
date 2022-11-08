@@ -743,7 +743,7 @@ void CProtocol::HandlePeerLinks(void)
 					if (std::string::npos == g_CFG.GetModules().find(c))
 					{	// is the local module not config'ed?
 						ok = false;
-						std::cerr << "This reflector has no module '" << c << "'" << std::endl;
+						std::cerr << "This reflector has no module '" << c << "', so it can't interlink with " << item.GetCallsign() << std::endl;
 					}
 					else if (std::string::npos == item.GetCMods().find(c))
 					{	// is the remote module not config'ed?

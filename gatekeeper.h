@@ -23,6 +23,7 @@
 
 #ifndef NO_DHT
 #include <opendht.h>
+#include "dvindatatypes.h"
 #endif
 
 #include "main.h"
@@ -30,31 +31,6 @@
 #include "ip.h"
 #include "bwset.h"
 #include "base.h"
-
-#ifndef NO_DHT
-// the possible DHT formats
-
-struct SReflectorData0
-{
-	std::string cs, ipv4;
-	std::string ipv6, mods, url, email;
-	uint16_t port;
-	std::vector<std::pair<std::string, std::string>> peers;
-
-	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, url, email, port, peers);
-};
-
-struct SReflectorData1
-{
-	std::string cs, ipv4;
-	std::string ipv6, mods, emods, url, email;
-	uint16_t port;
-	std::vector<std::pair<std::string, std::string>> peers;
-
-	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, port, peers);
-};
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class

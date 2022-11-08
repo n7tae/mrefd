@@ -50,10 +50,13 @@ SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
-all : $(EXE) test-all
+all : $(EXE) test-all dvin-get
 
 test-all : test-all.o crc.o callsign.o
 	$(CXX) $^ -o $@
+
+dvin-get : dvin-get.cpp
+	$(CXX) -o $@ $^ -pthread -lopendht
 
 $(EXE) : $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS)

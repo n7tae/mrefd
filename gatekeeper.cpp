@@ -317,7 +317,7 @@ void CGateKeeper::Listen(const std::string &cs)
 					std::cerr << "Listen() returned unknown user_type: '" << v->user_type << "'" << std::endl;
 				}
 			}
-			return true;
+			return false;
 		}
 	);
 }

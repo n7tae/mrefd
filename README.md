@@ -1,12 +1,18 @@
 # MREFD
 
-MREFD is a new M17 open source Reflector. Most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevent source files reflect this. The sources are published under GPL Licenses.
+This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevent source files reflect this. The sources are published under GPL Licenses.
 
 ## Introduction
 
-This is prototype software. Currently, this totally ignores, and in fact assumes, that no client is using M17 encrytion. Incoming M17 voice streams are readdressed to each client by rewriting the destination callsign and then recalculating the CRC for each packet.
+The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be configured with up to 26 different channels. M17 clients (M17 repeaters, M17 hot-spots and other MREFD reflectors) can be linked to a channel. An incoming M17 voice stream from one of the clients will be heard by all the other clients.
 
-Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. Also, by default, mrefd is built without gdb support. Finally, this repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
+Encrypted voice streams will pass through an *mrefd* channel, but **only** if they are configured for it.
+
+*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retreving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection informating. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
+
+The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefdash.git).
+
+Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
 
 ## Usage
 
@@ -36,7 +42,9 @@ sudo apt install g++
 
 OpenDHT and gomrefdash both have their own requirements.
 
-### Distributed Hash Table (OpenDHT)
+### DVIN support (optional, but highly recommended)
+
+**DVIN** is implemented using a distributed hash table provided by OpenDHT.
 
 OpenDHT is available [here](https://github./com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Pascal support and proxy-server support (RESTinio) is not required for mrefd and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
 
@@ -74,11 +82,13 @@ cp config/mrefd.interlink .
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The mrefd reflector will monitor these file and dynamically update itself whenever anything changes. There is no need to stop and restart the reflector.
 
-The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Also group linking demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
+The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **DVIN** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **DVIN** will provided it, and this information comes directly from the peer. Using the **DVIN** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
+
+If your reflector or your desired peer doesn't use **DVIN**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
+
+Inter-linking a channel to more than one other reflector demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
 
 Group adminstration will require coordination among the admins of all involved reflectors. If a group memeber drops out or if a new member wants to join a group, all other group members will need to remove or add a line to their mrefd.interlink file.
-
-Finally, if both ends of a link in a group support IPv6, that part of the group can use IPv6 while the rest of the group can use IPv4.
 
 ### Configuring your reflector
 
