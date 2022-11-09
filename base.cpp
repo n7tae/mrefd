@@ -37,7 +37,7 @@ void CBase::Dump(const char *title, const void *pointer, int length)
 		for (unsigned i = 0U; i < bytes; i++) {
 			if (i)
 				std::cout << " ";
-			std::cout << std::hex << std::setw(2) << std::right << std::setfill('0') << int(data[offset + i]);
+			std::cout << std::hex << std::setw(2) << std::right << std::setfill('0') << int(data[offset + i]) << std::dec;
 		}
 
 		for (unsigned int i = bytes; i < 16U; i++)
