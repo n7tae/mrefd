@@ -143,6 +143,14 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.bootstrap.assign(value);
 		}
+		else if (0 == key.compare("Sponsor"))
+		{
+			data.sponsor.assign(value);
+		}
+		else if (0 == key.compare("Country"))
+		{
+			data.country.assign(value.substr(0, 2));
+		}
 #endif
 		else if (0 == key.compare("XmlPath"))
 		{
@@ -365,6 +373,25 @@ bool CConfigure::ReadData(const std::string &path)
 	else
 	{
 		std::cout << "Bootstrap='" << data.bootstrap << "'" << std::endl;
+	}
+
+	if (!data.sponsor.empty())
+	{
+		std::cout << "Sponsor='" << data.sponsor << "'" << std::endl;
+	}
+
+	if (data.country.empty())
+	{
+		std::cerr << "ERROR - no Country" << std::endl;
+	}
+	else
+	{
+		for (auto &c : data.country)
+		{
+			if (std::islower(c))
+				c = std::toupper(c);
+		}
+		std::cout << "Country='" << data.country << "'" << std::endl;
 	}
 #endif
 

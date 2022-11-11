@@ -29,7 +29,6 @@
 #include "callsign.h"
 #include "ip.h"
 
-
 class CIFileItem
 {
 public:
@@ -54,14 +53,12 @@ public:
 	const CIp &GetIp(void) const              { return m_Ip; }
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	const std::string &GetModules(void) const { return m_Mods; }
+#ifndef NO_DHT
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
 	const std::string &GetEMods(void) const   { return m_EMods; }
 	const std::string &GetCMods(void) const   { return m_CMods; }
 	uint16_t GetPort(void) const              { return m_Port; }
-
-	// listen future (it won't be used if there is no DHT support)
-#ifndef NO_DHT
 	mutable std::future<size_t> m_Future;
 #endif
 

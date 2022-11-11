@@ -32,8 +32,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
-
+#ifdef NO_DHT
+CIFileItem::CIFileItem() {}
+#else
 CIFileItem::CIFileItem() : m_Updated(false) {}
+#endif
 
 CIFileItem::CIFileItem(const CCallsign &cs, const char *mods) : CIFileItem()
 {
@@ -45,22 +48,6 @@ CIFileItem::CIFileItem(const CCallsign &cs, const char *addr, const char *mods, 
 {
 	m_Ip.Initialize(strchr(addr, ':') ? AF_INET6 : AF_INET, port, addr);
 }
-
-// set
-
-void CIFileItem::UpdateIP(bool IPv6NotConfigured)
-{
-	if (m_Updated)
-	{
-		if (IPv6NotConfigured || m_IPv6.empty())
-			m_Ip.Initialize(AF_INET,  m_Port, m_IPv4.c_str());
-		else
-			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
-
-		m_Updated = false;
-	}
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
@@ -133,6 +120,19 @@ void CIFileItem::Update(const std::string &cmods, const std::string &ipv4, const
 	{
 		m_EMods.assign(emods);
 		m_Updated = true;
+	}
+}
+
+void CIFileItem::UpdateIP(bool IPv6NotConfigured)
+{
+	if (m_Updated)
+	{
+		if (IPv6NotConfigured || m_IPv6.empty())
+			m_Ip.Initialize(AF_INET,  m_Port, m_IPv4.c_str());
+		else
+			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
+
+		m_Updated = false;
 	}
 }
 #endif

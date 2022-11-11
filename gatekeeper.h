@@ -23,7 +23,6 @@
 
 #ifndef NO_DHT
 #include <opendht.h>
-#include "dvindatatypes.h"
 #endif
 
 #include "main.h"
@@ -31,6 +30,29 @@
 #include "ip.h"
 #include "bwset.h"
 #include "base.h"
+
+#ifndef NO_DHT
+struct SReflectorData0
+{
+	std::string cs, ipv4;
+	std::string ipv6, mods, url, email;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
+
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, url, email, port, peers);
+};
+
+struct SReflectorData1
+{
+	std::string cs, ipv4;
+	std::string ipv6, mods, emods, url, email;
+	std::string sponsor, country;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
+
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, port, peers);
+};
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -48,12 +70,12 @@ public:
 	bool Init(void);
 	void Close(void);
 
+#ifndef NO_DHT
 	// Publish DHT
-	#ifndef NO_DHT
 	void PutDHTInfo();
 	void Listen(const std::string &cs);
 	void CancelListen(const std::string &cs);
-	#endif
+#endif
 
 	// authorizations
 	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
@@ -76,9 +98,9 @@ protected:
 	std::future<void> m_Future;
 
 	// Distributed Hash Table
-	#ifndef NO_DHT
+#ifndef NO_DHT
 	dht::DhtRunner node;
 	dht::crypto::Identity refID;
 	dht::crypto::PrivateKey privateKey;
-	#endif
+#endif
 };
