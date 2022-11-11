@@ -141,6 +141,8 @@ void CGateKeeper::PutDHTInfo()
 	rd.emods.assign(g_CFG.GetEncryptedMods());
 	rd.url.assign(g_CFG.GetURL());
 	rd.email.assign(g_CFG.GetEmailAddr());
+	rd.country.assign(g_CFG.GetCountry());
+	rd.sponsor.assign(g_CFG.GetSponsor());
 	rd.port = (unsigned short)g_CFG.GetPort();
 
 	auto peers = g_Reflector.GetPeers();
