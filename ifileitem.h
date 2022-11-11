@@ -42,7 +42,7 @@ public:
 	// Update things
 	void UpdateIP(bool IPv6NotConfigured);
 #ifndef NO_DHT
-	void Update(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods);
+	void UpdateItem(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods);
 #endif
 
 	// compare

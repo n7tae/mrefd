@@ -107,7 +107,7 @@ bool CIFileItem::CheckListedModules(const char *mods) const
 }
 
 #ifndef NO_DHT
-void CIFileItem::Update(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods)
+void CIFileItem::UpdateItem(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods)
 {
 	if (m_CMods.compare(cmods))
 	{

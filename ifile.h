@@ -49,7 +49,7 @@ public:
 	bool NeedReload(void);
 
 #ifndef NO_DHT
-	void Update(const std::string &cs, const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &encryptedmods = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	void Update(const std::string &cs, const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &encryptedmods);
 #endif
 
 	// compare

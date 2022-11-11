@@ -305,7 +305,7 @@ void CGateKeeper::Listen(const std::string &cs)
 				if (0 == v->user_type.compare("reflector-mrefd-0"))
 				{
 					auto rdat = dht::Value::unpack<SReflectorData0>(*v);
-					g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port);
+					g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, ""); // this empty string shoud be "ABCDEFGHIJKLMNOPQRSTUVWXYZ", but we need to wait until everyone catches up
 				}
 				else if (0 == v->user_type.compare("reflector-mrefd-1"))
 				{

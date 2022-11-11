@@ -259,7 +259,7 @@ void CIFileMap::Update(const std::string &cmods, const std::string &cs, const st
 	}
 	else
 	{
-		it->second.Update(cmods, ipv4, ipv6, port, emods);
+		it->second.UpdateItem(cmods, ipv4, ipv6, port, emods);
 	}
 }
 #endif
