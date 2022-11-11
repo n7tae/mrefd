@@ -34,7 +34,9 @@ class CIFileItem
 public:
 	// constructor
 	CIFileItem();
+#ifndef NO_DHT
 	CIFileItem(const CCallsign &cs, const char *mods);
+#endif
 	CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port);
 
 	// Update things
@@ -53,6 +55,7 @@ public:
 	const CIp &GetIp(void) const              { return m_Ip; }
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	const std::string &GetModules(void) const { return m_Mods; }
+	bool UsesDHT(void) const                  { return m_UsesDHT; }
 #ifndef NO_DHT
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
@@ -68,6 +71,7 @@ private:
 	CIp         m_Ip;
 	std::string m_Mods;
 	uint16_t    m_Port;
+	bool        m_UsesDHT;
 
 #ifndef NO_DHT
 	bool m_Updated;

@@ -33,19 +33,32 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 #ifdef NO_DHT
-CIFileItem::CIFileItem() {}
+CIFileItem::CIFileItem()
+{
+	m_UsesDHT = false;
+}
 #else
-CIFileItem::CIFileItem() : m_Updated(false) {}
+CIFileItem::CIFileItem()
+{
+	m_UsesDHT = false;
+	m_Updated = false;
+}
 #endif
 
-CIFileItem::CIFileItem(const CCallsign &cs, const char *mods) : CIFileItem()
+#ifndef NO_DHT
+CIFileItem::CIFileItem(const CCallsign &cs, const char *mods)
 {
+	m_UsesDHT = true;
+	m_Updated = false;
 	m_Callsign.CSIn(cs.GetCS());
 	m_Mods.assign(mods);
 }
+#endif
 
-CIFileItem::CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port) : CIFileItem(cs, mods)
+CIFileItem::CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port) : CIFileItem()
 {
+	m_Callsign.CSIn(cs.GetCS());
+	m_Mods.assign(mods);
 	m_Ip.Initialize(strchr(addr, ':') ? AF_INET6 : AF_INET, port, addr);
 }
 

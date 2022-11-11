@@ -745,15 +745,18 @@ void CProtocol::HandlePeerLinks(void)
 						ok = false;
 						std::cerr << "This reflector has no module '" << c << "', so it can't interlink with " << item.GetCallsign() << std::endl;
 					}
-					else if (std::string::npos == item.GetCMods().find(c))
-					{	// is the remote module not config'ed?
-						ok = false;
-						std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
-					}
-					else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
-					{	// are the encyption states on both sides mismatched?
-						ok = false;
-						std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
+					else if (item.UsesDHT())
+					{
+						if (std::string::npos == item.GetCMods().find(c))
+						{	// is the remote module not config'ed?
+							ok = false;
+							std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
+						}
+						else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
+						{	// are the encyption states on both sides mismatched?
+							ok = false;
+							std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
+						}
 					}
 				}
 				if (ok)
