@@ -23,7 +23,6 @@
 #pragma once
 
 #include <string>
-#include <future>
 
 #include "main.h"
 #include "callsign.h"
@@ -62,7 +61,6 @@ public:
 	const std::string &GetEMods(void) const   { return m_EMods; }
 	const std::string &GetCMods(void) const   { return m_CMods; }
 	uint16_t GetPort(void) const              { return m_Port; }
-	mutable std::future<size_t> m_Future;
 #endif
 
 private:

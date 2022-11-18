@@ -716,9 +716,6 @@ void CProtocol::HandlePeerLinks(void)
 			EncodeDisconnectPacket(buf, 0);
 			Send(buf, 10, peer->GetIp());
 			std::cout << "Sent disconnect packet to M17 peer " << cs << " at " << peer->GetIp() << std::endl;
-#ifndef NO_DHT
-			g_GateKeeper.CancelListen(cs);
-#endif
 			// remove client
 			peers->RemovePeer(peer);
 			publish = true;
@@ -773,14 +770,7 @@ void CProtocol::HandlePeerLinks(void)
 			}
 			else // m_Ip is not set!
 			{
-				if (item.m_Future.valid())
-				{
-					std::cout << "Waiting for DHT data for " << item.GetCallsign() << std::endl;
-				}
-				else
-				{
-					g_GateKeeper.Listen(item.GetCallsign().GetCS());
-				}
+				g_GateKeeper.Get(item.GetCallsign().GetCS());
 			}
 #endif
 		}
