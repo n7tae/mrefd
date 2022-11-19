@@ -73,8 +73,7 @@ public:
 #ifndef NO_DHT
 	// Publish DHT
 	void PutDHTInfo();
-	void Listen(const std::string &cs);
-	void CancelListen(const std::string &cs);
+	void Get(const std::string &cs);
 #endif
 
 	// authorizations
