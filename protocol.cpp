@@ -845,12 +845,17 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 {
 	if (0 == memcmp(buf, "CONN", 4))
 	{
+		Dump("Conn packet=", buf, 11);
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), clientRegEx))
 		{
 			*mod = buf[10];
 			if (IsLetter(*mod))
 				return true;
+		}
+		else
+		{
+			std::cout << "CONN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
 	return false;
