@@ -37,7 +37,7 @@
 CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}(($)|( [A-Z]$))", std::regex::extended);
-	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}(($)|([ ]*[A-Z]?$)|([-/\\.][A-Z0-9]+$))", std::regex::extended);
+	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9][A-Z]{1,4}(()|(/[A-Z0-9]{1,3}|-[A-Z0-9]))(()|([ ]*[A-Z]))$", std::regex::extended);
 }
 
 
@@ -845,13 +845,16 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 {
 	if (0 == memcmp(buf, "CONN", 4))
 	{
-		Dump("Conn packet=", buf, 11);
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), clientRegEx))
 		{
 			*mod = buf[10];
 			if (IsLetter(*mod))
+			{
 				return true;
+			}
+			std::cout << "Bad CONN from '" << cs.GetCS() << "'." << std::endl;
+			Dump("The requested module is not a letter:", buf, 11);
 		}
 		else
 		{
