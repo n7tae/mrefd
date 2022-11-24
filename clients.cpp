@@ -23,10 +23,12 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
 #include "reflector.h"
 #include "clients.h"
 #include "configure.h"
+
+extern CReflector g_Reflector;
+extern CConfigure g_CFG;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor

@@ -59,7 +59,7 @@ public:
 	// set
 
 	// identity
-	int GetProtocolRevision(const CVersion &ver) const;
+	uint8_t GetProtocolRevision(const CVersion &ver) const;
 	const char *GetProtocolName(void) const     { return "M17"; }
 
 	// status

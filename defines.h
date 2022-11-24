@@ -1,5 +1,7 @@
 //
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
+//  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//  Copyright © 2022 Thomas A. Eary, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -20,42 +22,9 @@
 
 #pragma once
 
-#include <unordered_set>
-#include <string>
-#include <mutex>
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
-
-class CBWSet
-{
-public:
-	// constructor
-	CBWSet();
-
-	// locks
-	void Lock(void)   const { m_Mutex.lock(); }
-	void Unlock(void) const { m_Mutex.unlock(); }
-
-	// file io
-	bool LoadFromFile(const char *);
-	bool ReloadFromFile(void);
-	bool NeedReload(void);
-
-	// pass-thru
-	bool empty() const { return m_Callsigns.empty(); }
-
-	// compare
-	bool IsMatched(const std::string &) const;
-
-protected:
-	bool GetLastModTime(time_t *);
-	char *TrimWhiteSpaces(char *);
-	char *ToUpper(char *str);
-
-	// data
-	mutable std::mutex  m_Mutex;
-	const char *m_Filename;
-	time_t      m_LastModTime;
-	std::unordered_set<std::string> m_Callsigns;
-};
+// defines
+#define M17_KEEPALIVE_PERIOD			3
+#define M17_KEEPALIVE_TIMEOUT           (M17_KEEPALIVE_PERIOD*10)
+#define M17_RECONNECT_PERIOD            5
+#define LASTHEARD_USERS_MAX_SIZE        100
+#define XML_UPDATE_PERIOD               10

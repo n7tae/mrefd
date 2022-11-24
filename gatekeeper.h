@@ -25,7 +25,6 @@
 #include <opendht.h>
 #endif
 
-#include "main.h"
 #include "callsign.h"
 #include "ip.h"
 #include "bwset.h"

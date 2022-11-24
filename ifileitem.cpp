@@ -25,7 +25,6 @@
 
 #include <string.h>
 
-#include "main.h"
 #include "configure.h"
 #include "ifileitem.h"
 #include "reflector.h"

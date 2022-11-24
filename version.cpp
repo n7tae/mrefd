@@ -1,9 +1,10 @@
 //
-//  cversion.cpp
+//  version.h
 //  m17ref
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/01/2018.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//  Copyright © 2022 Thomas A. Early N7TAE.
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -22,58 +23,64 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
 #include "version.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructor
+CVersion g_Version(0, 8, 3);	// the global object!
 
-CVersion::CVersion()
+CVersion::CVersion(uint8_t maj, uint8_t min, uint8_t rev) : version(0x10000*maj + 0x100*min + rev) {}
+
+uint8_t CVersion::GetMajor(void) const
 {
-	m_iMajor = 0;
-	m_iMinor = 0;
-	m_iRevision = 0;
+	return uint8_t(version / 0x10000);
 }
 
-CVersion::CVersion(int iMajor, int iMinor, int iRevision)
+uint8_t CVersion::GetMinor(void) const
 {
-	m_iMajor = iMajor;
-	m_iMinor = iMinor;
-	m_iRevision = iRevision;
+	return uint8_t(version / 0x100 % 0x100);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// comparaison
-
-bool CVersion::IsEqualOrHigherTo(const CVersion &version) const
+uint8_t CVersion::GetRevision(void) const
 {
-	if ( m_iMajor > version.m_iMajor )
-	{
-		return true;
-	}
-	else if ( m_iMajor == version.m_iMajor )
-	{
-		if ( m_iMinor > version.m_iMinor )
-		{
-			return true;
-		}
-		else if ( m_iMinor == version.m_iMinor )
-		{
-			if ( m_iRevision >= version.m_iRevision )
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+	return uint8_t(version % 100);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// operator
-
-bool CVersion::operator ==(const CVersion &Version) const
+int CVersion::GetVersion(void)  const
 {
-	return ( (Version.m_iMajor == m_iMajor) &&
-			 (Version.m_iMinor == m_iMinor) &&
-			 (Version.m_iRevision == m_iRevision )) ;
+	return version;
 }
+
+bool CVersion::operator ==(const CVersion &v) const
+{
+	return v.version == version;
+};
+
+bool CVersion::operator !=(const CVersion &v) const
+{
+	return v.version != version;
+};
+
+bool CVersion::operator >=(const CVersion &v) const
+{
+	return v.version >= version;
+}
+
+bool CVersion::operator <=(const CVersion &v) const
+{
+	return v.version <= version;
+}
+bool CVersion::operator >(const CVersion &v) const
+{
+	return v.version  > version;
+}
+
+bool CVersion::operator <(const CVersion &v) const
+{
+	return v.version  < version;
+}
+
+// output
+std::ostream &operator <<(std::ostream &os, const CVersion &v)
+{
+	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetRevision();
+	return os;
+};

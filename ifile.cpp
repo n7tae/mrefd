@@ -23,16 +23,17 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <fstream>
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "main.h"
 #include "configure.h"
 #include "ifile.h"
 
 // the global object
 CIFileMap g_IFile;
+extern CConfigure g_CFG;
 
 CIFileMap::CIFileMap()
 {

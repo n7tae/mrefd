@@ -24,7 +24,6 @@
 
 #include <string>
 
-#include "main.h"
 #include "callsign.h"
 #include "ip.h"
 

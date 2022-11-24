@@ -23,6 +23,7 @@
 #pragma once
 
 #include <queue>
+#include <mutex>
 
 #include "packet.h"
 #include "client.h"

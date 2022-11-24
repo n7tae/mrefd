@@ -23,14 +23,13 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
 #include "reflector.h"
 #include "peers.h"
 
+extern CReflector g_Reflector;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
-
 
 CPeers::CPeers() {}
 

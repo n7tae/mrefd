@@ -25,6 +25,10 @@
 
 #pragma once
 
+#include <atomic>
+#include <future>
+#include <list>
+
 #include <regex>
 #include "udpsocket.h"
 #include "packetstream.h"

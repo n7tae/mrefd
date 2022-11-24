@@ -1,9 +1,10 @@
 //
-//  cversion.h
+//  version.h
 //  m17ref
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/01/2018.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//  Copyright © 2022 Thomas A. Early N7TAE.
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -22,39 +23,36 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#pragma once
 
-#ifndef cversion_h
-#define cversion_h
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
+#include <cstdint>
+#include <iostream>
 
 class CVersion
 {
 public:
 	// constructor
-	CVersion();
-	CVersion(int, int, int);
+	CVersion(uint8_t maj, uint8_t min, uint8_t rev);
 
 	// get
-	int GetMajor(void) const        { return m_iMajor; }
-	int GetMinor(void) const        { return m_iMinor; }
-	int GetRevision(void) const     { return m_iRevision; }
+	uint8_t GetMajor(void) const;
+	uint8_t GetMinor(void) const;
+	uint8_t GetRevision(void) const;
+	int     GetVersion(void) const;
 
-	// comparaison
-	bool IsEqualOrHigherTo(const CVersion &) const;
+	// comparaison operators
+	bool operator ==(const CVersion &v) const;
+	bool operator !=(const CVersion &v) const;
+	bool operator >=(const CVersion &v) const;
+	bool operator <=(const CVersion &v) const;
+	bool operator  >(const CVersion &v) const;
+	bool operator  <(const CVersion &v) const;
 
-	// operator
-	bool operator ==(const CVersion &) const;
+	// output
+	friend std::ostream &operator <<(std::ostream &os, const CVersion &v);
+
 
 protected:
 	// data
-	int     m_iMajor;
-	int     m_iMinor;
-	int     m_iRevision;
+	const int version;
 };
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-#endif /* cversion_h */

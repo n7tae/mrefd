@@ -18,12 +18,18 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <iostream>
+#include <fstream>
 #include <regex>
 #include <sys/stat.h>
 
-#include "main.h"
 #include "reflector.h"
 #include "configure.h"
+#include "version.h"
+
+extern CConfigure g_CFG;
+extern CVersion g_Version;
+extern CReflector g_Reflector;
 
 int main(int argc, char *argv[])
 {
@@ -36,7 +42,7 @@ int main(int argc, char *argv[])
 	remove(g_CFG.GetPidPath().c_str());
 
 	// splash
-	std::cout << "Starting mrefd version #" << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_REVISION << std::endl;
+	std::cout << "Starting mrefd version #" << g_Version << std::endl;
 
 	// and let it run
 	if ( g_Reflector.Start(argv[1]) )

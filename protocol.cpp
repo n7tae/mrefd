@@ -23,13 +23,18 @@
 //    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include "defines.h"
 #include "protocol.h"
 #include "clients.h"
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
 #include "ifile.h"
+
+extern CConfigure g_CFG;
+extern CGateKeeper g_GateKeeper;
+extern CReflector g_Reflector;
+extern CIFileMap g_IFile;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor

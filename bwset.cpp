@@ -23,11 +23,12 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <iostream>
+#include <fstream>
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "main.h"
 #include "bwset.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////

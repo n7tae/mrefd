@@ -18,13 +18,13 @@
 # if you change these locations, make sure the sgs.service file is updated!
 # you will also break hard coded paths in the dashboard file, index.php.
 
-# if you make changed in these two variable, you'll need to change things
-# in the main.h file as well as the systemd service file.
 
 include mrefd.mk
 
 EXE = mrefd
 
+# if you make changed in these two variable, you'll need to change things
+# in other files as well as the systemd service file.
 BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
 

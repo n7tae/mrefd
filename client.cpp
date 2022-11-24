@@ -23,12 +23,16 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include <ctime>
+#include <iostream>
+#include <fstream>
 #include <string.h>
 
+#include "defines.h"
 #include "client.h"
 #include "configure.h"
 
+extern CConfigure g_CFG;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructors

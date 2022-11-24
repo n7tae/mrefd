@@ -23,13 +23,21 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include <thread>
+#include <iostream>
+#include <fstream>
 #include <string.h>
+
+#include "defines.h"
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
+#include "version.h"
 
 CReflector g_Reflector;
+extern CGateKeeper g_GateKeeper;
+extern CConfigure g_CFG;
+extern CVersion g_Version;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -312,7 +320,7 @@ void CReflector::XmlReportThread()
 		}
 
 		// and wait a bit
-		for (int i=0; i< XML_UPDATE_PERIOD && keep_running; i++)
+		for (int i=0; i<XML_UPDATE_PERIOD && keep_running; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
@@ -409,13 +417,11 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "<REFLECTOR CALLSIGN=\"" << Callsign << "\">" << std::endl;
 
 	// software version
-	char sz[64];
 #ifdef NO_DHT
-	::sprintf(sz, "%d.%d.%d-nodht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	xmlFile << "<VERSION>" << g_Version << "-nodht" << "</VERSION>" << std::endl;
 #else
-	::sprintf(sz, "%d.%d.%d-dht", VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	xmlFile << "<VERSION>" << g_Version << "-dht" << "</VERSION>" << std::endl;
 #endif
-	xmlFile << "<VERSION>" << sz << "</VERSION>" << std::endl;
 
 	// linked peers
 	xmlFile << "<PEERS>" << std::endl;

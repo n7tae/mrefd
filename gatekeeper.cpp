@@ -24,12 +24,16 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include <thread>
 #include "timer.h"
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
 #include "ifile.h"
+
+extern CReflector g_Reflector;
+extern CConfigure g_CFG;
+extern CIFileMap g_IFile;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

@@ -19,9 +19,11 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <iostream>
+#include <fstream>
+#include <ctime>
 #include <string.h>
 
-#include "main.h"
 #include "user.h"
 
 

@@ -24,6 +24,7 @@
 
 #include <list>
 #include <mutex>
+#include <memory>
 
 #include "client.h"
 

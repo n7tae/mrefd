@@ -23,9 +23,11 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include "defines.h"
 #include "users.h"
 #include "reflector.h"
+
+extern CReflector g_Reflector;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor

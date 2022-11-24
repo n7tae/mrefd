@@ -23,11 +23,12 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "main.h"
+#include <iostream>
+#include <fstream>
+
 #include <string.h>
 #include "reflector.h"
 #include "peer.h"
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -152,7 +153,7 @@ bool CPeer::IsAlive(void) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // revision helper
 
-int CPeer::GetProtocolRevision(const CVersion &version) const
+uint8_t CPeer::GetProtocolRevision(const CVersion &version) const
 {
 	return version.GetMajor();
 }
