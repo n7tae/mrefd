@@ -417,11 +417,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "<REFLECTOR CALLSIGN=\"" << Callsign << "\">" << std::endl;
 
 	// software version
-#ifdef NO_DHT
-	xmlFile << "<VERSION>" << g_Version << "-nodht" << "</VERSION>" << std::endl;
-#else
-	xmlFile << "<VERSION>" << g_Version << "-dht" << "</VERSION>" << std::endl;
-#endif
+	xmlFile << "<VERSION>" << g_Version << "</VERSION>" << std::endl;
 
 	// linked peers
 	xmlFile << "<PEERS>" << std::endl;

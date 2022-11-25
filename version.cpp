@@ -82,5 +82,8 @@ bool CVersion::operator <(const CVersion &v) const
 std::ostream &operator <<(std::ostream &os, const CVersion &v)
 {
 	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetRevision();
+#ifndef NO_DHT
+	os << "-dht";
+#endif
 	return os;
 };
