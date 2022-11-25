@@ -35,10 +35,10 @@ public:
 	CVersion(uint8_t maj, uint8_t min, uint8_t rev);
 
 	// get
-	uint8_t GetMajor(void) const;
-	uint8_t GetMinor(void) const;
-	uint8_t GetRevision(void) const;
-	int     GetVersion(void) const;
+	int GetMajor(void) const;
+	int GetMinor(void) const;
+	int GetRevision(void) const;
+	int GetVersion(void) const;
 
 	// comparaison operators
 	bool operator ==(const CVersion &v) const;

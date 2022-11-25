@@ -29,19 +29,19 @@ CVersion g_Version(0, 8, 3);	// the global object!
 
 CVersion::CVersion(uint8_t maj, uint8_t min, uint8_t rev) : version(0x10000*maj + 0x100*min + rev) {}
 
-uint8_t CVersion::GetMajor(void) const
+int CVersion::GetMajor(void) const
 {
-	return uint8_t(version / 0x10000);
+	return version / 0x10000;
 }
 
-uint8_t CVersion::GetMinor(void) const
+int CVersion::GetMinor(void) const
 {
-	return uint8_t(version / 0x100 % 0x100);
+	return version / 0x100 % 0x100;
 }
 
-uint8_t CVersion::GetRevision(void) const
+int CVersion::GetRevision(void) const
 {
-	return uint8_t(version % 100);
+	return version % 0x100;
 }
 
 int CVersion::GetVersion(void)  const
