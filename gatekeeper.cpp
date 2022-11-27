@@ -160,6 +160,7 @@ void CGateKeeper::PutDHTInfo()
 	auto nv = std::make_shared<dht::Value>(rd);
 	Dump("My dht::Value =", nv->data.data(), nv->data.size());
 	nv->user_type.assign("reflector-mrefd-1");
+	nv->id = 0xffffffffffffffffu;
 	nv->sign(privateKey);
 
 	if (! node.isRunning())
@@ -318,13 +319,13 @@ void CGateKeeper::Get(const std::string &cs)
 			}
 			else
 			{
-				std::cerr << "Listen() returned unknown user_type: '" << v->user_type << "'" << std::endl;
+				std::cerr << "Get() returned unknown user_type: '" << v->user_type << "'" << std::endl;
 			}
 			return false;
 		},
 		[](bool success) {
 			if (! success)
-				std::cout << "node.get() was unsuccessful" << std::endl;
+				std::cout << "Get() was unsuccessful" << std::endl;
 		}
 	);
 }
