@@ -775,7 +775,7 @@ void CProtocol::HandlePeerLinks(void)
 			}
 			else // m_Ip is not set!
 			{
-				g_Reflector.Get(item.GetCallsign().GetCS());
+				g_Reflector.GetDHTConfig(item.GetCallsign().GetCS());
 			}
 #endif
 		}
@@ -787,7 +787,7 @@ void CProtocol::HandlePeerLinks(void)
 #ifndef NO_DHT
 	if (publish)
 	{
-		g_Reflector.PutDHTInfo();
+		g_Reflector.PutDHTPeers();
 		publish = false;
 	}
 #endif

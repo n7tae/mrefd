@@ -251,12 +251,12 @@ char *CIFileMap::ToUpper(char *str)
 }
 
 #ifndef NO_DHT
-void CIFileMap::Update(const std::string &cmods, const std::string &cs, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods)
+void CIFileMap::Update(const std::string &cs, const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods)
 {
 	auto it = m_InterlinkMap.find(cs);
 	if (m_InterlinkMap.end() == it)
 	{
-		std::cerr << "Can't Update ListenMap item '" << cs << "' because it doesn't exist!";
+		std::cerr << "Can't Update CIFileMap item '" << cs << "' because it doesn't exist!";
 	}
 	else
 	{

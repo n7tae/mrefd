@@ -108,6 +108,9 @@ bool CReflector::Start(const char *cfgfilename)
 
 	// start the reporting threads
 	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
+#ifndef NO_DHT
+	PutDHTConfig();
+#endif
 
 	return false;
 }
@@ -483,50 +486,52 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "</REFLECTOR>" << std::endl;
 }
 
+// DHT put() and get()
 #ifndef NO_DHT
-void CReflector::PutDHTInfo()
+void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SReflectorData1 rd;
-	rd.cs.assign(cs);
-	rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
-	rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
-	rd.mods.assign(g_CFG.GetModules());
-	rd.emods.assign(g_CFG.GetEncryptedMods());
-	rd.url.assign(g_CFG.GetURL());
-	rd.email.assign(g_CFG.GetEmailAddr());
-	rd.country.assign(g_CFG.GetCountry());
-	rd.sponsor.assign(g_CFG.GetSponsor());
-	rd.port = (unsigned short)g_CFG.GetPort();
-
+	SReflectorPeers0 p;
 	auto peers = g_Reflector.GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
 		const auto modules((*pit)->GetReflectorModules());
-		rd.peers.emplace_back(std::pair<std::string,std::string>((*pit)->GetCallsign().GetCS(), modules));
+		p.peers.emplace_back(std::pair<std::string,std::string>((*pit)->GetCallsign().GetCS(), modules));
 	}
 	g_Reflector.ReleasePeers();
 
-	auto nv = std::make_shared<dht::Value>(rd);
-	nv->user_type.assign("reflector-mrefd-1");
-	nv->id = 0xffffffffffffffffu;
+	auto nv = std::make_shared<dht::Value>(p);
+	nv->user_type.assign("mrefd-peers-0");
+	nv->id = toUType(EMrefdValueID::Peers);
 	nv->sign(privateKey);
 
-	if (! node.isRunning())
-	{
-		std::cout << "Waiting for node" << std::flush;
+	node.putSigned(
+		dht::InfoHash::get(cs),
+		nv,
+		[](bool success){ std::cout << "PutDHTPeers() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		true
+	);
+}
 
-		unsigned count = 30u;
-		for (; count > 0 && not node.isRunning(); count--)
-		{
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			std::cout << '.' << std::flush;
-		}
-		if (count)
-			std::cout << "done" << std::endl;
-		else
-			std::cout << "Error waiting!" << std::endl;
-	}
+void CReflector::PutDHTConfig()
+{
+	const std::string cs(g_CFG.GetCallsign());
+	SReflectorConfig0 cfg;
+	cfg.cs.assign(cs);
+	cfg.ipv4.assign(g_CFG.GetIPv4ExtAddr());
+	cfg.ipv6.assign(g_CFG.GetIPv6ExtAddr());
+	cfg.mods.assign(g_CFG.GetModules());
+	cfg.emods.assign(g_CFG.GetEncryptedMods());
+	cfg.url.assign(g_CFG.GetURL());
+	cfg.email.assign(g_CFG.GetEmailAddr());
+	cfg.country.assign(g_CFG.GetCountry());
+	cfg.sponsor.assign(g_CFG.GetSponsor());
+	cfg.port = (unsigned short)g_CFG.GetPort();
+
+	auto nv = std::make_shared<dht::Value>(cfg);
+	nv->user_type.assign("mrefd-config-0");
+	nv->id = toUType(EMrefdValueID::Config);
+	nv->sign(privateKey);
 
 	node.putSigned(
 		dht::InfoHash::get(cs),
@@ -536,7 +541,7 @@ void CReflector::PutDHTInfo()
 	);
 }
 
-void CReflector::Get(const std::string &cs)
+void CReflector::GetDHTConfig(const std::string &cs)
 {
 	auto item = g_IFile.FindMapItem(cs);
 	if (nullptr == item)
@@ -545,18 +550,16 @@ void CReflector::Get(const std::string &cs)
 		return;
 	}
 	std::cout << "Getting " << cs << " connection info..." << std::endl;
+
+	dht::Where w;
+	w.id(toUType(EMrefdValueID::Config));
 	node.get(
 		dht::InfoHash::get(cs),
 		[](const std::shared_ptr<dht::Value> &v) {
-			if (0 == v->user_type.compare("reflector-mrefd-0"))
+			if (0 == v->user_type.compare("mrefd-config-0"))
 			{
-				auto rdat = dht::Value::unpack<SReflectorData0>(*v);
-				g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, ""); // TODO: this empty string shoud be "ABCDEFGHIJKLMNOPQRSTUVWXYZ", but we need to wait until everyone catches up
-			}
-			else if (0 == v->user_type.compare("reflector-mrefd-1"))
-			{
-				auto rdat = dht::Value::unpack<SReflectorData1>(*v);
-				g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
+				auto rdat = dht::Value::unpack<SReflectorConfig0>(*v);
+				g_IFile.Update(rdat.cs, rdat.mods, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
 			}
 			else
 			{
@@ -567,7 +570,9 @@ void CReflector::Get(const std::string &cs)
 		[](bool success) {
 			if (! success)
 				std::cout << "Get() was unsuccessful" << std::endl;
-		}
+		},
+		{}, // empty filter
+		w
 	);
 }
 #endif

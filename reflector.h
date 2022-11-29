@@ -74,8 +74,9 @@ public:
 
 #ifndef NO_DHT
 	// Publish DHT
-	void PutDHTInfo();
-	void Get(const std::string &cs);
+	void PutDHTConfig();
+	void PutDHTPeers();
+	void GetDHTConfig(const std::string &cs);
 #endif
 
 protected:
