@@ -1,5 +1,3 @@
-//  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//
 //  Copyright © 2022 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
@@ -21,44 +19,25 @@
 
 #pragma once
 
-#include "callsign.h"
-#include "ip.h"
-#include "bwset.h"
-#include "base.h"
+#include <opendht.h>
 
-////////////////////////////////////////////////////////////////////////////////////////
-// class
-
-class CGateKeeper : public CBase
+struct SReflectorData0
 {
-public:
-	// constructor
-	CGateKeeper();
+	std::string cs, ipv4;
+	std::string ipv6, mods, url, email;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
 
-	// destructor
-	~CGateKeeper();
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, url, email, port, peers);
+};
 
-	// init & clode
-	bool Init(void);
-	void Close(void);
+struct SReflectorData1
+{
+	std::string cs, ipv4;
+	std::string ipv6, mods, emods, url, email;
+	std::string sponsor, country;
+	uint16_t port;
+	std::vector<std::pair<std::string, std::string>> peers;
 
-	// authorizations
-	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
-	bool MayTransmit(const CCallsign &, const CIp &) const;
-
-protected:
-	// thread
-	void Thread();
-
-	// operation helpers
-	bool IsNodeListedOk(const CCallsign &) const;
-	bool IsPeerListedOk(const CCallsign &, const CIp &, const char *) const;
-
-	// data
-	CBWSet   m_NodeWhiteSet;
-	CBWSet   m_NodeBlackSet;
-
-	// thread
-	std::atomic<bool> keep_running;
-	std::future<void> m_Future;
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, port, peers);
 };

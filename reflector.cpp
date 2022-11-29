@@ -33,11 +33,13 @@
 #include "gatekeeper.h"
 #include "configure.h"
 #include "version.h"
+#include "ifile.h"
 
 CReflector g_Reflector;
 extern CGateKeeper g_GateKeeper;
 extern CConfigure g_CFG;
 extern CVersion g_Version;
+extern CIFileMap g_IFile;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -79,6 +81,14 @@ bool CReflector::Start(const char *cfgfilename)
 
 	// init gate keeper. It can only return true!
 	g_GateKeeper.Init();
+
+#ifndef NO_DHT
+	// start the dht instance
+	refID = dht::crypto::generateIdentity(g_CFG.GetCallsign());
+	privateKey = dht::crypto::PrivateKey::generate();
+	node.run(17171, refID, true);
+	node.bootstrap(g_CFG.GetBootstrap(), "17171");
+#endif
 
 	// create protocols
 	if (! m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
@@ -127,6 +137,14 @@ void CReflector::Stop(void)
 
 	// close gatekeeper
 	g_GateKeeper.Close();
+
+#ifndef NO_DHT
+	// kill the DHT
+	node.shutdown({}, true);
+	node.join();
+#endif
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -464,3 +482,92 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// reflector end
 	xmlFile << "</REFLECTOR>" << std::endl;
 }
+
+#ifndef NO_DHT
+void CReflector::PutDHTInfo()
+{
+	const std::string cs(g_CFG.GetCallsign());
+	SReflectorData1 rd;
+	rd.cs.assign(cs);
+	rd.ipv4.assign(g_CFG.GetIPv4ExtAddr());
+	rd.ipv6.assign(g_CFG.GetIPv6ExtAddr());
+	rd.mods.assign(g_CFG.GetModules());
+	rd.emods.assign(g_CFG.GetEncryptedMods());
+	rd.url.assign(g_CFG.GetURL());
+	rd.email.assign(g_CFG.GetEmailAddr());
+	rd.country.assign(g_CFG.GetCountry());
+	rd.sponsor.assign(g_CFG.GetSponsor());
+	rd.port = (unsigned short)g_CFG.GetPort();
+
+	auto peers = g_Reflector.GetPeers();
+	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
+	{
+		const auto modules((*pit)->GetReflectorModules());
+		rd.peers.emplace_back(std::pair<std::string,std::string>((*pit)->GetCallsign().GetCS(), modules));
+	}
+	g_Reflector.ReleasePeers();
+
+	auto nv = std::make_shared<dht::Value>(rd);
+	nv->user_type.assign("reflector-mrefd-1");
+	nv->id = 0xffffffffffffffffu;
+	nv->sign(privateKey);
+
+	if (! node.isRunning())
+	{
+		std::cout << "Waiting for node" << std::flush;
+
+		unsigned count = 30u;
+		for (; count > 0 && not node.isRunning(); count--)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout << '.' << std::flush;
+		}
+		if (count)
+			std::cout << "done" << std::endl;
+		else
+			std::cout << "Error waiting!" << std::endl;
+	}
+
+	node.putSigned(
+		dht::InfoHash::get(cs),
+		nv,
+		[](bool success){ std::cout << "PutDHTInfo() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		true
+	);
+}
+
+void CReflector::Get(const std::string &cs)
+{
+	auto item = g_IFile.FindMapItem(cs);
+	if (nullptr == item)
+	{
+		std::cerr << "Can't Listen() for " << cs << " because it doesn't exist" << std::endl;
+		return;
+	}
+	std::cout << "Getting " << cs << " connection info..." << std::endl;
+	node.get(
+		dht::InfoHash::get(cs),
+		[](const std::shared_ptr<dht::Value> &v) {
+			if (0 == v->user_type.compare("reflector-mrefd-0"))
+			{
+				auto rdat = dht::Value::unpack<SReflectorData0>(*v);
+				g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, ""); // TODO: this empty string shoud be "ABCDEFGHIJKLMNOPQRSTUVWXYZ", but we need to wait until everyone catches up
+			}
+			else if (0 == v->user_type.compare("reflector-mrefd-1"))
+			{
+				auto rdat = dht::Value::unpack<SReflectorData1>(*v);
+				g_IFile.Update(rdat.mods, rdat.cs, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
+			}
+			else
+			{
+				std::cerr << "Get() returned unknown user_type: '" << v->user_type << "'" << std::endl;
+			}
+			return false;
+		},
+		[](bool success) {
+			if (! success)
+				std::cout << "Get() was unsuccessful" << std::endl;
+		}
+	);
+}
+#endif

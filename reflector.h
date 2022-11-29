@@ -31,17 +31,9 @@
 #include "packetstream.h"
 #include "notificationqueue.h"
 
-
-////////////////////////////////////////////////////////////////////////////////////////
-// define
-
-// event defines
-#define EVENT_NONE      0
-#define EVENT_CLIENTS   1
-#define EVENT_USERS     2
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
+#ifndef NO_DHT
+#include "reflectordht.h"
+#endif
 
 class CReflector
 {
@@ -80,6 +72,12 @@ public:
 	void OnStreamOpen(const CCallsign &);
 	void OnStreamClose(const CCallsign &);
 
+#ifndef NO_DHT
+	// Publish DHT
+	void PutDHTInfo();
+	void Get(const std::string &cs);
+#endif
+
 protected:
 	// threads
 	void RouterThread(std::shared_ptr<CPacketStream>);
@@ -109,4 +107,11 @@ protected:
 
 	// notifications
 	CNotificationQueue  m_Notifications;
+
+	// Distributed Hash Table
+#ifndef NO_DHT
+	dht::DhtRunner node;
+	dht::crypto::Identity refID;
+	dht::crypto::PrivateKey privateKey;
+#endif
 };
