@@ -50,6 +50,8 @@ public:
 	const CCallsign &GetCallsign(void) const { return m_Callsign; }
 	const CIp &GetIp(void) const             { return m_Ip; }
 	char GetModule(void) const               { return m_Callsign.GetModule(); }
+	std::time_t GetConnectTime(void) const   { return m_ConnectTime; }
+	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
 	bool HasReflectorModule(void) const      { return m_ReflectorModule != ' '; }
 	char GetReflectorModule(void) const      { return m_ReflectorModule; }
 

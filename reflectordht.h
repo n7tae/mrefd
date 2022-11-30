@@ -24,16 +24,26 @@
 template<typename E> constexpr auto toUType(E enumerator) noexcept
 {
 	return static_cast<std::underlying_type_t<E>>(enumerator);
-}
+} // Item #10 in "Effective Modern C++", by Scott Meyers, O'REILLY
 
-enum class EMrefdValueID : uint64_t { Config=1, Peers=2 };
-enum class EMrefdPeerFields : int { callsign, modules, connecttime, lastheardtime };
+enum class EMrefdValueID : uint64_t { Config=1, Peers=2, Clients=3 };
 
+using PeerTuple = std::tuple<std::string, std::string, std::time_t, std::time_t>;
+enum class EMrefdPeerFields { Callsign, Modules, ConnectTime, LastHeardTime };
 struct SReflectorPeers0
 {
-	std::list<std::tuple<std::string, std::string, std::time_t, std::time_t>> peers;
+	std::list<PeerTuple> peers;
 
-	MSGPACK_DEFINE(peers);
+	MSGPACK_DEFINE(peers)
+};
+
+using ClientTuple = std::tuple<std::string, std::string, char, std::time_t, std::time_t>;
+enum class EMrefdClientFields { Callsign, Ip, Module, ConnectTime, LastHeardTime };
+struct SReflectorClients0
+{
+	std::list<ClientTuple> clients;
+
+	MSGPACK_DEFINE(clients)
 };
 
 struct SReflectorConfig0
@@ -41,5 +51,5 @@ struct SReflectorConfig0
 	std::string cs, ipv4, ipv6, mods, emods, url, email, sponsor, country;
 	uint16_t port;
 
-	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, port);
+	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, port)
 };

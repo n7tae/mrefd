@@ -76,6 +76,7 @@ public:
 	// Publish DHT
 	void PutDHTConfig();
 	void PutDHTPeers();
+	void PutDHTClients();
 	void GetDHTConfig(const std::string &cs);
 #endif
 

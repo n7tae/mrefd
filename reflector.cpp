@@ -492,13 +492,12 @@ void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
 	SReflectorPeers0 p;
-	auto peers = g_Reflector.GetPeers();
+	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
-		const auto modules((*pit)->GetReflectorModules());
-		p.peers.emplace_back(std::tuple<std::string, std::string, std::time_t, std::time_t>((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime(), (*pit)->GetLastHeardTime()));
+		p.peers.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime(), (*pit)->GetLastHeardTime());
 	}
-	g_Reflector.ReleasePeers();
+	ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(p);
 	nv->user_type.assign("mrefd-peers-0");
@@ -509,6 +508,30 @@ void CReflector::PutDHTPeers()
 		dht::InfoHash::get(cs),
 		nv,
 		[](bool success){ std::cout << "PutDHTPeers() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		true	// permanent!
+	);
+}
+
+void CReflector::PutDHTClients()
+{
+	const std::string cs(g_CFG.GetCallsign());
+	SReflectorClients0 p;
+	auto clients = GetClients();
+	for (auto cit=clients->cbegin(); cit!=clients->cend(); cit++)
+	{
+		p.clients.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
+	}
+	ReleasePeers();
+
+	auto nv = std::make_shared<dht::Value>(p);
+	nv->user_type.assign("mrefd-clients-0");
+	nv->id = toUType(EMrefdValueID::Clients);
+	nv->sign(privateKey);
+
+	node.putSigned(
+		dht::InfoHash::get(cs),
+		nv,
+		[](bool success){ std::cout << "PutDHTClients() " << (success ? "successful" : "unsuccessful") << std::endl; },
 		true	// permanent!
 	);
 }
