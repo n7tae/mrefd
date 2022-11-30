@@ -27,19 +27,18 @@ template<typename E> constexpr auto toUType(E enumerator) noexcept
 }
 
 enum class EMrefdValueID : uint64_t { Config=1, Peers=2 };
+enum class EMrefdPeerFields : int { callsign, modules, connecttime, lastheardtime };
 
 struct SReflectorPeers0
 {
-	std::vector<std::pair<std::string, std::string>> peers;
+	std::list<std::tuple<std::string, std::string, std::time_t, std::time_t>> peers;
 
 	MSGPACK_DEFINE(peers);
 };
 
 struct SReflectorConfig0
 {
-	std::string cs, ipv4;
-	std::string ipv6, mods, emods, url, email;
-	std::string sponsor, country;
+	std::string cs, ipv4, ipv6, mods, emods, url, email, sponsor, country;
 	uint16_t port;
 
 	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, port);

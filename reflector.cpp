@@ -496,7 +496,7 @@ void CReflector::PutDHTPeers()
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
 		const auto modules((*pit)->GetReflectorModules());
-		p.peers.emplace_back(std::pair<std::string,std::string>((*pit)->GetCallsign().GetCS(), modules));
+		p.peers.emplace_back(std::tuple<std::string, std::string, std::time_t, std::time_t>((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime(), (*pit)->GetLastHeardTime()));
 	}
 	g_Reflector.ReleasePeers();
 
@@ -509,7 +509,7 @@ void CReflector::PutDHTPeers()
 		dht::InfoHash::get(cs),
 		nv,
 		[](bool success){ std::cout << "PutDHTPeers() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		true
+		true	// permanent!
 	);
 }
 
