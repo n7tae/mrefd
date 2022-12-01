@@ -21,6 +21,7 @@
 
 #include <opendht.h>
 
+/* HELPERS */
 template<typename E> constexpr auto toUType(E enumerator) noexcept
 {
 	return static_cast<std::underlying_type_t<E>>(enumerator);
@@ -28,25 +29,27 @@ template<typename E> constexpr auto toUType(E enumerator) noexcept
 
 enum class EMrefdValueID : uint64_t { Config=1, Peers=2, Clients=3 };
 
+/* PEERS */
 using PeerTuple = std::tuple<std::string, std::string, std::time_t, std::time_t>;
 enum class EMrefdPeerFields { Callsign, Modules, ConnectTime, LastHeardTime };
-struct SReflectorPeers0
+struct SMrefdPeers0
 {
 	std::list<PeerTuple> peers;
 
 	MSGPACK_DEFINE(peers)
 };
 
+/* Clients */
 using ClientTuple = std::tuple<std::string, std::string, char, std::time_t, std::time_t>;
 enum class EMrefdClientFields { Callsign, Ip, Module, ConnectTime, LastHeardTime };
-struct SReflectorClients0
+struct SMrefdClients0
 {
 	std::list<ClientTuple> clients;
 
 	MSGPACK_DEFINE(clients)
 };
 
-struct SReflectorConfig0
+struct SMrefdConfig0
 {
 	std::string cs, ipv4, ipv6, mods, emods, url, email, sponsor, country;
 	uint16_t port;

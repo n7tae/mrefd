@@ -491,7 +491,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SReflectorPeers0 p;
+	SMrefdPeers0 p;
 	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
@@ -515,7 +515,7 @@ void CReflector::PutDHTPeers()
 void CReflector::PutDHTClients()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SReflectorClients0 p;
+	SMrefdClients0 p;
 	auto clients = GetClients();
 	for (auto cit=clients->cbegin(); cit!=clients->cend(); cit++)
 	{
@@ -539,7 +539,7 @@ void CReflector::PutDHTClients()
 void CReflector::PutDHTConfig()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SReflectorConfig0 cfg;
+	SMrefdConfig0 cfg;
 	cfg.cs.assign(cs);
 	cfg.ipv4.assign(g_CFG.GetIPv4ExtAddr());
 	cfg.ipv6.assign(g_CFG.GetIPv6ExtAddr());
@@ -581,7 +581,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 		[](const std::shared_ptr<dht::Value> &v) {
 			if (0 == v->user_type.compare("mrefd-config-0"))
 			{
-				auto rdat = dht::Value::unpack<SReflectorConfig0>(*v);
+				auto rdat = dht::Value::unpack<SMrefdConfig0>(*v);
 				g_IFile.Update(rdat.cs, rdat.mods, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
 			}
 			else
