@@ -209,7 +209,7 @@ void CProtocol::Task(void)
 			if ( g_GateKeeper.MayLink(cs, ip, mods) )
 			{
 				// already connected ?
-				CPeers *peers = g_Reflector.GetPeers();
+				auto peers = g_Reflector.GetPeers();
 				if ( nullptr == peers->FindPeer(cs, ip) )
 				{
 					// create the new peer
@@ -266,7 +266,7 @@ void CProtocol::Task(void)
 		{
 			if (cs.GetCS(4).compare("M17-")) {
 				// find all clients with that callsign & ip and keep them alive
-				CClients *clients = g_Reflector.GetClients();
+				auto clients = g_Reflector.GetClients();
 				auto it = clients->begin();
 				std::shared_ptr<CClient>client = nullptr;
 				while (nullptr != (client = clients->FindNextClient(cs, ip, it)))
@@ -278,8 +278,8 @@ void CProtocol::Task(void)
 			else
 			{
 				// find peer
-				CPeers *peers = g_Reflector.GetPeers();
-				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
+				auto peers = g_Reflector.GetPeers();
+				auto peer = peers->FindPeer(ip);
 				if ( peer )
 				{
 					// keep it alive
@@ -293,8 +293,8 @@ void CProtocol::Task(void)
 			std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
 			if (cs.GetCS(4).compare("M17-")) {
 				// find the regular client & remove it
-				CClients *clients = g_Reflector.GetClients();
-				std::shared_ptr<CClient>client = clients->FindClient(ip);
+				auto clients = g_Reflector.GetClients();
+				auto client = clients->FindClient(ip);
 				if ( client != nullptr )
 				{
 					// ack disconnect packet
@@ -308,8 +308,8 @@ void CProtocol::Task(void)
 			else
 			{
 				// find the peer and remove it
-				CPeers *peers = g_Reflector.GetPeers();
-				std::shared_ptr<CPeer>peer = peers->FindPeer(ip);
+				auto peers = g_Reflector.GetPeers();
+				auto peer = peers->FindPeer(ip);
 				if ( peer )
 				{
 					// remove it from reflector peer list
@@ -580,7 +580,7 @@ void CProtocol::HandleQueue(void)
 		m_Queue.pop();
 
 		// push it to all our clients linked to the module and who is not streaming in
-		CClients *clients = g_Reflector.GetClients();
+		auto clients = g_Reflector.GetClients();
 		auto it = clients->begin();
 		std::shared_ptr<CClient>client = nullptr;
 		while (nullptr != (client = clients->FindNextClient(it)))
@@ -623,7 +623,7 @@ void CProtocol::HandleKeepalives(void)
 	EncodeKeepAlivePacket(keepalive);
 
 	// iterate on clients
-	CClients *clients = g_Reflector.GetClients();
+	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	std::shared_ptr<CClient> client;
 	while ( nullptr != (client = clients->FindNextClient(it)) )
@@ -644,7 +644,7 @@ void CProtocol::HandleKeepalives(void)
 		// otherwise check if still with us
 		else if ( !client->IsAlive() )
 		{
-			CPeers *peers = g_Reflector.GetPeers();
+			auto peers = g_Reflector.GetPeers();
 			auto peer = peers->FindPeer(client->GetCallsign(), client->GetIp());
 			if ( peer && (peer->GetReflectorModules()[0] == client->GetReflectorModule()) )
 			{
@@ -668,7 +668,7 @@ void CProtocol::HandleKeepalives(void)
 	g_Reflector.ReleaseClients();
 
 	// iterate on peers
-	CPeers *peers = g_Reflector.GetPeers();
+	auto peers = g_Reflector.GetPeers();
 	auto pit = peers->begin();
 	std::shared_ptr<CPeer> peer;
 	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
@@ -705,7 +705,7 @@ void CProtocol::HandlePeerLinks(void)
 {
 	// get the list of peers
 	g_IFile.Lock();
-	CPeers *peers = g_Reflector.GetPeers();
+	auto peers = g_Reflector.GetPeers();
 
 	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
@@ -809,7 +809,7 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 	else
 	{
 		// find this client
-		std::shared_ptr<CClient> client = g_Reflector.GetClients()->FindClient(ip);
+		auto client = g_Reflector.GetClients()->FindClient(ip);
 		if ( client )
 		{
 			// save the source and destination module for Hearing().

@@ -443,7 +443,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// linked peers
 	xmlFile << "<PEERS>" << std::endl;
 	// lock
-	CPeers *peers = GetPeers();
+	auto peers = GetPeers();
 	// iterate on peers
 	for ( auto pit=peers->cbegin(); pit!=peers->cend(); pit++ )
 	{
@@ -456,7 +456,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// linked nodes
 	xmlFile << "<NODES>" << std::endl;
 	// lock
-	CClients *clients = GetClients();
+	auto clients = GetClients();
 	// iterate on clients
 	for ( auto cit=clients->cbegin(); cit!=clients->cend(); cit++ )
 	{
