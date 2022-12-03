@@ -559,7 +559,7 @@ void CReflector::PutDHTConfig()
 	node.putSigned(
 		dht::InfoHash::get(cs),
 		nv,
-		[](bool success){ std::cout << "PutDHTInfo() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		[](bool success){ std::cout << "PutDHTConfig() " << (success ? "successful" : "unsuccessful") << std::endl; },
 		true
 	);
 }

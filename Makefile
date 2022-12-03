@@ -18,24 +18,31 @@
 # if you change these locations, make sure the sgs.service file is updated!
 # you will also break hard coded paths in the dashboard file, index.php.
 
-
-include mrefd.mk
-
 EXE = mrefd
 
-# if you make changed in these two variable, you'll need to change things
-# in other files as well as the systemd service file.
+# some default values
+USESYMLINK = false
 BINDIR = /usr/local/bin
 CFGDIR = /usr/local/etc
+DEBUG = false
+DHT = true
+
+include $(EXE).mk
+
+ifeq ($(USESYMLINK), true)
+CPORLN = cp -f
+else
+CPORLN = ln -s
+endif
 
 CFLAGS += -c -W -std=c++17 -MMD -c
 LDFLAGS=-pthread
 
-ifeq ($(debug), true)
+ifeq ($(DEBUG), true)
 CFLAGS += -ggdb3
 endif
 
-ifeq ($(dht), true)
+ifeq ($(DHT), true)
 LDFLAGS += -lopendht
 else
 CFLAGS += -DNO_DHT
@@ -67,11 +74,11 @@ clean :
 -include $(DEPS)
 
 install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink $(EXE).cfg
-	ln -s $(shell pwd)/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
-	ln -s $(shell pwd)/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
-	ln -s $(shell pwd)/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
-	ln -s $(shell pwd)/$(EXE).cfg $(CFGDIR)/$(EXE).cfg
-	cp -f systemd/$(EXE).service /etc/systemd/system/
+	$(CPORLN) $(shell pwd)/$(EXE).blacklist $(CFGDIR)/$(EXE).blacklist
+	$(CPORLN) $(shell pwd)/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
+	$(CPORLN) $(shell pwd)/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
+	$(CPORLN) $(shell pwd)/$(EXE).cfg $(CFGDIR)/$(EXE).cfg
+	sed -e "s/XXX/$(CFGDIR)/" -e "s/YYY/$(EXE)/" systemd/$(EXE).service > /etc/systemd/system/$(EXE).service
 	cp -f $(EXE) $(BINDIR)
 	systemctl enable $(EXE).service
 	systemctl daemon-reload
