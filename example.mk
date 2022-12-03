@@ -5,7 +5,7 @@
 # files and you want to copy instead of link set this to "false"
 USESYMLINK = true
 
-# This is the folder is where the executable file will be install.
+# This is the folder where the executable file will be install.
 BINDIR = /usr/local/bin
 
 # this is the folder where config files (or symbolic links) are located
