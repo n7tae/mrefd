@@ -521,7 +521,7 @@ void CReflector::PutDHTClients()
 	{
 		p.clients.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
 	}
-	ReleasePeers();
+	ReleaseClients();
 
 	auto nv = std::make_shared<dht::Value>(p);
 	nv->user_type.assign("mrefd-clients-0");
