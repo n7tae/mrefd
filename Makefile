@@ -78,7 +78,7 @@ install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink $(EXE).cfg
 	$(CPORLN) $(shell pwd)/$(EXE).whitelist $(CFGDIR)/$(EXE).whitelist
 	$(CPORLN) $(shell pwd)/$(EXE).interlink $(CFGDIR)/$(EXE).interlink
 	$(CPORLN) $(shell pwd)/$(EXE).cfg $(CFGDIR)/$(EXE).cfg
-	sed -e "s/XXX/$(CFGDIR)/" -e "s/YYY/$(EXE)/" systemd/mrefd.service > /etc/systemd/system/$(EXE).service
+	sed -e "s#XXX#$(CFGDIR)#" -e "s#YYY#$(EXE)#" systemd/mrefd.service > /etc/systemd/system/$(EXE).service
 	cp -f $(EXE) $(BINDIR)
 	systemctl enable $(EXE).service
 	systemctl daemon-reload
