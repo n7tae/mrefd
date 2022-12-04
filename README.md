@@ -14,6 +14,10 @@ The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefda
 
 Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
 
+## A few words about valid callsign secondary suffixes
+
+There are two callsign seconday suffixes allowed by *mrefd*. Either must follow the client station's callsign immediately (without any space between the callsign and the secondary suffix). The first, usually used to differentiate multiple stations, begins with a dash, "-", followed by a single alphanumeric character. The second, usually used to indicate a temporary change in locations begins with a stroke, "/", and followed by up to three alphanumeric characters. Keep in mind that M17 callsigns are limited to nine characters and on some client software, the ninth charater is reserved for a module. Because of the space limitation and the fact that the majority of hams have six character callsigns, *mrefd* will reject connections from callsigns using *both* the dash and stroke secondary suffixes.
+
 ## Usage
 
 The packages which are described in this document are designed to install server software which is used for the digital voice network infrastructure. It requires a 24/7 internet connection which can support 20 voice streams or more to connect repeaters and hot-spots and other digitial voice clients!
@@ -159,7 +163,7 @@ It should be fairly straightforward to install multiple mrefd instances on a sin
 
 - The reflector executable name is defined in the Makefile at the line "EXE=mrefd".
 - The configuration file is read at start-up and defined in mrefd.service file. Each instance would require a different service file.
-- Each instance will need its own support files with unique paths to those files.
+- Each instance will need its own config files with unique paths to those files.
 - Each instance will need a unique url so that each will have its own webpage.
 - Need to add unix sockets for interlinking between instances.
 
