@@ -131,7 +131,7 @@ To view the mrefd log:
 sudo journalctl -u mrefd -f
 ```
 
-The blacklist, whitelist and interlink files can be modified in real time while xrfd is executing and the reflector will update itself within a few seconds. Edit the files in build directory. While mrefd accesses the configuration files in /usr/local/etc, these files are symbolically linked back to your build directory.
+The blacklist, whitelist and interlink files can be modified in real time while xrfd is executing and the reflector will update itself within a few seconds. If `USESYMLINK` is true in your mrefd.mk file, then you can edit the files in your build directory. Otherwise, you will need to edit the files in the `CFGDIR` folder.
 
 ### Install the Dashboard
 
