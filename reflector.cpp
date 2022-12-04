@@ -519,7 +519,7 @@ void CReflector::PutDHTClients()
 	auto clients = GetClients();
 	for (auto cit=clients->cbegin(); cit!=clients->cend(); cit++)
 	{
-		p.clients.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
+		p.clients.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetReflectorModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
 	}
 	ReleaseClients();
 
