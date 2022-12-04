@@ -243,6 +243,9 @@ void CProtocol::Task(void)
 					// create the client and append
 					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
 					g_Reflector.ReleaseClients();
+#ifndef NO_DHT
+					g_Reflector.PutDHTClients();
+#endif
 				}
 				else
 				{
@@ -295,6 +298,7 @@ void CProtocol::Task(void)
 				// find the regular client & remove it
 				auto clients = g_Reflector.GetClients();
 				auto client = clients->FindClient(ip);
+				bool removed_client = false;
 				if ( client != nullptr )
 				{
 					// ack disconnect packet
@@ -302,8 +306,13 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 					// and remove it
 					clients->RemoveClient(client);
+					removed_client = true;
 				}
 				g_Reflector.ReleaseClients();
+#ifndef NO_DHT
+				if (removed_client)
+					g_Reflector.PutDHTClients();
+#endif
 			}
 			else
 			{
@@ -626,6 +635,7 @@ void CProtocol::HandleKeepalives(void)
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	std::shared_ptr<CClient> client;
+	bool removed_client = false;
 	while ( nullptr != (client = clients->FindNextClient(it)) )
 	{
 		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
@@ -660,12 +670,17 @@ void CProtocol::HandleKeepalives(void)
 				// remove it
 				std::cout << "Client " << client->GetCallsign() << " keepalive timeout" << std::endl;
 				clients->RemoveClient(client);
+				removed_client = true;
 			}
 			g_Reflector.ReleasePeers();
 		}
 
 	}
 	g_Reflector.ReleaseClients();
+#ifndef NO_DHT
+	if (removed_client)
+		g_Reflector.PutDHTClients();
+#endif
 
 	// iterate on peers
 	auto peers = g_Reflector.GetPeers();
@@ -788,6 +803,7 @@ void CProtocol::HandlePeerLinks(void)
 	if (publish)
 	{
 		g_Reflector.PutDHTPeers();
+		g_Reflector.PutDHTClients();
 		publish = false;
 	}
 #endif

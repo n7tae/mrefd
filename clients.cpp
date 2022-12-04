@@ -76,9 +76,6 @@ void CClients::AddClient(std::shared_ptr<CClient> client)
 	std::cout << std::endl;
 	// notify
 	g_Reflector.OnClientsChanged();
-#ifndef NO_DTH
-	g_Reflector.PutDHTClients();
-#endif
 }
 
 void CClients::RemoveClient(std::shared_ptr<CClient> client)
@@ -103,9 +100,6 @@ void CClients::RemoveClient(std::shared_ptr<CClient> client)
 				m_Clients.erase(it);
 				// notify
 				g_Reflector.OnClientsChanged();
-#ifndef NO_DHT
-				g_Reflector.PutDHTClients();
-#endif
 				break;
 			}
 		}
