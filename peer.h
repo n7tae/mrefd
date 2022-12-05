@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include <list>
+#include <memory>
+
 #include "version.h"
 #include "timer.h"
 #include "ip.h"
@@ -56,7 +59,6 @@ public:
 	const CIp &GetIp(void) const                 { return m_Ip; }
 	const std::string &GetReflectorModules(void) { return m_ReflectorModules; }
 	std::time_t GetConnectTime(void)             { return m_ConnectTime; }
-	std::time_t GetLastHeardTime(void)           { return m_LastHeardTime; }
 
 	// set
 

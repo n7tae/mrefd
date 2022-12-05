@@ -491,16 +491,16 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdPeers0 p;
+	SMrefdPeers1 p;
 	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
-		p.peers.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime(), (*pit)->GetLastHeardTime());
+		p.peers.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime());
 	}
 	ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(p);
-	nv->user_type.assign("mrefd-peers-0");
+	nv->user_type.assign("mrefd-peers-1");
 	nv->id = toUType(EMrefdValueID::Peers);
 	nv->sign(privateKey);
 

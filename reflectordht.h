@@ -30,9 +30,9 @@ template<typename E> constexpr auto toUType(E enumerator) noexcept
 enum class EMrefdValueID : uint64_t { Config=1, Peers=2, Clients=3 };
 
 /* PEERS */
-using PeerTuple = std::tuple<std::string, std::string, std::time_t, std::time_t>;
-enum class EMrefdPeerFields { Callsign, Modules, ConnectTime, LastHeardTime };
-struct SMrefdPeers0
+using PeerTuple = std::tuple<std::string, std::string, std::time_t>;
+enum class EMrefdPeerFields { Callsign, Modules, ConnectTime };
+struct SMrefdPeers1
 {
 	std::list<PeerTuple> peers;
 
