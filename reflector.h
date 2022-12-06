@@ -113,7 +113,6 @@ protected:
 	// Distributed Hash Table
 #ifndef NO_DHT
 	dht::DhtRunner node;
-	dht::crypto::Identity refID;
-	dht::crypto::PrivateKey privateKey;
+	dht::InfoHash refhash;
 #endif
 };

@@ -84,9 +84,8 @@ bool CReflector::Start(const char *cfgfilename)
 
 #ifndef NO_DHT
 	// start the dht instance
-	refID = dht::crypto::generateIdentity(g_CFG.GetCallsign());
-	privateKey = dht::crypto::PrivateKey::generate();
-	node.run(17171, refID, true);
+	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
+	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true);
 	node.bootstrap(g_CFG.GetBootstrap(), "17171");
 #endif
 
@@ -143,6 +142,9 @@ void CReflector::Stop(void)
 
 #ifndef NO_DHT
 	// kill the DHT
+	node.cancelPut(refhash, toUType(EMrefdValueID::Config));
+	node.cancelPut(refhash, toUType(EMrefdValueID::Peers));
+	node.cancelPut(refhash, toUType(EMrefdValueID::Clients));
 	node.shutdown({}, true);
 	node.join();
 #endif
@@ -502,10 +504,9 @@ void CReflector::PutDHTPeers()
 	auto nv = std::make_shared<dht::Value>(p);
 	nv->user_type.assign("mrefd-peers-1");
 	nv->id = toUType(EMrefdValueID::Peers);
-	nv->sign(privateKey);
 
 	node.putSigned(
-		dht::InfoHash::get(cs),
+		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTPeers() " << (success ? "successful" : "unsuccessful") << std::endl; },
 		true	// permanent!
@@ -526,10 +527,9 @@ void CReflector::PutDHTClients()
 	auto nv = std::make_shared<dht::Value>(p);
 	nv->user_type.assign("mrefd-clients-0");
 	nv->id = toUType(EMrefdValueID::Clients);
-	nv->sign(privateKey);
 
 	node.putSigned(
-		dht::InfoHash::get(cs),
+		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTClients() " << (success ? "successful" : "unsuccessful") << std::endl; },
 		true	// permanent!
@@ -554,10 +554,9 @@ void CReflector::PutDHTConfig()
 	auto nv = std::make_shared<dht::Value>(cfg);
 	nv->user_type.assign("mrefd-config-0");
 	nv->id = toUType(EMrefdValueID::Config);
-	nv->sign(privateKey);
 
 	node.putSigned(
-		dht::InfoHash::get(cs),
+		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTConfig() " << (success ? "successful" : "unsuccessful") << std::endl; },
 		true
