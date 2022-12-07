@@ -493,7 +493,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdPeers1 p;
+	SMrefdPeers0 p;
 	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
@@ -502,7 +502,7 @@ void CReflector::PutDHTPeers()
 	ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(p);
-	nv->user_type.assign("mrefd-peers-1");
+	nv->user_type.assign("mrefd-peers-0");
 	nv->id = toUType(EMrefdValueID::Peers);
 
 	node.putSigned(
@@ -536,6 +536,29 @@ void CReflector::PutDHTClients()
 	);
 }
 
+void CReflector::PutDHTUsers()
+{
+	const std::string cs(g_CFG.GetCallsign());
+	SMrefdUsers0 p;
+	auto users = GetUsers();
+	for (auto uit=users->cbegin(); uit!=users->cend(); uit++)
+	{
+		p.users.emplace_back((*uit).GetSource(), std::string((*uit).GetDestination()), (*uit).GetReflector(), (*uit).GetLastHeardTime());
+	}
+	ReleaseUsers();
+
+	auto nv = std::make_shared<dht::Value>(p);
+	nv->user_type.assign("mrefd-users-0");
+	nv->id = toUType(EMrefdValueID::Users);
+
+	node.putSigned(
+		refhash,
+		nv,
+		[](bool success){ std::cout << "PutDHTUsers() " << (success ? "successful" : "unsuccessful") << std::endl; },
+		true	// permanent!
+	);
+}
+
 void CReflector::PutDHTConfig()
 {
 	const std::string cs(g_CFG.GetCallsign());
@@ -549,6 +572,9 @@ void CReflector::PutDHTConfig()
 	cfg.email.assign(g_CFG.GetEmailAddr());
 	cfg.country.assign(g_CFG.GetCountry());
 	cfg.sponsor.assign(g_CFG.GetSponsor());
+	std::ostringstream ss;
+	ss << g_Version;
+	cfg.version.assign(ss.str());
 	cfg.port = (unsigned short)g_CFG.GetPort();
 
 	auto nv = std::make_shared<dht::Value>(cfg);

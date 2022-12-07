@@ -851,6 +851,7 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 				ref.SetModule(d);
 				g_Reflector.GetUsers()->Hearing(s, from, ref);
 				g_Reflector.ReleaseUsers();
+				g_Reflector.PutDHTUsers();
 			}
 
 		}
