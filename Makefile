@@ -30,9 +30,9 @@ DHT = true
 include $(EXE).mk
 
 ifeq ($(USESYMLINK), true)
-CPORLN = cp -f
-else
 CPORLN = ln -s
+else
+CPORLN = cp -f
 endif
 
 CFLAGS += -c -W -std=c++17 -MMD -c
