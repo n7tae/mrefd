@@ -46,6 +46,9 @@ extern CIFileMap g_IFile;
 
 CReflector::CReflector()
 {
+#ifndef NO_DHT
+	peers_put_count = clients_put_count = users_put_count = 0;
+#endif
 	keep_running = true;
 }
 
@@ -488,21 +491,25 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	xmlFile << "</REFLECTOR>" << std::endl;
 }
 
-// DHT put() and get()
 #ifndef NO_DHT
+
+// DHT put() and get()
 void CReflector::PutDHTPeers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdPeers0 p;
+	// load it up
+	SMrefdPeers1 p;
+	time(&p.timestamp);
+	p.sequence = peers_put_count++;
 	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
-		p.peers.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime());
+		p.list.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime());
 	}
 	ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(p);
-	nv->user_type.assign("mrefd-peers-0");
+	nv->user_type.assign("mrefd-peers-1");
 	nv->id = toUType(EMrefdValueID::Peers);
 
 	node.putSigned(
@@ -516,16 +523,18 @@ void CReflector::PutDHTPeers()
 void CReflector::PutDHTClients()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdClients0 p;
+	SMrefdClients1 c;
+	time(&c.timestamp);
+	c.sequence = clients_put_count++;
 	auto clients = GetClients();
 	for (auto cit=clients->cbegin(); cit!=clients->cend(); cit++)
 	{
-		p.clients.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetReflectorModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
+		c.list.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetReflectorModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
 	}
 	ReleaseClients();
 
-	auto nv = std::make_shared<dht::Value>(p);
-	nv->user_type.assign("mrefd-clients-0");
+	auto nv = std::make_shared<dht::Value>(c);
+	nv->user_type.assign("mrefd-clients-1");
 	nv->id = toUType(EMrefdValueID::Clients);
 
 	node.putSigned(
@@ -539,16 +548,18 @@ void CReflector::PutDHTClients()
 void CReflector::PutDHTUsers()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdUsers0 p;
+	SMrefdUsers1 u;
+	time(&u.timestamp);
+	u.sequence = users_put_count++;
 	auto users = GetUsers();
 	for (auto uit=users->cbegin(); uit!=users->cend(); uit++)
 	{
-		p.users.emplace_back((*uit).GetSource(), std::string((*uit).GetDestination()), (*uit).GetReflector(), (*uit).GetLastHeardTime());
+		u.list.emplace_back((*uit).GetSource(), std::string((*uit).GetDestination()), (*uit).GetReflector(), (*uit).GetLastHeardTime());
 	}
 	ReleaseUsers();
 
-	auto nv = std::make_shared<dht::Value>(p);
-	nv->user_type.assign("mrefd-users-0");
+	auto nv = std::make_shared<dht::Value>(u);
+	nv->user_type.assign("mrefd-users-1");
 	nv->id = toUType(EMrefdValueID::Users);
 
 	node.putSigned(
@@ -562,7 +573,8 @@ void CReflector::PutDHTUsers()
 void CReflector::PutDHTConfig()
 {
 	const std::string cs(g_CFG.GetCallsign());
-	SMrefdConfig0 cfg;
+	SMrefdConfig1 cfg;
+	time(&cfg.timestamp);
 	cfg.cs.assign(cs);
 	cfg.ipv4.assign(g_CFG.GetIPv4ExtAddr());
 	cfg.ipv6.assign(g_CFG.GetIPv6ExtAddr());
@@ -578,7 +590,7 @@ void CReflector::PutDHTConfig()
 	cfg.port = (unsigned short)g_CFG.GetPort();
 
 	auto nv = std::make_shared<dht::Value>(cfg);
-	nv->user_type.assign("mrefd-config-0");
+	nv->user_type.assign("mrefd-config-1");
 	nv->id = toUType(EMrefdValueID::Config);
 
 	node.putSigned(
@@ -591,6 +603,8 @@ void CReflector::PutDHTConfig()
 
 void CReflector::GetDHTConfig(const std::string &cs)
 {
+	static SMrefdConfig1 cfg;
+	cfg.timestamp = 0;	// everytime this is called, zero the timestamp
 	auto item = g_IFile.FindMapItem(cs);
 	if (nullptr == item)
 	{
@@ -599,28 +613,45 @@ void CReflector::GetDHTConfig(const std::string &cs)
 	}
 	std::cout << "Getting " << cs << " connection info..." << std::endl;
 
+	// we only want the configuration section of the reflector's document
 	dht::Where w;
 	w.id(toUType(EMrefdValueID::Config));
+
 	node.get(
 		dht::InfoHash::get(cs),
 		[](const std::shared_ptr<dht::Value> &v) {
-			if (0 == v->user_type.compare("mrefd-config-0"))
+			if (0 == v->user_type.compare("mrefd-config-1"))
 			{
-				auto rdat = dht::Value::unpack<SMrefdConfig0>(*v);
-				g_IFile.Update(rdat.cs, rdat.mods, rdat.ipv4, rdat.ipv6, rdat.port, rdat.emods);
+				auto rdat = dht::Value::unpack<SMrefdConfig1>(*v);
+				if (rdat.timestamp > cfg.timestamp)
+				{
+					// the time stamp is the newest so far, so put it in the static cfg struct
+					cfg = dht::Value::unpack<SMrefdConfig1>(*v);
+				}
 			}
 			else
 			{
 				std::cerr << "Get() returned unknown user_type: '" << v->user_type << "'" << std::endl;
 			}
-			return false;
+			return true;	// check all the values returned
 		},
 		[](bool success) {
-			if (! success)
+			if (success)
+			{
+				if (cfg.timestamp)
+				{
+					// if the get() call was successful and there is a nonzero timestamp, then do the update
+					g_IFile.Update(cfg.cs, cfg.mods, cfg.ipv4, cfg.ipv6, cfg.port, cfg.emods);
+				}
+			}
+			else
+			{
 				std::cout << "Get() was unsuccessful" << std::endl;
+			}
 		},
 		{}, // empty filter
-		w
+		w	// just the configuration section
 	);
 }
+
 #endif

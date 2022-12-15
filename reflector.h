@@ -32,7 +32,7 @@
 #include "notificationqueue.h"
 
 #ifndef NO_DHT
-#include "reflectordht.h"
+#include "mrefd-dht-values.h"
 #endif
 
 class CReflector
@@ -115,5 +115,6 @@ protected:
 #ifndef NO_DHT
 	dht::DhtRunner node;
 	dht::InfoHash refhash;
+	unsigned int peers_put_count, clients_put_count, users_put_count;
 #endif
 };

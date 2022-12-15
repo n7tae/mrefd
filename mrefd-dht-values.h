@@ -32,38 +32,45 @@ enum class EMrefdValueID : uint64_t { Config=1, Peers=2, Clients=3, Users=4 };
 /* PEERS */
 using PeerTuple = std::tuple<std::string, std::string, std::time_t>;
 enum class EMrefdPeerFields { Callsign, Modules, ConnectTime };
-struct SMrefdPeers0
+struct SMrefdPeers1
 {
-	std::list<PeerTuple> peers;
+	std::time_t timestamp;
+	unsigned int sequence;
+	std::list<PeerTuple> list;
 
-	MSGPACK_DEFINE(peers)
+	MSGPACK_DEFINE(timestamp, sequence, list)
 };
 
 /* CLIENTS */
 using ClientTuple = std::tuple<std::string, std::string, char, std::time_t, std::time_t>;
 enum class EMrefdClientFields { Callsign, Ip, Module, ConnectTime, LastHeardTime };
-struct SMrefdClients0
+struct SMrefdClients1
 {
-	std::list<ClientTuple> clients;
+	std::time_t timestamp;
+	unsigned int sequence;
+	std::list<ClientTuple> list;
 
-	MSGPACK_DEFINE(clients)
+	MSGPACK_DEFINE(timestamp, sequence, list)
 };
 
 /* USERS */
 using UserTuple = std::tuple<std::string, std::string, std::string, std::time_t>;
 enum class EMrefdUserFields { Source, Destination, Reflector, LastHeardTime };
-struct SMrefdUsers0
+struct SMrefdUsers1
 {
-	std::list<UserTuple> users;
+	std::time_t timestamp;
+	unsigned int sequence;
+	std::list<UserTuple> list;
 
-	MSGPACK_DEFINE(users);
+	MSGPACK_DEFINE(timestamp, sequence, list);
 };
 
 /* CONFIGURATION */
-struct SMrefdConfig0
+struct SMrefdConfig1
 {
+	std::time_t timestamp;
 	std::string cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, version;
 	uint16_t port;
 
-	MSGPACK_DEFINE(cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, version, port)
+	MSGPACK_DEFINE(timestamp, cs, ipv4, ipv6, mods, emods, url, email, sponsor, country, version, port)
 };
