@@ -148,6 +148,7 @@ void CReflector::Stop(void)
 	node.cancelPut(refhash, toUType(EMrefdValueID::Config));
 	node.cancelPut(refhash, toUType(EMrefdValueID::Peers));
 	node.cancelPut(refhash, toUType(EMrefdValueID::Clients));
+	node.cancelPut(refhash, toUType(EMrefdValueID::Users));
 	node.shutdown({}, true);
 	node.join();
 #endif
