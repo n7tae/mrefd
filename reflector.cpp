@@ -152,8 +152,6 @@ void CReflector::Stop(void)
 	node.shutdown({}, true);
 	node.join();
 #endif
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -282,9 +280,6 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 
 void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 {
-	// get our module
-	uint8_t uiModuleId = GetStreamModule(streamIn);
-
 	// get on input queue
 	std::unique_ptr<CPacket> packet;
 
