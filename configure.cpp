@@ -16,7 +16,9 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
+#ifndef NO_DHT
+#include <curl/curl.h>
+#endif
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -57,16 +59,83 @@ static inline void trim(std::string &s) {
     rtrim(s);
 }
 
+#ifndef NO_DHT
+// callback function writes data to a std::ostream
+static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
+{
+	if(userp)
+	{
+		std::ostream& os = *static_cast<std::ostream*>(userp);
+		std::streamsize len = size * nmemb;
+		if(os.write(static_cast<char*>(buf), len))
+			return len;
+	}
+
+	return 0;
+}
+
+static CURLcode curl_read(const std::string& url, std::ostream& os, long timeout = 30)
+{
+	CURLcode code(CURLE_FAILED_INIT);
+	CURL* curl = curl_easy_init();
+
+	if(curl)
+	{
+		if(CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &data_write))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FILE, &os))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_URL, url.c_str())))
+		{
+			code = curl_easy_perform(curl);
+		}
+		curl_easy_cleanup(curl);
+	}
+	return code;
+}
+
+void CConfigure::CurlAddresses(std::string &ipv4, std::string &ipv6)
+{
+	std::ostringstream oss;
+
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	if(CURLE_OK == curl_read("https://ipv4.icanhazip.com", oss))
+	{
+		// Web page successfully written to string
+		ipv4.assign(oss.str());
+		trim(ipv4);
+		oss.str(std::string());
+	}
+
+	if(CURLE_OK == curl_read("https://ipv6.icanhazip.com", oss))
+	{
+		ipv6.assign(oss.str());
+		trim(ipv6);
+	}
+
+	curl_global_cleanup();
+
+	std::cout << "IPv4=" << ipv4 << " IPv6=" << ipv6 << std::endl;
+}
+#endif
+
 bool CConfigure::ReadData(const std::string &path)
 // returns true on failure
 {
-	data.port = 1700U;
+	data.port = 17000U;
 	data.mcclients = false;
 	std::ifstream cfg(path.c_str(), std::ifstream::in);
 	if (! cfg.is_open()) {
 		std::cerr << path << " was not found!" << std::endl;
 		return true;
 	}
+
+#ifndef NO_DHT
+	std::string ipv4, ipv6;
+	CurlAddresses(ipv4, ipv6);
+#endif
 
 	std::string line;
 	while (std::getline(cfg, line)) {
@@ -125,10 +194,18 @@ bool CConfigure::ReadData(const std::string &path)
 #ifndef NO_DHT
 		else if (0 == key.compare("IPv4ExtAddr"))
 		{
+			if (value.compare(ipv4))
+			{
+				std::cout << "WARNING: IPv4ExtAddr '" << value << "' differs from curl result of '" << ipv4 << "'" << std::endl;
+			}
 			data.ipv4extaddr.assign(value);
 		}
 		else if (0 == key.compare("IPv6ExtAddr"))
 		{
+			if (value.compare(ipv4))
+			{
+				std::cout << "WARNING: IPv6ExtAddr '" << value << "' differs from curl result of '" << ipv6 << "'" << std::endl;
+			}
 			data.ipv6extaddr.assign(value);
 		}
 		else if (0 == key.compare("DashboardURL"))
@@ -187,7 +264,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	cfg.close();
 
-	// check the input
+	////////////////////////////// check the input
 
 	bool rval = false;
 
@@ -223,6 +300,11 @@ bool CConfigure::ReadData(const std::string &path)
 	std::cout << "EncryptionAllowed='" << data.encryptedmods << "'" << std::endl;
 
 #ifndef NO_DHT
+	if (data.ipv4extaddr.empty())
+	{
+		data.ipv4extaddr.assign(ipv4);
+	}
+
 	if (data.ipv4bindaddr.empty())
 	{
 		data.ipv4extaddr.clear();
@@ -276,6 +358,11 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 
 #ifndef NO_DHT
+	if (data.ipv6extaddr.empty())
+	{
+		data.ipv6extaddr.assign(ipv6);
+	}
+
 	if (data.ipv6bindaddr.empty())
 	{
 		data.ipv6extaddr.clear();

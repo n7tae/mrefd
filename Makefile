@@ -43,7 +43,7 @@ CFLAGS += -ggdb3
 endif
 
 ifeq ($(DHT), true)
-LDFLAGS += -lopendht
+LDFLAGS += -lopendht -lcurl
 else
 CFLAGS += -DNO_DHT
 endif

@@ -39,12 +39,10 @@ sudo apt upgrade
 ### Required packages (some of these may already be installed)
 
 ```bash
-sudo apt install git
-sudo apt install build-essential
-sudo apt install g++
+sudo apt install git build-essential g++ libcurl4-gnutls-dev
 ```
 
-OpenDHT and gomrefdash both have their own requirements.
+The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT and gomrefdash both have their own requirements.
 
 ### DVIN support (optional, but highly recommended)
 

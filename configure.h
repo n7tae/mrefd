@@ -66,5 +66,8 @@ public:
 	bool               GetMCClients()     const { return data.mcclients;     }
 
 private:
+#ifndef NO_DHT
+	void CurlAddresses(std::string &v4, std::string &v6);
+#endif
 	CFGDATA data;
 };
