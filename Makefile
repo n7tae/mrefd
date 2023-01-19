@@ -20,13 +20,6 @@
 
 EXE = mrefd
 
-# some default values
-USESYMLINK = false
-BINDIR = /usr/local/bin
-CFGDIR = /usr/local/etc
-DEBUG = false
-DHT = true
-
 include $(EXE).mk
 
 ifeq ($(USESYMLINK), true)
