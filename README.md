@@ -8,11 +8,11 @@ The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be con
 
 Encrypted voice streams will pass through an *mrefd* channel, but **only** if they are configured for it.
 
-*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retrieving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection informating. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
+*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retrieving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection information. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
 
 The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefdash.git).
 
-Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
+Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from your locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
 
 ## A few words about valid callsign secondary suffixes
 
@@ -84,7 +84,7 @@ cp config/mrefd.interlink .
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The mrefd reflector will monitor these file and dynamically update itself whenever anything changes. There is no need to stop and restart the reflector.
 
-The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **DVIN** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **DVIN** will provided it, and this information comes directly from the peer. Using the **DVIN** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
+The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **DVIN** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **DVIN** will provide it, and this information comes directly from the peer. Using the **DVIN** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vice versa*.
 
 If your reflector or your desired peer doesn't use **DVIN**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
 
@@ -157,7 +157,7 @@ If, after doing the `git pull`, you see that it's downloaded a new example.cfg f
 
 ## Running multiple instances
 
-It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to me aware of:
+It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to be aware of:
 
 - The reflector executable name is defined in the Makefile at the line "EXE=mrefd".
 - The configuration file is read at start-up and defined in mrefd.service file. Each instance would require a different service file.
