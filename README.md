@@ -1,6 +1,6 @@
 # MREFD
 
-This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevent source files reflect this. The sources are published under GPL Licenses.
+This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevant source files reflect this. The sources are published under GPL Licenses.
 
 ## Introduction
 
@@ -8,7 +8,7 @@ The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be con
 
 Encrypted voice streams will pass through an *mrefd* channel, but **only** if they are configured for it.
 
-*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retreving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection informating. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
+*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retrieving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection informating. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
 
 The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefdash.git).
 
@@ -16,11 +16,11 @@ Only systemd-based operating systems are supported. Debian or Ubuntu is recommen
 
 ## A few words about valid callsign secondary suffixes
 
-There are two callsign seconday suffixes allowed by *mrefd*. Either must follow the client station's callsign immediately (without any space between the callsign and the secondary suffix). The first, usually used to differentiate multiple stations, begins with a dash, "-", followed by a single alphanumeric character. The second, usually used to indicate a temporary change in locations begins with a stroke, "/", and followed by up to three alphanumeric characters. Keep in mind that M17 callsigns are limited to nine characters and on some client software, the ninth charater is reserved for a module. Because of the space limitation and the fact that the majority of hams have six character callsigns, *mrefd* will reject connections from callsigns using *both* the dash and stroke secondary suffixes.
+There are two callsign secondary suffixes allowed by *mrefd*. Either must follow the client station's callsign immediately (without any space between the callsign and the secondary suffix). The first, usually used to differentiate multiple stations, begins with a dash, "-", followed by a single alphanumeric character. The second, usually used to indicate a temporary change in locations begins with a stroke, "/", and followed by up to three alphanumeric characters. Keep in mind that M17 callsigns are limited to nine characters and on some client software, the ninth character is reserved for a module. Because of the space limitation and the fact that the majority of hams have six character callsigns, *mrefd* will reject connections from callsigns using *both* the dash and stroke secondary suffixes.
 
 ## Usage
 
-The packages which are described in this document are designed to install server software which is used for the digital voice network infrastructure. It requires a 24/7 internet connection which can support 20 voice streams or more to connect repeaters and hot-spots and other digitial voice clients!
+The packages which are described in this document are designed to install server software which is used for the digital voice network infrastructure. It requires a 24/7 internet connection which can support 20 voice streams or more to connect repeaters and hot-spots and other digital voice clients!
 
 - The server can build a reflector that support IPv4, IPv6 or both (dual stack).
 - The public IP addresses should have a DNS record which must be published in the common host files.
@@ -90,7 +90,7 @@ If your reflector or your desired peer doesn't use **DVIN**, you can specify the
 
 Inter-linking a channel to more than one other reflector demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
 
-Group adminstration will require coordination among the admins of all involved reflectors. If a group memeber drops out or if a new member wants to join a group, all other group members will need to remove or add a line to their mrefd.interlink file.
+Group administration will require coordination among the admins of all involved reflectors. If a group member drops out or if a new member wants to join a group, all other group members will need to remove or add a line to their mrefd.interlink file.
 
 ### Configuring your reflector
 
@@ -103,9 +103,9 @@ cp example.cfg mrefd.cfg   # while this file sets the run-time configuration
 
 Use your favorite editor to edit mrefd.mk and mrefd.cfg. These file contains comments so it should be obvious what values need changing.
 
-### Compling and installing your system
+### Compiling and installing your system
 
-After you have written your configutation files, you can build and install your system:
+After you have written your configuration files, you can build and install your system:
 
 ```bash
 make && sudo make install
@@ -113,7 +113,7 @@ make && sudo make install
 
 Use this command to compile and install your system. Use `sudo make uninstall` to uninstall mrefd.
 
-### Stoping and starting the service manually
+### Stopping and starting the service manually
 
 To stop the execution of mrefd:
 

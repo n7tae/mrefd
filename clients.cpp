@@ -84,7 +84,7 @@ void CClients::RemoveClient(std::shared_ptr<CClient> client)
 	bool found = false;
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		// compare objetc pointers
+		// compare object pointers
 		if ( *it == client )
 		{
 			// found it !

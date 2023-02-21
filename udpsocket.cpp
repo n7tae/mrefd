@@ -43,7 +43,7 @@ CUdpSocket::~CUdpSocket()
 // returns true on error
 bool CUdpSocket::Open(const CIp &Ip)
 {
-	// check for a vaild family
+	// check for a valid family
 	if (AF_UNSPEC == Ip.GetFamily())
 		return true;
 

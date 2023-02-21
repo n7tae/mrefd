@@ -29,7 +29,7 @@
  * Description
  * -----------
  * The source file contains routines which calculate the CCITT CRC
- * values for an incomming byte string.
+ * values for an incoming byte string.
  */
 
 #pragma once
