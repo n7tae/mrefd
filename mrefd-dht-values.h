@@ -62,7 +62,7 @@ struct SMrefdUsers1
 	unsigned int sequence;
 	std::list<UserTuple> list;
 
-	MSGPACK_DEFINE(timestamp, sequence, list);
+	MSGPACK_DEFINE(timestamp, sequence, list)
 };
 
 /* CONFIGURATION */

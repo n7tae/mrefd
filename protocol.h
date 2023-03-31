@@ -138,9 +138,6 @@ protected:
 	CTimer m_LastKeepaliveTime;
 	CTimer m_LastPeersLinkTime;
 
-	// for PutDHTInfo
-	bool publish;
-
 private:
 	std::regex clientRegEx, peerRegEx;
 	CCRC crc;

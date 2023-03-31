@@ -29,7 +29,6 @@
 #include "peers.h"
 #include "protocol.h"
 #include "packetstream.h"
-#include "notificationqueue.h"
 
 #ifndef NO_DHT
 #include "mrefd-dht-values.h"
@@ -69,8 +68,8 @@ public:
 	void OnPeersChanged(void);
 	void OnClientsChanged(void);
 	void OnUsersChanged(void);
-	void OnStreamOpen(const CCallsign &);
-	void OnStreamClose(const CCallsign &);
+	// void OnStreamOpen(const CCallsign &);
+	// void OnStreamClose(const CCallsign &);
 
 #ifndef NO_DHT
 	// Publish DHT
@@ -107,9 +106,6 @@ protected:
 	std::atomic<bool> keep_running;
 	std::unordered_map<char, std::future<void>> m_ModuleFutures;
 	std::future<void> m_XmlReportFuture, m_JsonReportFuture;
-
-	// notifications
-	CNotificationQueue  m_Notifications;
 
 	// Distributed Hash Table
 #ifndef NO_DHT
