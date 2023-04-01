@@ -220,7 +220,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		stream->Push(std::move(Header));
 
 		// notify
-		//g_Reflector.OnStreamOpen(stream->GetUserCallsign());
+		g_Reflector.OnStreamOpen(stream->GetUserCallsign());
 
 	}
 	stream->Unlock();
@@ -257,7 +257,7 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 			client->ClearTX();
 
 			// notify
-			//OnStreamClose(stream->GetUserCallsign());
+			OnStreamClose(stream->GetUserCallsign());
 
 			std::cout << "Closing stream on module " << GetStreamModule(stream) << std::endl;
 		}
@@ -352,32 +352,48 @@ void CReflector::XmlReportThread()
 
 void CReflector::OnPeersChanged(void)
 {
-#ifndef NO_DHT
-	PutDHTPeers();
-#endif
+	CNotification notification(NOTIFICATION_PEERS);
+
+	m_Notifications.Lock();
+	m_Notifications.push(notification);
+	m_Notifications.Unlock();
 }
 
 void CReflector::OnClientsChanged(void)
 {
-#ifndef NO_DHT
-	PutDHTClients();
-#endif
+	CNotification notification(NOTIFICATION_CLIENTS);
+
+	m_Notifications.Lock();
+	m_Notifications.push(notification);
+	m_Notifications.Unlock();
 }
 
 void CReflector::OnUsersChanged(void)
 {
-#ifndef NO_DHT
-	PutDHTUsers();
-#endif
+	CNotification notification(NOTIFICATION_USERS);
+
+	m_Notifications.Lock();
+	m_Notifications.push(notification);
+	m_Notifications.Unlock();
 }
 
-// void CReflector::OnStreamOpen(const CCallsign &callsign)
-// {
-// }
+void CReflector::OnStreamOpen(const CCallsign &callsign)
+{
+	CNotification notification(NOTIFICATION_STREAM_OPEN, callsign);
 
-// void CReflector::OnStreamClose(const CCallsign &callsign)
-// {
-// }
+	m_Notifications.Lock();
+	m_Notifications.push(notification);
+	m_Notifications.Unlock();
+}
+
+void CReflector::OnStreamClose(const CCallsign &callsign)
+{
+	CNotification notification(NOTIFICATION_STREAM_CLOSE, callsign);
+
+	m_Notifications.Lock();
+	m_Notifications.push(notification);
+	m_Notifications.Unlock();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // modules & queues
