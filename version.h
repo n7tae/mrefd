@@ -40,7 +40,7 @@ public:
 	int GetRevision(void) const;
 	int GetVersion(void) const;
 
-	// comparaison operators
+	// comparison operators
 	bool operator ==(const CVersion &v) const;
 	bool operator !=(const CVersion &v) const;
 	bool operator >=(const CVersion &v) const;

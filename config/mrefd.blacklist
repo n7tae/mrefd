@@ -2,7 +2,7 @@
 #  MREFD blacklist file
 #
 #  one line per entry
-#  each entry is explicitely denied access (blacklisted)
+#  each entry is explicitly denied access (blacklisted)
 #  you can use * as last wildcard character
 #  example:
 #    *     -> deny access to  eveybody (that would be stupid!)

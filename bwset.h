@@ -42,7 +42,7 @@ public:
 	bool ReloadFromFile(void);
 	bool NeedReload(void);
 
-	// pass-thru
+	// pass-through
 	bool empty() const { return m_Callsigns.empty(); }
 
 	// compare

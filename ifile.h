@@ -56,7 +56,7 @@ public:
 	bool IsCallsignListed(const CCallsign &, const char) const;
 	bool IsCallsignListed(const CCallsign &, const CIp &ip, const char*) const;
 
-	// pass-thru
+	// pass-through
 	bool empty() const { return m_InterlinkMap.empty(); }
 	std::unordered_map<std::string, CIFileItem>::iterator begin() { return m_InterlinkMap.begin(); }
 	std::unordered_map<std::string, CIFileItem>::iterator end()   { return m_InterlinkMap.end(); }

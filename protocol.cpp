@@ -768,7 +768,7 @@ void CProtocol::HandlePeerLinks(void)
 							std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
 						}
 						else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
-						{	// are the encyption states on both sides mismatched?
+						{	// are the encryption states on both sides mismatched?
 							ok = false;
 							std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
 						}

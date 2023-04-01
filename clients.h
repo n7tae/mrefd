@@ -55,7 +55,7 @@ public:
 	void    RemoveClient(std::shared_ptr<CClient>);
 	bool    IsClient(std::shared_ptr<CClient>) const;
 
-	// pass-thru
+	// pass-through
 	std::list<std::shared_ptr<CClient>>::iterator begin()              { return m_Clients.begin(); }
 	std::list<std::shared_ptr<CClient>>::iterator end()                { return m_Clients.end(); }
 	std::list<std::shared_ptr<CClient>>::const_iterator cbegin() const { return m_Clients.cbegin(); }

@@ -53,7 +53,7 @@ public:
 	void AddPeer(std::shared_ptr<CPeer>);
 	void RemovePeer(std::shared_ptr<CPeer>);
 
-	// pass-thru
+	// pass-through
 	std::list<std::shared_ptr<CPeer>>::iterator begin()              { return m_Peers.begin(); }
 	std::list<std::shared_ptr<CPeer>>::iterator end()                { return m_Peers.end(); }
 	std::list<std::shared_ptr<CPeer>>::const_iterator cbegin() const { return m_Peers.cbegin(); }
