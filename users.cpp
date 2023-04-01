@@ -47,9 +47,6 @@ void CUsers::AddUser(const CUser &user)
 	{
 		m_Users.resize(m_Users.size()-1);
 	}
-
-	// notify
-	g_Reflector.OnUsersChanged();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

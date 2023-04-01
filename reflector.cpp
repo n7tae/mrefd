@@ -218,10 +218,6 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 
 		// and push header packet
 		stream->Push(std::move(Header));
-
-		// notify
-		g_Reflector.OnStreamOpen(stream->GetUserCallsign());
-
 	}
 	stream->Unlock();
 	return stream;
@@ -255,9 +251,6 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 		{
 			// client no longer a master
 			client->ClearTX();
-
-			// notify
-			OnStreamClose(stream->GetUserCallsign());
 
 			std::cout << "Closing stream on module " << GetStreamModule(stream) << std::endl;
 		}
@@ -345,54 +338,6 @@ void CReflector::XmlReportThread()
 		for (int i=0; i<XML_UPDATE_PERIOD && keep_running; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// notifications
-
-void CReflector::OnPeersChanged(void)
-{
-	CNotification notification(NOTIFICATION_PEERS);
-
-	m_Notifications.Lock();
-	m_Notifications.push(notification);
-	m_Notifications.Unlock();
-}
-
-void CReflector::OnClientsChanged(void)
-{
-	CNotification notification(NOTIFICATION_CLIENTS);
-
-	m_Notifications.Lock();
-	m_Notifications.push(notification);
-	m_Notifications.Unlock();
-}
-
-void CReflector::OnUsersChanged(void)
-{
-	CNotification notification(NOTIFICATION_USERS);
-
-	m_Notifications.Lock();
-	m_Notifications.push(notification);
-	m_Notifications.Unlock();
-}
-
-void CReflector::OnStreamOpen(const CCallsign &callsign)
-{
-	CNotification notification(NOTIFICATION_STREAM_OPEN, callsign);
-
-	m_Notifications.Lock();
-	m_Notifications.push(notification);
-	m_Notifications.Unlock();
-}
-
-void CReflector::OnStreamClose(const CCallsign &callsign)
-{
-	CNotification notification(NOTIFICATION_STREAM_CLOSE, callsign);
-
-	m_Notifications.Lock();
-	m_Notifications.push(notification);
-	m_Notifications.Unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
