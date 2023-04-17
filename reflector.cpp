@@ -516,11 +516,11 @@ void CReflector::PutDHTConfig()
 	const std::string cs(g_CFG.GetCallsign());
 	SMrefdConfig1 cfg;
 	time(&cfg.timestamp);
-	cfg.cs.assign(cs);
-	cfg.ipv4.assign(g_CFG.GetIPv4ExtAddr());
-	cfg.ipv6.assign(g_CFG.GetIPv6ExtAddr());
-	cfg.mods.assign(g_CFG.GetModules());
-	cfg.emods.assign(g_CFG.GetEncryptedMods());
+	cfg.callsign.assign(cs);
+	cfg.ipv4addr.assign(g_CFG.GetIPv4ExtAddr());
+	cfg.ipv6addr.assign(g_CFG.GetIPv6ExtAddr());
+	cfg.modules.assign(g_CFG.GetModules());
+	cfg.encryptedmods.assign(g_CFG.GetEncryptedMods());
 	cfg.url.assign(g_CFG.GetURL());
 	cfg.email.assign(g_CFG.GetEmailAddr());
 	cfg.country.assign(g_CFG.GetCountry());
@@ -561,7 +561,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 	node.get(
 		dht::InfoHash::get(cs),
 		[](const std::shared_ptr<dht::Value> &v) {
-			if (0 == v->user_type.compare("mrefd-config-1"))
+			if (0 == v->user_type.compare(MREFD_CONFIG_1))
 			{
 				auto rdat = dht::Value::unpack<SMrefdConfig1>(*v);
 				if (rdat.timestamp > cfg.timestamp)
@@ -582,7 +582,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 				if (cfg.timestamp)
 				{
 					// if the get() call was successful and there is a nonzero timestamp, then do the update
-					g_IFile.Update(cfg.cs, cfg.mods, cfg.ipv4, cfg.ipv6, cfg.port, cfg.emods);
+					g_IFile.Update(cfg.callsign, cfg.modules, cfg.ipv4addr, cfg.ipv6addr, cfg.port, cfg.encryptedmods);
 				}
 			}
 			else

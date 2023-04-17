@@ -31,7 +31,7 @@
 #include "packetstream.h"
 
 #ifndef NO_DHT
-#include "mrefd-dht-values.h"
+#include "dht-values.h"
 #endif
 
 class CReflector
