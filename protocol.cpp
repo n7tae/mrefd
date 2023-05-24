@@ -1,5 +1,4 @@
 //
-//  cprotocol.cpp
 //  mrefd
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 01/11/2015.
@@ -201,7 +200,7 @@ void CProtocol::Task(void)
 			}
 
 		}
-		else if (IsVaildInterlinkAcknowledge(buf, cs, mods))
+		else if (IsValidInterlinkAcknowledge(buf, cs, mods))
 		{
 			//std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
@@ -981,7 +980,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	return true;
 }
 
-bool CProtocol::IsVaildInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
+bool CProtocol::IsValidInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
 {
 	SInterConnect *p = (SInterConnect *)buf;
 	if (0 == memcmp(p->magic, "ACKN", 4))

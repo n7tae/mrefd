@@ -83,7 +83,7 @@ protected:
 	bool IsValidPacket(const uint8_t *, bool is_internal, std::unique_ptr<CPacket> &);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
-	bool IsVaildInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
+	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
 
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);

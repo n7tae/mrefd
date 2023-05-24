@@ -8,7 +8,12 @@ The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be con
 
 Encrypted voice streams will pass through an *mrefd* channel, but **only** if they are configured for it.
 
-*mrefd* uses **DVIN**, the *Digital Voice Information Network*. **DVIN** is a distributed hash table network for publishing and retrieving connection information. Each M17 client on the **DVIN** that can accept inbound connections publishes its connection informating. Other M17 clients wishing to connect only need to know the callsign of the destination. The connecting information is available in the **DVIN**.
+*mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a four-part document on the DHT network. The four parts:
+1. Configuration - Connecting clients can use this to know how to connect.
+2. Peers - Other mrefd reflectors that are interlinked is in this part.
+3. Clients - Any node listing to any configured module is in this part. This includes simple clients as well as other interlinked reflector modules.
+4. Last heard users - A limited list of last heard users is in this part.
+Any node on the network can read an mrefd document. The key to the *mrefd* document is the reflector's callsign. either the entire document or any part of the document may be retrieved.
 
 The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefdash.git).
 
@@ -44,9 +49,9 @@ sudo apt install git build-essential g++ libcurl4-gnutls-dev
 
 The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT and gomrefdash both have their own requirements.
 
-### DVIN support (optional, but highly recommended)
+### Ham-DHT support (optional, but highly recommended)
 
-**DVIN** is implemented using a distributed hash table provided by OpenDHT.
+**Ham-DHT** is implemented using a distributed hash table provided by OpenDHT.
 
 OpenDHT is available [here](https://github./com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Pascal support and proxy-server support (RESTinio) is not required for mrefd and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
 
@@ -84,9 +89,9 @@ cp config/mrefd.interlink .
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The mrefd reflector will monitor these file and dynamically update itself whenever anything changes. There is no need to stop and restart the reflector.
 
-The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **DVIN** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **DVIN** will provided it, and this information comes directly from the peer. Using the **DVIN** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
+The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **Ham-DHT** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **Ham-DHT** will provided it, and this information comes directly from the peer. Using the **Ham-DHT** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
 
-If your reflector or your desired peer doesn't use **DVIN**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
+If your reflector or your desired peer doesn't use **Ham-DHT**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
 
 Inter-linking a channel to more than one other reflector demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
 
