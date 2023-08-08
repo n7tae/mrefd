@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 {
 	if (2 != argc)
 	{
-		std::cerr << "USAGE: " << argv[0] << " /full/athname/to/config/file>" << std::endl;
+		std::cerr << "USAGE: " << argv[0] << " /full/pathname/to/config/file>" << std::endl;
 		return EXIT_FAILURE;
 	}
 	// remove pidfile
