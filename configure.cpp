@@ -22,6 +22,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <vector>
 #include <algorithm>
