@@ -141,12 +141,27 @@ bool CConfigure::ReadData(const std::string &path)
 	std::string line;
 	while (std::getline(cfg, line)) {
 		trim(line);
+
 		if (0==line.size())
 			continue;	// skip empty lines
+
 		if ('#'==line[0])
 			continue;	// skip comments
+
+		if (std::string::npos == line.find('='))
+		{
+			std::cout << "WARNING - No equal sign found: '" << line << "'" << std::endl;
+			continue;
+		}
+
 		std::vector<std::string> tokens;
 		split(line, '=', tokens);
+
+		if (2 > tokens.size())
+		{
+			std::cout << "WARNING - bad assignment: '" << line << "'" << std::endl;
+			continue;
+		}
 
 		rtrim(tokens[0]);
 		ltrim(tokens[1]);
@@ -203,7 +218,7 @@ bool CConfigure::ReadData(const std::string &path)
 		}
 		else if (0 == key.compare("IPv6ExtAddr"))
 		{
-			if (value.compare(ipv4))
+			if (value.compare(ipv6))
 			{
 				std::cout << "WARNING: IPv6ExtAddr '" << value << "' differs from curl result of '" << ipv6 << "'" << std::endl;
 			}
@@ -459,8 +474,8 @@ bool CConfigure::ReadData(const std::string &path)
 
 	if (data.bootstrap.empty())
 	{
-		std::cerr << "WARNING - no Bootstrap specified" << std::endl;
-		//rval = true;
+		std::cerr << "ERROR - no Bootstrap specified" << std::endl;
+		rval = true;
 	}
 	else
 	{
@@ -539,8 +554,8 @@ bool CConfigure::ReadData(const std::string &path)
 
 	if (data.dhtstatepath.empty())
 	{
-		std::cerr << "WARNING - no DHT network state path specified" << std::endl;
-		//rval = true;
+		std::cerr << "ERROR - no DHT network state path specified" << std::endl;
+		rval = true;
 	}
 	else
 	{
