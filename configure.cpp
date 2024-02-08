@@ -250,6 +250,10 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.interlinkpath.assign(value);
 		}
+		else if (0 == key.compare("DHTStatePath"))
+		{
+			data.dhtstatepath.assign(value);
+		}
 		else if (0 == key.compare("Port"))
 		{
 			data.port = std::stoul(value);
@@ -455,8 +459,8 @@ bool CConfigure::ReadData(const std::string &path)
 
 	if (data.bootstrap.empty())
 	{
-		std::cerr << "ERROR - no Bootstrap" << std::endl;
-		rval = true;
+		std::cerr << "WARNING - no Bootstrap specified" << std::endl;
+		//rval = true;
 	}
 	else
 	{
@@ -531,6 +535,16 @@ bool CConfigure::ReadData(const std::string &path)
 	else
 	{
 		std::cout << "InterlinkPath='" << data.interlinkpath << "'" << std::endl;
+	}
+
+	if (data.dhtstatepath.empty())
+	{
+		std::cerr << "WARNING - no DHT network state path specified" << std::endl;
+		//rval = true;
+	}
+	else
+	{
+		std::cout << "DHTStatePath='" << data.bootstrap << "'" << std::endl;
 	}
 
 	if (49000U < data.port || data.port < 4096U)

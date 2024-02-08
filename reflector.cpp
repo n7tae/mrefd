@@ -89,7 +89,40 @@ bool CReflector::Start(const char *cfgfilename)
 	// start the dht instance
 	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
 	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true);
-	node.bootstrap(g_CFG.GetBootstrap(), "17171");
+	std::ifstream myfile;
+	const auto path = g_CFG.GetDHTStatePath();
+	if (path.size() > 0)
+		myfile.open(path, std::ios::binary|std::ios::ate);
+	if (myfile.is_open())
+	{
+		msgpack::unpacker pac;
+		auto size = myfile.tellg();
+		myfile.seekg (0, std::ios::beg);
+		pac.reserve_buffer(size);
+		myfile.read (pac.buffer(), size);
+		pac.buffer_consumed(size);
+		// Import nodes
+		msgpack::object_handle oh;
+		while (pac.next(oh)) {
+			auto imported_nodes = oh.get().as<std::vector<dht::NodeExport>>();
+			std::cout << "Importing " << imported_nodes.size() << " ham-dht nodes from " << path << std::endl;
+			node.bootstrap(imported_nodes);
+		}
+		myfile.close();
+	}
+	else
+	{
+		const auto bsnode = g_CFG.GetBootstrap();
+		if (bsnode.size())
+		{
+			std::cout << "Bootstrapping from " << bsnode << std::endl;
+			node.bootstrap(bsnode, "17171");
+		}
+		else
+		{
+			std::cout << "WARNING: The DHT is not bootstrapping from any node!" << std::endl;
+		}
+	}
 #endif
 
 	// create protocols
@@ -144,6 +177,28 @@ void CReflector::Stop(void)
 	g_GateKeeper.Close();
 
 #ifndef NO_DHT
+	// save the state of the DHT network
+	const auto path = g_CFG.GetDHTStatePath();
+	if (path.size() > 0)
+	{
+		auto exnodes = node.exportNodes();
+		if (exnodes.size())
+		{
+			// Export nodes to binary file
+			std::ofstream myfile(path, std::ios::binary | std::ios::trunc);
+			if (myfile.is_open())
+			{
+				std::cout << "Saving " << exnodes.size() << " nodes to " << path << std::endl;
+				msgpack::pack(myfile, exnodes);
+				myfile.close();
+			}
+			else
+				std::cerr << "Trouble opening " << path << std::endl;
+		}
+		else
+			std::cout << "There are no DHT network nodes to save!" << std::endl;
+	}
+
 	// kill the DHT
 	node.cancelPut(refhash, toUType(EMrefdValueID::Config));
 	node.cancelPut(refhash, toUType(EMrefdValueID::Peers));

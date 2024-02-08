@@ -29,6 +29,7 @@ using CFGDATA = struct CFGData_struct {
 	std::string ipv4extaddr, ipv6extaddr;
 	std::string url, emailaddr, bootstrap;
 	std::string sponsor, country;
+	std::string dhtstatepath;
 #endif
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
@@ -56,6 +57,7 @@ public:
 	const std::string &GetBootstrap()     const { return data.bootstrap;     }
 	const std::string &GetSponsor()       const { return data.sponsor;       }
 	const std::string &GetCountry()       const { return data.country;       }
+	const std::string &GetDHTStatePath()  const { return data.dhtstatepath;  }
 #endif
 	const std::string &GetXmlPath()       const { return data.xmlpath;       }
 	const std::string &GetPidPath()       const { return data.pidpath;       }
