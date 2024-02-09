@@ -22,6 +22,7 @@
 #include <fstream>
 #include <regex>
 #include <sys/stat.h>
+#include <csignal>
 
 #include "reflector.h"
 #include "configure.h"
@@ -31,8 +32,26 @@ extern CConfigure g_CFG;
 extern CVersion g_Version;
 extern CReflector g_Reflector;
 
+void SigHandler(int sig)
+{
+	switch (sig)
+	{
+	case SIGINT:
+	case SIGHUP:
+	case SIGTERM:
+		std::cout << "caught a signal=" << sig << std::endl;
+		break;
+	default:
+		std::cerr << "caught an unexpected signal=" << sig << std::endl;
+		break;
+	}
+}
+
 int main(int argc, char *argv[])
 {
+	std::signal(SIGINT, SigHandler);
+	std::signal(SIGHUP, SigHandler);
+	std::signal(SIGTERM, SigHandler);
 	if (2 != argc)
 	{
 		std::cerr << "USAGE: " << argv[0] << " /full/pathname/to/config/file>" << std::endl;
