@@ -559,7 +559,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "DHTSavedNodesPath='" << data.bootstrap << "'" << std::endl;
+		std::cout << "DHTSavedNodesPath='" << data.dhtstatepath << "'" << std::endl;
 	}
 
 	if (49000U < data.port || data.port < 4096U)
