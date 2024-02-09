@@ -265,7 +265,7 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.interlinkpath.assign(value);
 		}
-		else if (0 == key.compare("DHTStatePath"))
+		else if (0 == key.compare("DHTSavedNodesPath"))
 		{
 			data.dhtstatepath.assign(value);
 		}
@@ -559,7 +559,7 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 	else
 	{
-		std::cout << "DHTStatePath='" << data.bootstrap << "'" << std::endl;
+		std::cout << "DHTSavedNodesPath='" << data.bootstrap << "'" << std::endl;
 	}
 
 	if (49000U < data.port || data.port < 4096U)
