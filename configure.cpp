@@ -265,9 +265,9 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.interlinkpath.assign(value);
 		}
-		else if (0 == key.compare("DHTSavedNodesPath"))
+		else if (0 == key.compare("DHTSavePath"))
 		{
-			data.dhtstatepath.assign(value);
+			data.dhtsavepath.assign(value);
 		}
 		else if (0 == key.compare("Port"))
 		{
@@ -552,14 +552,14 @@ bool CConfigure::ReadData(const std::string &path)
 		std::cout << "InterlinkPath='" << data.interlinkpath << "'" << std::endl;
 	}
 
-	if (data.dhtstatepath.empty())
+	if (data.dhtsavepath.empty())
 	{
 		std::cerr << "ERROR - no DHT network state path specified" << std::endl;
 		rval = true;
 	}
 	else
 	{
-		std::cout << "DHTSavedNodesPath='" << data.dhtstatepath << "'" << std::endl;
+		std::cout << "DHTSavePath='" << data.dhtsavepath << "'" << std::endl;
 	}
 
 	if (49000U < data.port || data.port < 4096U)

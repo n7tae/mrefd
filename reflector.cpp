@@ -90,7 +90,7 @@ bool CReflector::Start(const char *cfgfilename)
 	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
 	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true);
 	std::ifstream myfile;
-	const auto path = g_CFG.GetDHTStatePath();
+	const auto path = g_CFG.GetDHTSavePath();
 	if (path.size() > 0)
 		myfile.open(path, std::ios::binary|std::ios::ate);
 	if (myfile.is_open())
@@ -178,7 +178,7 @@ void CReflector::Stop(void)
 
 #ifndef NO_DHT
 	// save the state of the DHT network
-	const auto path = g_CFG.GetDHTStatePath();
+	const auto path = g_CFG.GetDHTSavePath();
 	if (path.size() > 0)
 	{
 		auto exnodes = node.exportNodes();
