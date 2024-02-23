@@ -41,7 +41,7 @@ extern CIFileMap g_IFile;
 CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-([A-Z0-9]){3,3}(($)|( [A-Z]$))", std::regex::extended);
-	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9][A-Z]{1,4}(()|(/[A-Z0-9]{1,3}|-[A-Z0-9]))(()|([ ]*[A-Z]))$", std::regex::extended);
+	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}(()|(/[A-Z0-9]{1,3}|-[A-Z0-9]))(()|([ ]*[A-Z]))$", std::regex::extended);
 }
 
 
