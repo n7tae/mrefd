@@ -50,7 +50,6 @@ void SigHandler(int sig)
 int main(int argc, char *argv[])
 {
 	std::signal(SIGINT, SigHandler);
-	std::signal(SIGHUP, SigHandler);
 	std::signal(SIGTERM, SigHandler);
 	if (2 != argc)
 	{
