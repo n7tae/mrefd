@@ -41,6 +41,10 @@ else
 CFLAGS += -DNO_DHT
 endif
 
+ifeq ($(SIGHUP), false)
+CFLAGS += -DNO_HUP
+endif
+
 ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif

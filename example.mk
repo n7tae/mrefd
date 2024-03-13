@@ -16,3 +16,6 @@ DEBUG = false
 
 # To disable DHT support, set DHT to false.
 DHT = true
+
+# To disable SIGHUP handling, set SIGHUP to false.
+SIGHUP = true

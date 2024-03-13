@@ -37,7 +37,9 @@ void SigHandler(int sig)
 	switch (sig)
 	{
 	case SIGINT:
+#ifndef NO_HUP
 	case SIGHUP:
+#endif
 	case SIGTERM:
 		std::cout << "caught a signal=" << sig << std::endl;
 		break;
@@ -50,7 +52,9 @@ void SigHandler(int sig)
 int main(int argc, char *argv[])
 {
 	std::signal(SIGINT, SigHandler);
+#ifndef NO_HUP
 	std::signal(SIGHUP, SigHandler);
+#endif
 	std::signal(SIGTERM, SigHandler);
 	if (2 != argc)
 	{
