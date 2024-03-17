@@ -21,7 +21,7 @@ Only systemd-based operating systems are supported. Debian or Ubuntu is recommen
 
 ## A few words about valid client callsigns
 
-A client callsign must begin with something that looks like a legal callsign: it begins with an optional digit, followed by one or two letters followed by one or two digit, followed by one to four letters. After that, any valid M17 characters can appear as a suffix as long as the first of these suffix characters is a non-alphanumeric M17 character, *i.e.*, a space (`' '`), period (`'.'`), slash (`'-'`) or dash (`'-'`).
+A client callsign must begin with something that looks like a legal callsign: it begins with an optional digit, followed by one or two letters followed by one or two digit, followed by one to four letters. After that, any valid M17 characters can appear as a suffix as long as the first of these suffix characters is a non-alphanumeric M17 character, *i.e.*, a space (`' '`), period (`'.'`), slash (`'/'`) or dash (`'-'`).
 
 ## Usage
 
