@@ -19,9 +19,9 @@ The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefda
 
 Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
 
-## A few words about valid callsign secondary suffixes
+## A few words about valid client callsigns
 
-There are two callsign secondary suffixes allowed by *mrefd*. Either must follow the client station's callsign immediately (without any space between the callsign and the secondary suffix). The first, usually used to differentiate multiple stations, begins with a dash, "-", followed by a single alphanumeric character. The second, usually used to indicate a temporary change in locations begins with a stroke, "/", and followed by up to three alphanumeric characters. Keep in mind that M17 callsigns are limited to nine characters and on some client software, the ninth character is reserved for a module. Because of the space limitation and the fact that the majority of hams have six character callsigns, *mrefd* will reject connections from callsigns using *both* the dash and stroke secondary suffixes.
+A client callsign must begin with something that looks like a legal callsign: it begins with an optional digit, followed by one or two letters followed by one or two digit, followed by one to four letters. After that, any valid M17 characters can appear as a suffix as long as the first of these suffix characters is a non-alphanumeric M17 character, *i.e.*, a space (`' '`), period (`'.'`), slash (`'-'`) or dash (`'-'`).
 
 ## Usage
 
