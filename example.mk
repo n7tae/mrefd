@@ -16,3 +16,6 @@ DEBUG = false
 
 # To disable DHT support, set DHT to false.
 DHT = true
+
+# To enable daemonize, set DAEMON to true.
+DAEMON = false
