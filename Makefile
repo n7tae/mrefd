@@ -41,6 +41,10 @@ else
 CFLAGS += -DNO_DHT
 endif
 
+ifeq ($(DAEMON), true)
+CFLAGS += -DRUN_AS_DAEMON
+endif
+
 ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif

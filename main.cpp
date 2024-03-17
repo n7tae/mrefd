@@ -49,14 +49,21 @@ void SigHandler(int sig)
 
 int main(int argc, char *argv[])
 {
+	if (2 != argc)
+	{
+		std::cerr << "USAGE: " << argv[0] << " </full/pathname/to/config/file>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+#ifdef RUN_AS_DAEMON
+	if (0 > daemon(1, 1))
+		return EXIT_FAILURE;
+#endif
+
 	std::signal(SIGINT, SigHandler);
 	std::signal(SIGHUP, SigHandler);
 	std::signal(SIGTERM, SigHandler);
-	if (2 != argc)
-	{
-		std::cerr << "USAGE: " << argv[0] << " /full/pathname/to/config/file>" << std::endl;
-		return EXIT_FAILURE;
-	}
+
 	// remove pidfile
 	remove(g_CFG.GetPidPath().c_str());
 
