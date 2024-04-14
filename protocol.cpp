@@ -925,7 +925,7 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	{
 		cs.CodeIn(buf + 4);
 		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
 		{
 			return true;
 		}
