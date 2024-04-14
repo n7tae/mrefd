@@ -68,6 +68,7 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+    m_ListenOnly = false;
 }
 
 CClient::CClient(const CClient &client)
@@ -79,6 +80,7 @@ CClient::CClient(const CClient &client)
 	m_LastKeepaliveTime = client.m_LastKeepaliveTime;
 	m_ConnectTime = client.m_ConnectTime;
 	m_LastHeardTime = client.m_LastHeardTime;
+    m_ListenOnly = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
