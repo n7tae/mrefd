@@ -44,6 +44,19 @@ CClient::CClient()
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+    m_ListenOnly = false;
+}
+
+CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly)
+{
+    m_ReflectorModule = reflectorModule;
+    m_Callsign = callsign;
+    m_Ip = ip;
+    m_TXModule = ' ';
+    m_LastKeepaliveTime.Start();
+    m_ConnectTime = std::time(nullptr);
+    m_LastHeardTime = std::time(nullptr);
+    m_ListenOnly = listenOnly;
 }
 
 CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
