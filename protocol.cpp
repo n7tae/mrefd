@@ -885,7 +885,23 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 		{
 			std::cout << "CONN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
-	}
+	} else if (0 == memcmp(buf, "LSTN", 4)) {
+        cs.CodeIn(buf + 4);
+        if (std::regex_match(cs.GetCS(), lstnRegEx))
+        {
+            *mod = buf[10];
+            if (IsLetter(*mod))
+            {
+                return true;
+            }
+            std::cout << "Bad LSTN from '" << cs.GetCS() << "'." << std::endl;
+            Dump("The requested module is not a letter:", buf, 11);
+        }
+        else
+        {
+            std::cout << "LSTN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+        }
+    }
 	return false;
 }
 
