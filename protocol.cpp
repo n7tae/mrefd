@@ -238,7 +238,11 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+                    if (std::regex_match(cs.GetCS(), lstnRegEx)) {
+                        g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+                    } else {
+                        g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+                    }
 					g_Reflector.ReleaseClients();
 #ifndef NO_DHT
 					g_Reflector.PutDHTClients();
