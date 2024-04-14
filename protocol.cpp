@@ -42,6 +42,7 @@ CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-[A-Z0-9]{3,3}( [A-Z])?$", std::regex::extended);
 	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}([ -/\\.].*)?$", std::regex::extended);
+    lstnRegEx = std::regex("^SWL[A-Z]{6}?$", std::regex::extended);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
