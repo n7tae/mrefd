@@ -88,7 +88,7 @@ bool CReflector::Start(const char *cfgfilename)
 #ifndef NO_DHT
 	// start the dht instance
 	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
-	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true);
+	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true, 73);
 	std::ifstream myfile;
 	const auto path = g_CFG.GetDHTSavePath();
 	if (path.size() > 0)

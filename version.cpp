@@ -25,7 +25,7 @@
 
 #include "version.h"
 
-CVersion g_Version(0, 11, 7);	// the global object
+CVersion g_Version(0, 11, 8);	// the global object
 
 CVersion::CVersion(uint8_t maj, uint8_t min, uint8_t rev) : version(0x10000*maj + 0x100*min + rev) {}
 
