@@ -537,7 +537,7 @@ void CReflector::PutDHTClients()
 		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTClients() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		true	// permanent!
+		false	// not permanent!
 	);
 }
 
@@ -562,7 +562,7 @@ void CReflector::PutDHTUsers()
 		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTUsers() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		true	// permanent!
+		false	// not permanent!
 	);
 }
 
