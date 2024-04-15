@@ -88,7 +88,7 @@ bool CReflector::Start(const char *cfgfilename)
 #ifndef NO_DHT
 	// start the dht instance
 	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
-	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true);
+	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true, 59973);
 	std::ifstream myfile;
 	const auto path = g_CFG.GetDHTSavePath();
 	if (path.size() > 0)
@@ -542,7 +542,7 @@ void CReflector::PutDHTClients()
 		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTClients() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		true	// permanent!
+		false	// not permanent!
 	);
 }
 
@@ -567,7 +567,7 @@ void CReflector::PutDHTUsers()
 		refhash,
 		nv,
 		[](bool success){ std::cout << "PutDHTUsers() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		true	// permanent!
+		false	// not permanent!
 	);
 }
 
