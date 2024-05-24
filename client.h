@@ -39,7 +39,7 @@ public:
 	CClient();
 	CClient(const CCallsign &, const CIp &, char);
 	CClient(const CClient &);
-    CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly);
+	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly);
 
 	// destructor
 	virtual ~CClient() {};
@@ -90,6 +90,6 @@ protected:
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;
 
-    // identity
-    bool         m_ListenOnly;
+	// identity
+	bool         m_ListenOnly;
 };

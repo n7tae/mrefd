@@ -234,10 +234,10 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		return nullptr;
 	}
 
-    if ( client->IsListenOnly()) {
-        std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-        return nullptr;
-    }
+	if ( client->IsListenOnly()) {
+		std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+		return nullptr;
+	}
 
 	if ( client->IsTransmitting() )
 	{

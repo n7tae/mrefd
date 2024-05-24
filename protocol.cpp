@@ -42,7 +42,7 @@ CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-[A-Z0-9]{3,3}( [A-Z])?$", std::regex::extended);
 	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}([ -/\\.].*)?$", std::regex::extended);
-    lstnRegEx = std::regex("^SWL[A-Z]{6}?$", std::regex::extended);
+	lstnRegEx = std::regex("^SWL[A-Z]{6}?$", std::regex::extended);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -238,11 +238,11 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-                    if (std::regex_match(cs.GetCS(), lstnRegEx)) {
-                        g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
-                    } else {
-                        g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
-                    }
+					if (std::regex_match(cs.GetCS(), lstnRegEx)) {
+						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+					} else {
+						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+					}
 					g_Reflector.ReleaseClients();
 #ifndef NO_DHT
 					g_Reflector.PutDHTClients();
@@ -886,22 +886,22 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 			std::cout << "CONN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	} else if (0 == memcmp(buf, "LSTN", 4)) {
-        cs.CodeIn(buf + 4);
-        if (std::regex_match(cs.GetCS(), lstnRegEx))
-        {
-            *mod = buf[10];
-            if (IsLetter(*mod))
-            {
-                return true;
-            }
-            std::cout << "Bad LSTN from '" << cs.GetCS() << "'." << std::endl;
-            Dump("The requested module is not a letter:", buf, 11);
-        }
-        else
-        {
-            std::cout << "LSTN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
-        }
-    }
+		cs.CodeIn(buf + 4);
+		if (std::regex_match(cs.GetCS(), lstnRegEx))
+		{
+			*mod = buf[10];
+			if (IsLetter(*mod))
+			{
+				return true;
+			}
+			std::cout << "Bad LSTN from '" << cs.GetCS() << "'." << std::endl;
+			Dump("The requested module is not a letter:", buf, 11);
+		}
+		else
+		{
+			std::cout << "LSTN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+		}
+	}
 	return false;
 }
 
