@@ -329,6 +329,9 @@ bool CConfigure::ReadData(const std::string &path)
 
 	std::cout << "EncryptionAllowed='" << data.encryptedmods << "'" << std::endl;
 
+	std::cout << "ListenOnlyAllowEncrypt=" << (data.swlencryptedmods ? "true" : "false") << std::endl;
+	std::cout << "ListenOnlyLogging=" << (data.swllogging ? "true" : "false") << std::endl;
+
 #ifndef NO_DHT
 	if (data.ipv4extaddr.empty())
 	{
