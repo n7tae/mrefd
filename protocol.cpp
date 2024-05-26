@@ -239,7 +239,15 @@ void CProtocol::Task(void)
 
 					// create the client and append
 					if (std::regex_match(cs.GetCS(), lstnRegEx)) {
-						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+						if (g_CFG.GetEncryptedMods().find(mod) != std::string::npos && !g_CFG.GetSWLEncryptedMods()) {
+							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
+
+							// deny the request
+							EncodeConnectNackPacket(buf);
+							Send(buf, 4, ip);
+						} else {
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+						}
 					} else {
 						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
 					}
