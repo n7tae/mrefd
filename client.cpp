@@ -113,6 +113,7 @@ void CClient::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
 	xmlFile << "\t<LINKEDMODULE>" << m_ReflectorModule << "</LINKEDMODULE>" << std::endl;
 	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
+	xmlFile << "\t<LISTENONLY>" << ((IsListenOnly()) ? "true" : "false") << "</LISTENONLY>" << std::endl;
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))
 	{
