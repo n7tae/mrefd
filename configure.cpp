@@ -199,6 +199,14 @@ bool CConfigure::ReadData(const std::string &path)
 					data.encryptedmods.append(1, c);
 			}
 		}
+		else if (0 == key.compare("ListenOnlyAllowEncrypt"))
+		{
+			data.swlencryptedmods = IS_TRUE(value[0]);
+		}
+		else if (0 == key.compare("ListenOnlyLogging"))
+		{
+			data.swllogging = IS_TRUE(value[0]);
+		}
 		else if (0 == key.compare("IPv4BindAddr"))
 		{
 			data.ipv4bindaddr.assign(value);

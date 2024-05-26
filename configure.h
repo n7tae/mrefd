@@ -34,6 +34,8 @@ using CFGDATA = struct CFGData_struct {
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
 	bool mcclients;
+	bool swllogging;
+	bool swlencryptedmods;
 };
 
 class CConfigure
@@ -44,28 +46,33 @@ public:
 	bool IsValidModule(char c) const { return std::string::npos != data.mods.find(c); }
 	bool IsEncyrptionAllowed(const char mod);
 
-	const std::string &GetCallsign()      const { return data.callsign;      }
-	const std::string &GetModules()       const { return data.mods;          }
-	const std::string &GetEncryptedMods() const { return data.encryptedmods; }
-	const std::string &GetIPv4BindAddr()  const { return data.ipv4bindaddr;  }
-	const std::string &GetIPv6BindAddr()  const { return data.ipv6bindaddr;  }
+	const std::string &GetCallsign()         const { return data.callsign;         }
+	const std::string &GetModules()          const { return data.mods;             }
+	const std::string &GetEncryptedMods()    const { return data.encryptedmods;    }
+	const std::string &GetIPv4BindAddr()     const { return data.ipv4bindaddr;     }
+	const std::string &GetIPv6BindAddr()     const { return data.ipv6bindaddr;     }
 #ifndef NO_DHT
-	const std::string &GetIPv4ExtAddr()   const { return data.ipv4extaddr;   }
-	const std::string &GetIPv6ExtAddr()   const { return data.ipv6extaddr;   }
-	const std::string &GetURL()           const { return data.url;           }
-	const std::string &GetEmailAddr()     const { return data.emailaddr;     }
-	const std::string &GetBootstrap()     const { return data.bootstrap;     }
-	const std::string &GetSponsor()       const { return data.sponsor;       }
-	const std::string &GetCountry()       const { return data.country;       }
-	const std::string &GetDHTSavePath()   const { return data.dhtsavepath;  }
+	const std::string &GetIPv4ExtAddr()      const { return data.ipv4extaddr;      }
+	const std::string &GetIPv6ExtAddr()      const { return data.ipv6extaddr;      }
+	const std::string &GetURL()              const { return data.url;              }
+	const std::string &GetEmailAddr()        const { return data.emailaddr;        }
+	const std::string &GetBootstrap()        const { return data.bootstrap;        }
+	const std::string &GetSponsor()          const { return data.sponsor;          }
+	const std::string &GetCountry()          const { return data.country;          }
+	const std::string &GetDHTSavePath()      const { return data.dhtsavepath;      }
 #endif
-	const std::string &GetXmlPath()       const { return data.xmlpath;       }
-	const std::string &GetPidPath()       const { return data.pidpath;       }
-	const std::string &GetWhitePath()     const { return data.whitepath;     }
-	const std::string &GetBlackPath()     const { return data.blackpath;     }
-	const std::string &GetInterlinkPath() const { return data.interlinkpath; }
-	unsigned long      GetPort()          const { return data.port;          }
-	bool               GetMCClients()     const { return data.mcclients;     }
+	const std::string &GetXmlPath()          const { return data.xmlpath;          }
+	const std::string &GetPidPath()          const { return data.pidpath;          }
+	const std::string &GetWhitePath()        const { return data.whitepath;        }
+	const std::string &GetBlackPath()        const { return data.blackpath;        }
+	const std::string &GetInterlinkPath()    const { return data.interlinkpath;    }
+	unsigned long      GetPort()             const { return data.port;             }
+	bool               GetMCClients()        const { return data.mcclients;        }
+
+	bool               GetSWLLogging()       const { return data.swllogging;       }
+	bool               GetSWLEncryptedMods() const { return data.swlencryptedmods; }
+
+
 
 private:
 #ifndef NO_DHT
