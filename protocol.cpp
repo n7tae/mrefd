@@ -237,7 +237,7 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
 					g_Reflector.ReleaseClients();
 #ifndef NO_DHT
 					g_Reflector.PutDHTClients();
@@ -329,6 +329,26 @@ void CProtocol::Task(void)
 		{
 			std::cout << "NACK packet received from " << cs << " at " << ip << std::endl;
 		}
+		break;
+	case 5:
+		if (IsValidInfo(buf, mod))
+		{
+			if (g_CFG.GetInfoEnable())
+			{
+				auto n = EncodeInfo(buf, mod);
+				Send(buf, n, ip);
+				break;
+			}
+			Dump("Blocked INFO:", buf, 5);
+		}
+		else
+		{
+			Dump("Invalid INFO:", buf, 5);
+			memcpy(buf, "INFO?", 5);
+			Send(buf, 5, ip);
+		}
+
+		std::cout << "From " << ip << std::endl;
 		break;
 	default:
 		break;
@@ -999,6 +1019,19 @@ bool CProtocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
+bool CProtocol::IsValidInfo(const uint8_t *buf, char &mod)
+{
+	if (0 == memcmp(buf, "INFO", 4))
+	{
+		mod = char(buf[4]);
+		if (' ' == mod)
+			return true;
+		else if (std::string::npos != g_CFG.GetModules().find(mod))
+			return true;
+	}
+	return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // packet encoding helpers
 
@@ -1052,4 +1085,94 @@ void CProtocol::EncodeDisconnectPacket(uint8_t *buf, char mod)
 void CProtocol::EncodeDisconnectedPacket(uint8_t *buf)
 {
 	memcpy(buf, "DISC", 4);
+}
+
+unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
+{
+	if (' ' == mod)
+	{
+		unsigned count = 0;
+		auto clients = g_Reflector.GetClients();
+		for (auto it=clients->cbegin(); it!=clients->cend(); it++)
+		{
+			if ((*it)->IsNotPeer())
+				count++;
+		}
+		g_Reflector.ReleaseClients();
+		// count is in bytes 4-5, capped to 2^16-1
+		if (count > 0xffffu)
+			count = 0xffffu;
+		buf[4] = uint8_t(count % 0x100f);
+		buf[4] = uint8_t(count / 0x100f);
+
+		auto users = g_Reflector.GetUsers();
+		auto it = users->cbegin();
+		int64_t t = (it == users->cend()) ? 0 : it->GetLastHeardTime();
+		g_Reflector.ReleaseUsers();
+		// last heard time is in bytes 6-10
+		// 5 bytes for a time_t is good until the second half of 3058!
+		for (unsigned i=0; i<5; i++)
+		{
+			buf[10-i] = uint8_t(t % 0x100);
+			t /= 0x100;
+		}
+
+		return 11u;
+	}
+	else
+	{
+		unsigned count = 0;
+		std::shared_ptr<CClient> maxClient;
+
+		auto clients = g_Reflector.GetClients();
+		auto it = clients->begin();
+
+		// count the clients on the module
+		while (it != clients->end())
+		{
+			auto client = *it;
+			if (mod == client->GetModule() && client->IsNotPeer())
+			{
+				count++;
+				if (nullptr == maxClient)
+				{
+					maxClient = client;
+				}
+				else
+				{
+					if (client->GetLastHeardTime() > maxClient->GetLastHeardTime())
+					{
+						maxClient = client;
+					}
+				}
+			}
+		}
+		g_Reflector.ReleaseClients();
+
+		if (maxClient)
+		{
+			if (count > 0xffffu)
+				count = 0xffffu;
+			// count is in bytes 4 and 5
+			buf[4] = uint8_t(count % 0x100u);
+			buf[5] = uint8_t(count / 0x100u);
+			// encrypted bool is in byte 6
+			// callsign is in bytes 7-12
+			maxClient->GetCallsign().CodeOut(buf+7);
+			// last heard time is on bytes 13-17
+			auto t = int64_t(maxClient->GetLastHeardTime());
+			for (unsigned i=0; i<5; i++)
+			{
+				buf[17-i] = uint8_t(t % 0x100);
+				t /= 0x100;
+			}
+		}
+		else
+		{
+			memset(buf+4, 0, 18-4);
+		}
+		buf[6] = (std::string::npos == g_CFG.GetEncryptedMods().find(mod)) ? false : true;
+
+		return 18u;
+	}
 }

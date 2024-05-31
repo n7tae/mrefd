@@ -33,7 +33,7 @@ using CFGDATA = struct CFGData_struct {
 #endif
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
-	bool mcclients;
+	bool mcclients, info_enable;
 };
 
 class CConfigure
@@ -66,6 +66,7 @@ public:
 	const std::string &GetInterlinkPath() const { return data.interlinkpath; }
 	unsigned long      GetPort()          const { return data.port;          }
 	bool               GetMCClients()     const { return data.mcclients;     }
+	bool               GetInfoEnable()    const { return data.info_enable;   }
 
 private:
 #ifndef NO_DHT

@@ -40,12 +40,12 @@ CUdpSocket::~CUdpSocket()
 ////////////////////////////////////////////////////////////////////////////////////////
 // open & close
 
-// returns true on error
+// returns true on success
 bool CUdpSocket::Open(const CIp &Ip)
 {
 	// check for a valid family
 	if (AF_UNSPEC == Ip.GetFamily())
-		return true;
+		return false;
 
 	// create socket
 	m_fd = socket(Ip.GetFamily(), SOCK_DGRAM, 0);

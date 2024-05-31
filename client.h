@@ -37,7 +37,7 @@ class CClient
 public:
 	// constructors
 	CClient();
-	CClient(const CCallsign &, const CIp &, char);
+	CClient(const CCallsign &, const CIp &, char, bool);
 	CClient(const CClient &);
 
 	// destructor
@@ -70,6 +70,7 @@ public:
 	void SetTXModule(char c)                 { m_TXModule = c; }
 	void ClearTX(void)                       { m_TXModule = ' '; }
 	void Heard(void)                         { m_LastHeardTime = std::time(nullptr); }
+	bool IsNotPeer(void) const               { return m_IsNotPeer; }
 
 	// reporting
 	void WriteXml(std::ofstream &);
@@ -78,6 +79,7 @@ protected:
 	// data
 	CCallsign   m_Callsign;
 	CIp         m_Ip;
+	bool        m_IsNotPeer;
 
 	// linked to
 	char        m_ReflectorModule;

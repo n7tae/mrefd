@@ -46,7 +46,7 @@ CClient::CClient()
 	m_LastHeardTime = std::time(nullptr);
 }
 
-CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
+CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool isnotpeer)
 {
 	m_ReflectorModule = reflectorModule;
 	m_Callsign = callsign;
@@ -55,6 +55,7 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+	m_IsNotPeer = isnotpeer;
 }
 
 CClient::CClient(const CClient &client)

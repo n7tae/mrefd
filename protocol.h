@@ -84,6 +84,7 @@ protected:
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
+	bool IsValidInfo(const uint8_t *, char &);
 
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);
@@ -94,6 +95,7 @@ protected:
 	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
 	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
 	void EncodeInterlinkNackPacket(uint8_t *);
+	unsigned EncodeInfo(uint8_t *, char);
 
 	// stream handle helpers
 	std::shared_ptr<CPacketStream> GetStream(uint16_t, const CIp &);

@@ -279,6 +279,10 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.mcclients = IS_TRUE(value[0]);
 		}
+		else if (0 == key.compare("InfoEnable"))
+		{
+			data.info_enable = IS_TRUE(value[0]);
+		}
 		else
 		{
 			std::cout << "WARNING - unknown parameter: '" << line << "'" << std::endl;
@@ -577,6 +581,8 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 
 	std::cout << "MultiClient=" << (data.mcclients ? "true" : "false") << std::endl;
+
+	std::cout << "InfoEnable=" << (data.info_enable ? "true" : "false") << std::endl;
 
 	return rval;
 }

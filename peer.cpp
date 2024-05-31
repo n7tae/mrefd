@@ -55,7 +55,7 @@ CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules)
 	for (auto p=modules; *p; p++)
 	{
 		// create and append to vector
-		m_Clients.push_back(std::make_shared<CClient>(callsign, ip, *p));
+		m_Clients.push_back(std::make_shared<CClient>(callsign, ip, *p, false));
 	}
 }
 

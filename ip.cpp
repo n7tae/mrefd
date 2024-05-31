@@ -28,26 +28,30 @@ CIp::CIp() : is_set(false)
 	Clear();
 }
 
-CIp::CIp(const char *address, int family, int type, uint16_t port) : is_set(true)
+CIp::CIp(const char *address, int family, int type, uint16_t port)
 {
 	Clear();
 	if (0 == strncasecmp(address, "none", 4))
 	{
-		is_set = false;
 		return;
 	}
 	struct addrinfo hints, *result;
 	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = family;
 	hints.ai_socktype = type;
-	if (0 == getaddrinfo(address, (port ? std::to_string(port).c_str() : nullptr), &hints, &result))
+	auto rv = getaddrinfo(address, (port ? std::to_string(port).c_str() : nullptr), &hints, &result);
+	if (rv)
 	{
-		memcpy(&addr, result->ai_addr, result->ai_addrlen);
-		addr.ss_family = result->ai_family;
-		freeaddrinfo(result);
+		std::cerr << "Could not find address for '" << address << "': " << gai_strerror(rv) << std::endl;
+		return;
 	}
+	memcpy(&addr, result->ai_addr, result->ai_addrlen);
+	addr.ss_family = result->ai_family;
+	freeaddrinfo(result);
 	SetPort(port);
+	is_set = true;
 }
+
 CIp::CIp(const int family, const uint16_t port, const char *address) : is_set(true)
 {
 	Initialize(family, port, address);
@@ -110,7 +114,7 @@ void CIp::Initialize(const int family, const uint16_t port, const char *address)
 	}
 }
 
-bool CIp::operator==(const CIp &rhs) const	// doesn't compare ports, only addresses and families
+bool CIp::operator == (const CIp &rhs) const	// doesn't compare ports, only addresses and families
 {
 	if (addr.ss_family != rhs.addr.ss_family)
 		return false;

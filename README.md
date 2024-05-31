@@ -53,6 +53,14 @@ The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT 
 
 **Ham-DHT** is implemented using a distributed hash table provided by OpenDHT.
 
+Newer Debian systems, Debian 12 or Ubuntu 24, have a precompiled package for OpenDHT. Try to install the OpenDHT package:
+
+```bash
+sudo apt install opendht-dev
+```
+
+If `apt` reports that the opendht-dev package was developed with C++17 or higher, you are good to go! Go ahead and this will install all needed packages. If this reported package was developed with less than C++17, don't install. Instead, you need to compile it yourself, described below.
+
 OpenDHT is available [here](https://github./com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Python support and proxy-server support (RESTinio) is not required for mrefd and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
 
 ```bash
@@ -69,8 +77,6 @@ cmake -DOPENDHT_PYTHON=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
 make
 sudo make install
 ```
-
-Please note that there is no easy way to uninstall OpenDHT once it's been installed.
 
 ### Download the *mrefd* repository and enter the directory
 
@@ -135,6 +141,12 @@ sudo journalctl -u mrefd -f
 ```
 
 The blacklist, whitelist and interlink files can be modified in real time while xrfd is executing and the reflector will update itself within a few seconds. If `USESYMLINK` is true in your mrefd.mk file, then you can edit the files in your build directory. Otherwise, you will need to edit the files in the `CFGDIR` folder.
+
+### Tools
+There are two M17 reflector tools that will be built:
+
+- `test-all` is a very small program that will make sure you system will properly run on you chosen server. In the build directory, type `./test-all`. It will test word size, callsign encoding and the M17 CRC.
+- `mref-info` is a demonstration program that will send a small *INFO* packet to any IP address. If there is an M17 reflector at that address *and* that reflector has set `InfoEnable = true` in it's configuration, that reflector will send back a small *INFO* packet back that will be decoded and displayed by `mrefd-info`. In the build directory, type `./mrefd-info` for a usage message.
 
 ### Install the Dashboard
 

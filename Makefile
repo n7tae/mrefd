@@ -54,9 +54,12 @@ SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
-all : $(EXE) test-all
+all : $(EXE) test-all mref-info
 
 test-all : test-all.o crc.o callsign.o
+	$(CXX) $^ -o $@
+
+mref-info : info.o ip.o callsign.o udpsocket.o
 	$(CXX) $^ -o $@
 
 $(EXE) : $(OBJS)
@@ -66,7 +69,7 @@ $(EXE) : $(OBJS)
 	$(CXX) $(CFLAGS) $< -o $@
 
 clean :
-	$(RM) *.o *.d $(EXE) test-all
+	$(RM) *.o *.d $(EXE) test-all mref-info
 
 -include $(DEPS)
 
