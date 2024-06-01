@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 		if (11 == n)
 		{
 			unsigned count = buf[4] * 0x100u + buf[5];
-			std::cout << count << " clients" << std::endl;
+			std::cout << count << " client" << ((1==count) ? "" : "s")  << std::endl;
 			std::time_t t = 0;
 
 			for (unsigned i=6; i<11; i++)
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 		else if (18 == n)
 		{
 			unsigned count = buf[4] * 0x100u + buf[5];
-			std::cout << count << " clients" << std::endl;
+			std::cout << count << " client" << ((1==count) ? "" : "s") << std::endl;
 
 			std::cout << "This module is " << (bool(buf[6]) ? "" : "not ") << "encrypted" << std::endl;
 
