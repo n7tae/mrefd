@@ -1136,7 +1136,7 @@ unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
 		while (it != clients->end())
 		{
 			auto client = *it;
-			if (mod == client->GetModule() && client->IsNotPeer())
+			if (mod == client->GetReflectorModule() && client->IsNotPeer())
 			{
 				count++;
 				if (nullptr == maxClient)
