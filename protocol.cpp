@@ -1102,8 +1102,8 @@ unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
 		// count is in bytes 4-5, capped to 2^16-1
 		if (count > 0xffffu)
 			count = 0xffffu;
-		buf[4] = uint8_t(count % 0x100f);
 		buf[4] = uint8_t(count / 0x100f);
+		buf[5] = uint8_t(count & 0x100f);
 
 		auto users = g_Reflector.GetUsers();
 		auto it = users->cbegin();
@@ -1160,8 +1160,8 @@ unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
 			if (count > 0xffffu)
 				count = 0xffffu;
 			// count is in bytes 4 and 5
-			buf[4] = uint8_t(count % 0x100u);
-			buf[5] = uint8_t(count / 0x100u);
+			buf[4] = uint8_t(count / 0x100u);
+			buf[5] = uint8_t(count % 0x100u);
 			// encrypted bool is in byte 6
 			// callsign is in bytes 7-12
 			maxClient->GetCallsign().CodeOut(buf+7);
