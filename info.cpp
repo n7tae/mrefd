@@ -130,7 +130,6 @@ int main(int argc, char *argv[])
 	uint8_t buf[UDP_BUFFER_LENMAX];
 	memcpy(buf, "INFO", 4);
 	buf[4] = mod;
-	std::cout << "Sending 'INFO" << mod << "' to " << toaddr << std::endl;
 	usock.Send(buf, 5, toaddr);
 
 	auto rv = poll(&pfd, 1, 5000);
@@ -166,16 +165,16 @@ int main(int argc, char *argv[])
 		{
 			unsigned count = buf[4] * 0x100u + buf[5];
 			std::cout << count << " clients" << std::endl;
-			std::time_t t = buf[6];
+			std::time_t t = 0;
 
-			for (unsigned i=7; i<11; i++)
+			for (unsigned i=6; i<11; i++)
 				t = t * 0x100u + buf[i];
 
 			std::cout << "Global last-heard time: ";
 			if (t)
 			{
 				char s[100];
-				if (std::strftime(s, sizeof(s), "%FT%TZ", std::localtime(&t)))
+				if (std::strftime(s, sizeof(s), "%F %T local time", std::localtime(&t)))
 					std::cout << s << std::endl;
 				else
 					std::cout << "Unknow time: " << int64_t(t) << std::endl;
@@ -205,14 +204,14 @@ int main(int argc, char *argv[])
 
 			std::cout << "This module is " << (bool(buf[6]) ? "" : "not ") << "encrypted" << std::endl;
 
-			std::time_t t = buf[13];
-			for (unsigned i=14; i<17; i++)
+			std::time_t t = 0;
+			for (unsigned i=13; i<18; i++)
 				t = t * 0x100u + buf[i];
 			std::cout << "Last-heard: ";
 			if (t)
 			{
 				CCallsign cs(buf+7);
-				std::cout << " from " << cs << " at ";
+				std::cout << cs << " at ";
 				char s[100];
 				if (std::strftime(s, sizeof(s), "%F %T local time", std::localtime(&t)))
 					std::cout << s << std::endl;

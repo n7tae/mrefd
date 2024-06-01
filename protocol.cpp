@@ -335,22 +335,11 @@ void CProtocol::Task(void)
 		{
 			if (g_CFG.GetInfoEnable())
 			{
-				std::cout << "Received 'INFO" << char(buf[4]) << "' from " << ip << std::endl;
+				// std::cout << "Received 'INFO" << char(buf[4]) << "' from " << ip << std::endl;
 				auto n = EncodeInfo(buf, mod);
-				Dump("Send Info Packet:", buf, n);
 				Send(buf, n, ip);
-				break;
 			}
-			Dump("Blocked INFO:", buf, 5);
 		}
-		else
-		{
-			Dump("Invalid INFO:", buf, 5);
-			memcpy(buf, "INFO?", 5);
-			Send(buf, 5, ip);
-		}
-
-		std::cout << "From " << ip << std::endl;
 		break;
 	default:
 		break;
@@ -1026,7 +1015,7 @@ bool CProtocol::IsValidInfo(const uint8_t *buf, char &mod)
 	if (0 == memcmp(buf, "INFO", 4))
 	{
 		mod = char(buf[4]);
-		if (' ' == mod || ('A' <= mod && mod <= 'Z'))
+		if (IsSpace(mod) || (IsLetter(mod)))
 			return true;
 	}
 	return false;
