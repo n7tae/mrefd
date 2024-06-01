@@ -158,6 +158,12 @@ int main(int argc, char *argv[])
 	}
 	usock.Close();
 
+	if (memcmp(buf, "INFO", 4))
+	{
+		Dump("Unknown packet received:", buf, n);
+		return EXIT_SUCCESS;
+	}
+
 	if (' ' == mod)
 	{
 		std::cout << "Received from " << fromaddr << " for reflector:" << std::endl;
