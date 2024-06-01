@@ -1151,6 +1151,7 @@ unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
 					}
 				}
 			}
+			clients->FindNextClient(it);
 		}
 		g_Reflector.ReleaseClients();
 
