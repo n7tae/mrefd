@@ -335,7 +335,9 @@ void CProtocol::Task(void)
 		{
 			if (g_CFG.GetInfoEnable())
 			{
+				std::cout << "Received 'INFO" << char(buf[4]) << "' from " << ip << std::endl;
 				auto n = EncodeInfo(buf, mod);
+				Dump("Send Info Packet:", buf, n);
 				Send(buf, n, ip);
 				break;
 			}
@@ -1024,9 +1026,7 @@ bool CProtocol::IsValidInfo(const uint8_t *buf, char &mod)
 	if (0 == memcmp(buf, "INFO", 4))
 	{
 		mod = char(buf[4]);
-		if (' ' == mod)
-			return true;
-		else if (std::string::npos != g_CFG.GetModules().find(mod))
+		if (' ' == mod || ('A' <= mod && mod <= 'Z'))
 			return true;
 	}
 	return false;
@@ -1118,6 +1118,11 @@ unsigned CProtocol::EncodeInfo(uint8_t *buf, char mod)
 		}
 
 		return 11u;
+	}
+	else if (std::string::npos == g_CFG.GetModules().find(mod))
+	{
+		buf[4] = '?';
+		return 5;
 	}
 	else
 	{
