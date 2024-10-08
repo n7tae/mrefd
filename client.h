@@ -37,9 +37,8 @@ class CClient
 public:
 	// constructors
 	CClient();
-	CClient(const CCallsign &, const CIp &, char);
 	CClient(const CClient &);
-	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly);
+	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly = false);
 
 	// destructor
 	virtual ~CClient() {};
