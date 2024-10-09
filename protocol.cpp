@@ -837,34 +837,38 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 		auto client = g_Reflector.GetClients()->FindClient(ip);
 		if ( client )
 		{
-			// save the source and destination module for Hearing().
-			// We're going to lose packet after the OpenStream() call.
-			auto s = packet->GetSourceCallsign();
-			auto d = packet->GetDestCallsign().GetModule();
-			// try to open the stream
-			stream = g_Reflector.OpenStream(packet, client);
-			if ( nullptr == stream )
-			{
-				packet.release();	// couldn't open the stream, so destroy the packet
-			}
-			else
-			{
-				// keep the handle
-				m_Streams.push_back(stream);
+			if ( client->IsListenOnly()) {
+				std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+				packet.release();	// LO client isn't allowed to open a stream, so destroy the packet
+			} else {
+				// save the source and destination module for Hearing().
+				// We're going to lose packet after the OpenStream() call.
+				auto s = packet->GetSourceCallsign();
+				auto d = packet->GetDestCallsign().GetModule();
+				// try to open the stream
+				stream = g_Reflector.OpenStream(packet, client);
+				if ( nullptr == stream )
+				{
+					packet.release();	// couldn't open the stream, so destroy the packet
+				}
+				else
+				{
+					// keep the handle
+					m_Streams.push_back(stream);
 
-				// update last heard
-				auto from = client->GetCallsign();
-				if (0 == from.GetCS(4).compare("M17-"))
-					from.SetModule(d);
-				auto ref = GetReflectorCallsign();
-				ref.SetModule(d);
-				g_Reflector.GetUsers()->Hearing(s, from, ref);
-				g_Reflector.ReleaseUsers();
+					// update last heard
+					auto from = client->GetCallsign();
+					if (0 == from.GetCS(4).compare("M17-"))
+						from.SetModule(d);
+					auto ref = GetReflectorCallsign();
+					ref.SetModule(d);
+					g_Reflector.GetUsers()->Hearing(s, from, ref);
+					g_Reflector.ReleaseUsers();
 #ifndef NO_DHT
-				g_Reflector.PutDHTUsers();
+					g_Reflector.PutDHTUsers();
 #endif
+				}
 			}
-
 		}
 		// release
 		g_Reflector.ReleaseClients();
