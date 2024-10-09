@@ -34,7 +34,6 @@ using CFGDATA = struct CFGData_struct {
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
 	bool mcclients;
-	bool swllogging;
 	bool swlencryptedmods;
 };
 
@@ -69,7 +68,6 @@ public:
 	unsigned long      GetPort()             const { return data.port;             }
 	bool               GetMCClients()        const { return data.mcclients;        }
 
-	bool               GetSWLLogging()       const { return data.swllogging;       }
 	bool               GetSWLEncryptedMods() const { return data.swlencryptedmods; }
 
 

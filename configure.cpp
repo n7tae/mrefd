@@ -203,10 +203,6 @@ bool CConfigure::ReadData(const std::string &path)
 		{
 			data.swlencryptedmods = IS_TRUE(value[0]);
 		}
-		else if (0 == key.compare("ListenOnlyLogging"))
-		{
-			data.swllogging = IS_TRUE(value[0]);
-		}
 		else if (0 == key.compare("IPv4BindAddr"))
 		{
 			data.ipv4bindaddr.assign(value);
@@ -330,7 +326,6 @@ bool CConfigure::ReadData(const std::string &path)
 	std::cout << "EncryptionAllowed='" << data.encryptedmods << "'" << std::endl;
 
 	std::cout << "ListenOnlyAllowEncrypt=" << (data.swlencryptedmods ? "true" : "false") << std::endl;
-	std::cout << "ListenOnlyLogging=" << (data.swllogging ? "true" : "false") << std::endl;
 
 #ifndef NO_DHT
 	if (data.ipv4extaddr.empty())
