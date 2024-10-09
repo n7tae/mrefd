@@ -225,7 +225,9 @@ void CProtocol::Task(void)
 	case 11:
 		if ( IsValidConnect(buf, cs, &mod) )
 		{
-			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << std::endl;
+			bool isLstn = (0 == memcmp(buf, "LSTN", 4));
+
+			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip) )
@@ -238,7 +240,7 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-					if (std::regex_match(cs.GetCS(), lstnRegEx)) {
+					if (isLstn) {
 						if (g_CFG.GetEncryptedMods().find(mod) != std::string::npos && !g_CFG.GetSWLEncryptedMods()) {
 							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
 
