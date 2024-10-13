@@ -957,7 +957,7 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_
 		auto dest = packet->GetDestCallsign();
 		if (g_CFG.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
-			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
+			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx) || std::regex_match(packet->GetSourceCallsign().GetCS(), lstnRegEx))
 			{	// looks like a valid source
 				if (0x18U & packet->GetFrameType())
 				{	// looks like this packet is encrypted
