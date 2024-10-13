@@ -840,7 +840,7 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 		if ( client )
 		{
 			if ( client->IsListenOnly()) {
-				std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+				// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
 				packet.release();	// LO client isn't allowed to open a stream, so destroy the packet
 			} else {
 				// save the source and destination module for Hearing().
@@ -925,7 +925,7 @@ bool CProtocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 	{
 		cs.CodeIn(buf + 4);
 		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
 		{
 			return true;
 		}
