@@ -142,6 +142,6 @@ protected:
 	bool publish;
 
 private:
-	std::regex clientRegEx, peerRegEx;
+	std::regex clientRegEx, peerRegEx, lstnRegEx;
 	CCRC crc;
 };

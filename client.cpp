@@ -44,9 +44,10 @@ CClient::CClient()
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+	m_ListenOnly = false;
 }
 
-CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
+CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly)
 {
 	m_ReflectorModule = reflectorModule;
 	m_Callsign = callsign;
@@ -55,6 +56,7 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule)
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
+	m_ListenOnly = listenOnly;
 }
 
 CClient::CClient(const CClient &client)
@@ -66,6 +68,7 @@ CClient::CClient(const CClient &client)
 	m_LastKeepaliveTime = client.m_LastKeepaliveTime;
 	m_ConnectTime = client.m_ConnectTime;
 	m_LastHeardTime = client.m_LastHeardTime;
+	m_ListenOnly = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -98,6 +101,7 @@ void CClient::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
 	xmlFile << "\t<LINKEDMODULE>" << m_ReflectorModule << "</LINKEDMODULE>" << std::endl;
 	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
+	xmlFile << "\t<LISTENONLY>" << ((IsListenOnly()) ? "true" : "false") << "</LISTENONLY>" << std::endl;
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))
 	{

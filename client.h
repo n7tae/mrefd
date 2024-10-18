@@ -37,8 +37,8 @@ class CClient
 public:
 	// constructors
 	CClient();
-	CClient(const CCallsign &, const CIp &, char);
 	CClient(const CClient &);
+	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly = false);
 
 	// destructor
 	virtual ~CClient() {};
@@ -62,6 +62,7 @@ public:
 	// identity
 	const char *GetProtocolName(void) const  { return "M17"; }
 	bool IsNode(void) const                  { return true; }
+	bool IsListenOnly(void) const            { return m_ListenOnly; }
 
 	// status
 	void Alive(void);
@@ -87,4 +88,7 @@ protected:
 	CTimer		m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;
+
+	// identity
+	bool         m_ListenOnly;
 };

@@ -42,6 +42,7 @@ CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-[A-Z0-9]{3,3}( [A-Z])?$", std::regex::extended);
 	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}([ -/\\.].*)?$", std::regex::extended);
+	lstnRegEx = std::regex("^[0-9]?[A-Z][A-Z0-9]{2,8}$", std::regex::extended);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +225,9 @@ void CProtocol::Task(void)
 	case 11:
 		if ( IsValidConnect(buf, cs, &mod) )
 		{
-			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << std::endl;
+			bool isLstn = (0 == memcmp(buf, "LSTN", 4));
+
+			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip) )
@@ -237,7 +240,19 @@ void CProtocol::Task(void)
 					Send(buf, 4, ip);
 
 					// create the client and append
-					g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+					if (isLstn) {
+						if (g_CFG.GetEncryptedMods().find(mod) != std::string::npos && !g_CFG.GetSWLEncryptedMods()) {
+							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
+
+							// deny the request
+							EncodeConnectNackPacket(buf);
+							Send(buf, 4, ip);
+						} else {
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+						}
+					} else {
+						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+					}
 					g_Reflector.ReleaseClients();
 #ifndef NO_DHT
 					g_Reflector.PutDHTClients();
@@ -824,34 +839,38 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 		auto client = g_Reflector.GetClients()->FindClient(ip);
 		if ( client )
 		{
-			// save the source and destination module for Hearing().
-			// We're going to lose packet after the OpenStream() call.
-			auto s = packet->GetSourceCallsign();
-			auto d = packet->GetDestCallsign().GetModule();
-			// try to open the stream
-			stream = g_Reflector.OpenStream(packet, client);
-			if ( nullptr == stream )
-			{
-				packet.release();	// couldn't open the stream, so destroy the packet
-			}
-			else
-			{
-				// keep the handle
-				m_Streams.push_back(stream);
+			if ( client->IsListenOnly()) {
+				// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+				packet.release();	// LO client isn't allowed to open a stream, so destroy the packet
+			} else {
+				// save the source and destination module for Hearing().
+				// We're going to lose packet after the OpenStream() call.
+				auto s = packet->GetSourceCallsign();
+				auto d = packet->GetDestCallsign().GetModule();
+				// try to open the stream
+				stream = g_Reflector.OpenStream(packet, client);
+				if ( nullptr == stream )
+				{
+					packet.release();	// couldn't open the stream, so destroy the packet
+				}
+				else
+				{
+					// keep the handle
+					m_Streams.push_back(stream);
 
-				// update last heard
-				auto from = client->GetCallsign();
-				if (0 == from.GetCS(4).compare("M17-"))
-					from.SetModule(d);
-				auto ref = GetReflectorCallsign();
-				ref.SetModule(d);
-				g_Reflector.GetUsers()->Hearing(s, from, ref);
-				g_Reflector.ReleaseUsers();
+					// update last heard
+					auto from = client->GetCallsign();
+					if (0 == from.GetCS(4).compare("M17-"))
+						from.SetModule(d);
+					auto ref = GetReflectorCallsign();
+					ref.SetModule(d);
+					g_Reflector.GetUsers()->Hearing(s, from, ref);
+					g_Reflector.ReleaseUsers();
 #ifndef NO_DHT
-				g_Reflector.PutDHTUsers();
+					g_Reflector.PutDHTUsers();
 #endif
+				}
 			}
-
 		}
 		// release
 		g_Reflector.ReleaseClients();
@@ -880,6 +899,22 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 		{
 			std::cout << "CONN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
+	} else if (0 == memcmp(buf, "LSTN", 4)) {
+		cs.CodeIn(buf + 4);
+		if (std::regex_match(cs.GetCS(), lstnRegEx))
+		{
+			*mod = buf[10];
+			if (IsLetter(*mod))
+			{
+				return true;
+			}
+			std::cout << "Bad LSTN from '" << cs.GetCS() << "'." << std::endl;
+			Dump("The requested module is not a letter:", buf, 11);
+		}
+		else
+		{
+			std::cout << "LSTN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+		}
 	}
 	return false;
 }
@@ -890,7 +925,7 @@ bool CProtocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 	{
 		cs.CodeIn(buf + 4);
 		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
 		{
 			return true;
 		}
@@ -904,7 +939,7 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	{
 		cs.CodeIn(buf + 4);
 		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx))
+		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
 		{
 			return true;
 		}
@@ -922,7 +957,7 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, bool is_internal, std::unique_
 		auto dest = packet->GetDestCallsign();
 		if (g_CFG.IsValidModule(dest.GetModule()) && dest.HasSameCallsign(GetReflectorCallsign()))
 		{
-			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx))
+			if (std::regex_match(packet->GetSourceCallsign().GetCS(), clientRegEx) || std::regex_match(packet->GetSourceCallsign().GetCS(), lstnRegEx))
 			{	// looks like a valid source
 				if (0x18U & packet->GetFrameType())
 				{	// looks like this packet is encrypted
