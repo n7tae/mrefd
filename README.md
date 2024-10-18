@@ -11,7 +11,7 @@ Encrypted voice streams will pass through an *mrefd* channel, but **only** if th
 *mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a four-part document on the DHT network. The four parts:
 1. Configuration - Connecting clients can use this to know how to connect.
 2. Peers - Other mrefd reflectors that are interlinked is in this part.
-3. Clients - Any node listing to any configured module is in this part. This includes simple clients as well as other interlinked reflector modules.
+3. Clients - Any node listing to any configured module is in this part. This includes simple clients, listen-only clients, and interlinked reflector modules.
 4. Last heard users - A limited list of last heard users is in this part.
 Any node on the network can read an mrefd document. The key to the *mrefd* document is the reflector's callsign. either the entire document or any part of the document may be retrieved.
 
