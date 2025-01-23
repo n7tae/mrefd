@@ -33,8 +33,8 @@
 using SM17Lich = struct __attribute__((__packed__)) lich_tag {
 	uint8_t  addr_dst[6];
 	uint8_t  addr_src[6];
-	uint16_t frametype; //frametype flag field per the M17 spec
-	uint8_t  nonce[14]; //bytes for the nonce
+	uint16_t frametype;      //frametype flag field per the M17 spec
+	uint8_t  meta_data[14];  //bytes for the meta data, as described in the M17 spec
 }; // 6 + 6 + 2 + 14 = 28 bytes
 
 //without SYNC or other parts
