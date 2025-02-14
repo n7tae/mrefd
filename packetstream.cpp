@@ -22,6 +22,7 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include "client.h"
 #include "packetstream.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -70,12 +71,12 @@ void CPacketStream::Push(std::unique_ptr<CPacket> Packet)
 {
 	// update stream dependent packet data
 	m_LastPacketTime.Start();
-	push(Packet);
+	Push(std::move(Packet));
 }
 
 bool CPacketStream::IsEmpty(void) const
 {
-	return empty();
+	return IsEmpty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

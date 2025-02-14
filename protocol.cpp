@@ -54,12 +54,10 @@ CProtocol::~CProtocol()
 	Close();
 
 	// empty queue
-	m_Queue.Lock();
-	while ( !m_Queue.empty() )
+	while ( !m_Queue.IsEmpty() )
 	{
-		m_Queue.pop();
+		m_Queue.Pop();
 	}
-	m_Queue.Unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -399,9 +397,7 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 		auto islast = packet->IsLastPacket(); // we'll need this after the std::move()!
 
 		// and push the packet
-		stream->Lock();
 		stream->Push(std::move(packet));
-		stream->Unlock();
 
 		if (islast)
 			g_Reflector.CloseStream(stream);
@@ -436,18 +432,12 @@ void CProtocol::CheckStreamsTimeout(void)
 	for ( auto it=m_Streams.begin(); it!=m_Streams.end(); )
 	{
 		// time out ?
-		(*it)->Lock();
 		if ( (*it)->IsExpired() )
 		{
 			// yes, close it
-			(*it)->Unlock();
 			g_Reflector.CloseStream(*it);
 			// and remove it
 			it = m_Streams.erase(it);
-		}
-		else
-		{
-			(*it++)->Unlock();
 		}
 	}
 }
@@ -592,13 +582,9 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 
 void CProtocol::HandleQueue(void)
 {
-	m_Queue.Lock();
-	while ( !m_Queue.empty() )
+	auto packet = m_Queue.Pop();
+	while ( packet )
 	{
-		// get the packet
-		auto packet = m_Queue.front();
-		m_Queue.pop();
-
 		// push it to all our clients linked to the module and who is not streaming in
 		auto clients = g_Reflector.GetClients();
 		auto it = clients->begin();
@@ -630,8 +616,8 @@ void CProtocol::HandleQueue(void)
 			}
 		}
 		g_Reflector.ReleaseClients();
+		packet = m_Queue.Pop();
 	}
-	m_Queue.Unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -257,7 +257,6 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		return nullptr;
 	}
 
-	stream->Lock();
 	// is it available ?
 	if ( stream->OpenPacketStream(*Header, client) )
 	{
@@ -274,7 +273,6 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		// and push header packet
 		stream->Push(std::move(Header));
 	}
-	stream->Unlock();
 	return stream;
 }
 
@@ -286,19 +284,16 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 		bool bEmpty = false;
 		do
 		{
-			stream->Lock();
 			// do not use stream->IsEmpty() has this "may" never succeed
 			// and anyway, the DvLastFramPacket short-circuit the transcoder
 			// loop queues
-			bEmpty = stream->empty();
-			stream->Unlock();
+			bEmpty = stream->IsEmpty();
 			if ( !bEmpty )
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 		while (!bEmpty);
 
 		GetClients();	// lock clients
-		stream->Lock();	// lock stream
 
 		// get and check the master
 		std::shared_ptr<CClient>client = stream->GetOwnerClient();
@@ -312,11 +307,6 @@ void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
 
 		// release clients
 		ReleaseClients();
-
-		// unlock before closing
-		// to avoid double lock in associated
-		// codecstream close/thread-join
-		stream->Unlock();
 
 		// and stop the queue
 		stream->ClosePacketStream();
@@ -334,33 +324,13 @@ void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 	while (keep_running)
 	{
 		// any packet in our input queue ?
-		streamIn->Lock();
-		if ( !streamIn->empty() )
-		{
-			// get the packet
-			packet = streamIn->front();
-			streamIn->pop();
-		}
-		else
-		{
-			packet = nullptr;
-		}
-		streamIn->Unlock();
+		packet = streamIn->PopWaitFor(100);
 
 		// route it
 		if ( packet != nullptr )
 		{
-			// duplicate packet
-			auto packetClone = packet->Duplicate();
-
 			// and push it
-			CPacketQueue *queue = m_Protocol.GetQueue();
-			queue->push(packetClone);
-			m_Protocol.ReleaseQueue();
-		}
-		else
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			m_Protocol.m_Queue.Push(packet);
 		}
 	}
 }

@@ -56,16 +56,15 @@ public:
 	bool Initialize(const uint16_t port, const std::string &ipv4bind, const std::string &ipv6bind);
 	void Close(void);
 
-	// queue
-	CPacketQueue *GetQueue(void)        { m_Queue.Lock(); return &m_Queue; }
-	void ReleaseQueue(void)             { m_Queue.Unlock(); }
-
 	// get
 	const CCallsign &GetReflectorCallsign(void)const { return m_ReflectorCallsign; }
 
 	// task
 	void Thread(void);
 	void Task(void);
+
+	// queue
+	CPacketQueue    m_Queue;
 
 protected:
 	// queue helper
@@ -123,9 +122,6 @@ protected:
 
 	// streams
 	std::list<std::shared_ptr<CPacketStream>> m_Streams;
-
-	// queue
-	CPacketQueue    m_Queue;
 
 	// thread
 	std::atomic<bool> keep_running;

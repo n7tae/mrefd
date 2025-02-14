@@ -22,9 +22,10 @@
 
 #pragma once
 
-#include "packetqueue.h"
+#include "safepacketqueue.h"
 #include "timer.h"
 #include "packet.h"
+#include "client.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
