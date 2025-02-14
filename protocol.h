@@ -37,8 +37,11 @@
 #include "crc.h"
 
 
-////////////////////////////////////////////////////////////////////////////////////////
-// class
+using SInterConnect = struct __attribute__((__packed__)) interconnect_tag {
+	uint8_t magic[4];
+	uint8_t fromcs[6];
+	uint8_t mods[27];
+}; // 37 bytes
 
 class CProtocol : public CBase
 {

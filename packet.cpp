@@ -23,11 +23,11 @@
 
 CPacket::CPacket(const uint8_t *buf, bool is_internal)
 {
-	memcpy(m17.frame.magic, buf, is_internal ? sizeof(SRefM17Frame) : sizeof(SM17Frame));
+	memcpy(m17.frame.magic, buf, is_internal ? sizeof(SStreamModePeerPacket) : sizeof(SStreamModeClientPacket));
 	if (! is_internal)
 		m17.relayed = false;
-	destination.CodeIn(m17.frame.lich.addr_dst);
-	source.CodeIn(m17.frame.lich.addr_src);
+	destination.CodeIn(m17.frame.lsd.addr_dst);
+	source.CodeIn(m17.frame.lsd.addr_src);
 }
 
 const CCallsign &CPacket::GetDestCallsign() const
@@ -52,7 +52,7 @@ uint16_t CPacket::GetStreamId() const
 
 uint16_t CPacket::GetFrameType() const
 {
-	return ntohs(m17.frame.lich.frametype);
+	return ntohs(m17.frame.lsd.frametype);
 }
 
 uint16_t CPacket::GetCRC() const
@@ -91,7 +91,7 @@ bool CPacket::IsFirstPacket() const
 	return 0x0U == m17.frame.framenumber;
 }
 
-SRefM17Frame &CPacket::GetFrame()
+SStreamModePeerPacket &CPacket::GetFrame()
 {
 	return m17;
 }

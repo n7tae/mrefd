@@ -30,7 +30,7 @@
 
 // M17 Packets
 //all structures must be big endian on the wire, so you'll want htonl (man byteorder 3) and such.
-using SM17Lich = struct __attribute__((__packed__)) lich_tag {
+using SLSD = struct __attribute__((__packed__)) lsd_tag {
 	uint8_t  addr_dst[6];
 	uint8_t  addr_src[6];
 	uint16_t frametype;      //frametype flag field per the M17 spec
@@ -38,26 +38,20 @@ using SM17Lich = struct __attribute__((__packed__)) lich_tag {
 }; // 6 + 6 + 2 + 14 = 28 bytes
 
 //without SYNC or other parts
-using SM17Frame = struct __attribute__((__packed__)) m17_tag {
+using SStreamModeClientPacket = struct __attribute__((__packed__)) m17_tag {
 	uint8_t  magic[4];
 	uint16_t streamid;
-	SM17Lich lich;
+	SLSD lsd;
 	uint16_t framenumber;
 	uint8_t  payload[16];
 	uint16_t crc; 	//16 bit CRC
 }; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes
 
 // includes extra bool (1 byte) for enforcing one-hop policy
-using SRefM17Frame = struct __attribute__((__packed__)) peer_tag {
-	SM17Frame frame;
+using SStreamModePeerPacket = struct __attribute__((__packed__)) peer_tag {
+	SStreamModeClientPacket frame;
 	bool relayed;
 }; // 4 + 2 + 28 + 2 + 16 + 2 + 1 = 55 bytes
-
-using SInterConnect = struct __attribute__((__packed__)) interconnect_tag {
-	uint8_t magic[4];
-	uint8_t fromcs[6];
-	uint8_t mods[27];
-}; // 37 bytes
 
 class CPacket
 {
@@ -76,9 +70,9 @@ public:
 	std::unique_ptr<CPacket> Duplicate(void) const;
 	bool IsFirstPacket() const;
 	bool IsLastPacket() const;
-	SRefM17Frame &GetFrame();
+	SStreamModePeerPacket &GetFrame();
 
 private:
 	CCallsign destination, source;
-	SRefM17Frame m17;
+	SStreamModePeerPacket m17;
 };

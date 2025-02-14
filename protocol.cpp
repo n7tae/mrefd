@@ -158,10 +158,10 @@ void CProtocol::Task(void)
 	auto len = (*this.*Receive)(buf, ip, 20);
 	//if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
 	switch (len) {
-	case sizeof(SM17Frame):	// a packet from a client
-	case sizeof(SRefM17Frame):	// a packet from a peer
+	case sizeof(SStreamModeClientPacket):	// a packet from a client
+	case sizeof(SStreamModePeerPacket):	// a packet from a peer
 		// check that the source and dest c/s is correct, including dest module
-		if ( IsValidPacket(buf, (sizeof(SM17Frame) == len) ? false : true, pack) )
+		if ( IsValidPacket(buf, (sizeof(SStreamModeClientPacket) == len) ? false : true, pack) )
 		{
 			if (g_GateKeeper.MayTransmit(pack->GetSourceCallsign(), ip))
 			{
@@ -613,18 +613,18 @@ void CProtocol::HandleQueue(void)
 				if (cs.GetCS(4).compare("M17-"))
 				{
 					// the client is not a reflector
-					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);
-					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2));
-					Send(packet->GetFrame().frame.magic, sizeof(SM17Frame), client->GetIp());
+					cs.CodeOut(packet->GetFrame().frame.lsd.addr_dst);
+					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SStreamModeClientPacket) - 2));
+					Send(packet->GetFrame().frame.magic, sizeof(SStreamModeClientPacket), client->GetIp());
 				}
 				else if (! packet->GetRelay())
 				{
 					// the client is a reflector and the packet hasn't yet been relayed
 					cs.SetModule(client->GetReflectorModule());
-					cs.CodeOut(packet->GetFrame().frame.lich.addr_dst);	      // set the destination
-					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SM17Frame) - 2)); // recalculate the crc
+					cs.CodeOut(packet->GetFrame().frame.lsd.addr_dst);	      // set the destination
+					packet->SetCRC(crc.CalcCRC(packet->GetFrame().frame.magic, sizeof(SStreamModeClientPacket) - 2)); // recalculate the crc
 					packet->SetRelay(true);  // make sure the destination reflector doesn't send it to other reflectors
-					Send(packet->GetFrame().frame.magic, sizeof(SRefM17Frame), client->GetIp());
+					Send(packet->GetFrame().frame.magic, sizeof(SStreamModePeerPacket), client->GetIp());
 					packet->SetRelay(false); // reset for the next client;
 				}
 			}
