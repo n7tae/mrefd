@@ -1,12 +1,14 @@
 # MREFD
 
-This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevant source files reflect this. The sources are published under GPL Licenses.
+This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevant source files reflect this. The sources are published under GPL Licenses. *mrefd* works with both M17 modes, Stream and Packet Mode.
+
+**Note:** This version of *mrefd* will ***not*** interlink with *mrefd* Version 0.x.x!
 
 ## Introduction
 
-The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be configured with up to 26 different channels. M17 clients (M17 repeaters, M17 hot-spots and other MREFD reflectors) can be linked to a channel. An incoming M17 voice stream from one of the clients will be heard by all the other clients.
+The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be configured with up to 26 different channels. M17 clients (M17 repeaters, M17 hot-spots and other MREFD reflectors) can be linked to a channel. An incoming M17 voice stream or data packet from one of the clients will be sent to all the other clients.
 
-Encrypted voice streams will pass through an *mrefd* channel, but **only** if they are configured for it.
+Encrypted voice streams will pass through an *mrefd* channel, but **only** if that channel configured for it.
 
 *mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a four-part document on the DHT network. The four parts:
 1. Configuration - Connecting clients can use this to know how to connect.
@@ -53,6 +55,14 @@ The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT 
 
 **Ham-DHT** is implemented using a distributed hash table provided by OpenDHT.
 
+If you are using a new OS, like Debian 12 or Ubuntu 24, you may not have to build the OpenDHT support. Try:
+
+```
+sudo apt install libopendht-dev
+```
+
+If the description shows that this package was build with C++17 or newer, go ahead and let it install, otherwise you should build your own version of the OpenDHT library.
+
 OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Python support and proxy-server support (RESTinio) is not required for mrefd and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
 
 ```bash
@@ -89,7 +99,7 @@ cp config/mrefd.interlink .
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The mrefd reflector will monitor these file and dynamically update itself whenever anything changes. There is no need to stop and restart the reflector.
 
-The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink now has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **Ham-DHT** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **Ham-DHT** will provided it, and this information comes directly from the peer. Using the **Ham-DHT** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
+The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **Ham-DHT** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **Ham-DHT** will provided it, and this information comes directly from the peer. Using the **Ham-DHT** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
 
 If your reflector or your desired peer doesn't use **Ham-DHT**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
 
@@ -183,4 +193,4 @@ MREFD requires the following port to be open to inbound network traffic:
 
 ## Copyright
 
-- Copyright © 2020-2022 Thomas A. Early N7TAE
+- Copyright © 2020-2025 Thomas A. Early N7TAE

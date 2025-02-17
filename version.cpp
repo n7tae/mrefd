@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/01/2018.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2022 Thomas A. Early N7TAE.
+//  Copyright © 202-2025 Thomas A. Early N7TAE.
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -25,26 +25,28 @@
 
 #include "version.h"
 
-CVersion g_Version(0, 12, 0);	// the global object
+CVersion g_Version(1, 0, 0);	// the global object
+
+CVersion::CVersion(uint32_t v) : version(v) {}
 
 CVersion::CVersion(uint8_t maj, uint8_t min, uint8_t rev) : version(0x10000*maj + 0x100*min + rev) {}
 
-int CVersion::GetMajor(void) const
+uint32_t CVersion::GetMajor(void) const
 {
 	return version / 0x10000;
 }
 
-int CVersion::GetMinor(void) const
+uint32_t CVersion::GetMinor(void) const
 {
 	return version / 0x100 % 0x100;
 }
 
-int CVersion::GetRevision(void) const
+uint32_t CVersion::GetRevision(void) const
 {
 	return version % 0x100;
 }
 
-int CVersion::GetVersion(void)  const
+uint32_t CVersion::GetVersion(void)  const
 {
 	return version;
 }

@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/01/2018.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2022 Thomas A. Early N7TAE.
+//  Copyright © 2022-2025 Thomas A. Early N7TAE.
 //
 // ----------------------------------------------------------------------------
 //    This file is part of m17ref.
@@ -32,13 +32,15 @@ class CVersion
 {
 public:
 	// constructor
+	CVersion(uint32_t v);
 	CVersion(uint8_t maj, uint8_t min, uint8_t rev);
 
+
 	// get
-	int GetMajor(void) const;
-	int GetMinor(void) const;
-	int GetRevision(void) const;
-	int GetVersion(void) const;
+	uint32_t GetMajor(void) const;
+	uint32_t GetMinor(void) const;
+	uint32_t GetRevision(void) const;
+	uint32_t GetVersion(void) const;
 
 	// comparison operators
 	bool operator ==(const CVersion &v) const;
@@ -54,5 +56,5 @@ public:
 
 protected:
 	// data
-	const int version;
+	uint32_t version;
 };

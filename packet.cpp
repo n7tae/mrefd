@@ -1,5 +1,5 @@
 //
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020-2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //
@@ -20,78 +20,85 @@
 #include <arpa/inet.h>
 
 #include "packet.h"
+#include "crc.h"
 
-CPacket::CPacket(const uint8_t *buf, bool is_internal)
+static const CCRC CRC;
+
+void CPacket::Fill(const uint8_t *buf, size_t size, bool bis)
 {
-	memcpy(m17.frame.magic, buf, is_internal ? sizeof(SStreamModePeerPacket) : sizeof(SStreamModeClientPacket));
-	if (! is_internal)
-		m17.relayed = false;
-	destination.CodeIn(m17.frame.lsd.addr_dst);
-	source.CodeIn(m17.frame.lsd.addr_src);
+	data.resize(size);
+	memcpy(data.data(), buf, size);
+	isstream = bis;
 }
 
-const CCallsign &CPacket::GetDestCallsign() const
+const uint8_t *CPacket::GetCDstAddress() const
 {
-	return destination;
+	return data.data() + (isstream ? 6u : 4u);
 }
 
-char CPacket::GetDestModule() const
+uint8_t *CPacket::GetDstAddress()
 {
-	return destination.GetModule();
+	return data.data() + (isstream ? 6u : 4u);
 }
 
-const CCallsign &CPacket::GetSourceCallsign() const
+const uint8_t *CPacket::GetCSrcAddress() const
 {
-	return source;
+	return data.data() + (isstream ? 12u : 10u);
 }
 
+// returns the StreamID in host byte order
 uint16_t CPacket::GetStreamId() const
 {
-	return ntohs(m17.frame.streamid);
+	return isstream ? 0x100u * data[4] + data[5] : 0u;
 }
 
+// returns LSD:TYPE in host byte order
 uint16_t CPacket::GetFrameType() const
 {
-	return ntohs(m17.frame.lsd.frametype);
+	if (isstream)
+		return 0x100u * data[18] + data[19];
+
+	return 0x100u * data[16] + data[17];
 }
 
-uint16_t CPacket::GetCRC() const
+void CPacket::SetRelay()
 {
-	return ntohs(m17.frame.crc);
+	data[3] = uint8_t(isstream ? '!' : 'Q');
 }
 
-void CPacket::SetCRC(uint16_t crc)
+void CPacket::ClearRelay()
 {
-	m17.frame.crc = htons(crc);
+	data[3] = uint8_t(isstream ? ' ' : 'P');
 }
 
-void CPacket::SetRelay(bool state)
+bool CPacket::IsRelaySet() const
 {
-	m17.relayed = state;
+	if (isstream)
+		return '!' == char(data[3]);
+
+	return 'Q' == char(data[3]);
 }
 
-bool CPacket::GetRelay() const
+uint16_t CPacket::GetFrameNumber()
 {
-	return m17.relayed;
+	if (isstream)
+		return 0x100u * data[34] + data[35];
+	else
+		return 0u;
 }
 
-std::unique_ptr<CPacket> CPacket::Duplicate(void) const
+void CPacket::CalcCRC()
 {
-	return std::unique_ptr<CPacket>(new CPacket(*this));
-}
-
-bool CPacket::IsLastPacket() const
-{
-	return ((0x8000u & ntohs(m17.frame.framenumber)) == 0x8000u);
-}
-
-bool CPacket::IsFirstPacket() const
-{
-	// we don't need ntohs() because we are testing for zero
-	return 0x0U == m17.frame.framenumber;
-}
-
-SStreamModePeerPacket &CPacket::GetFrame()
-{
-	return m17;
+	if (isstream)
+	{
+		auto crc = CRC.CalcCRC(data.data(), 52);
+		data[52] = uint8_t(crc >> 8);
+		data[53] = uint8_t(crc & 0xffu);
+	}
+	else
+	{	// set the CRC for the LSF
+		auto crc = CRC.CalcCRC(data.data(), 28);
+		data[32] = uint8_t(crc >> 8);
+		data[33] = uint8_t(crc & 0xffu);
+	}
 }

@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 01/11/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2022 Thomas A. Early, N7TAE
+//  Copyright © 2022-2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -82,7 +82,7 @@ protected:
 	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(const uint8_t *, bool is_internal, std::unique_ptr<CPacket> &);
+	bool IsValidPacket(const uint8_t *, size_t size, std::unique_ptr<CPacket> &);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);

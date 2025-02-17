@@ -1,5 +1,5 @@
 //
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020-2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //
@@ -22,57 +22,31 @@
 #include <cstdint>
 #include <string.h>
 #include <memory>
+#include <vector>
 
 #include "callsign.h"
-
-////////////////////////////////////////////////////////////////////////////////////////
-// aliases
-
-// M17 Packets
-//all structures must be big endian on the wire, so you'll want htonl (man byteorder 3) and such.
-using SLSD = struct __attribute__((__packed__)) lsd_tag {
-	uint8_t  addr_dst[6];
-	uint8_t  addr_src[6];
-	uint16_t frametype;      //frametype flag field per the M17 spec
-	uint8_t  meta_data[14];  //bytes for the meta data, as described in the M17 spec
-}; // 6 + 6 + 2 + 14 = 28 bytes
-
-//without SYNC or other parts
-using SStreamModeClientPacket = struct __attribute__((__packed__)) m17_tag {
-	uint8_t  magic[4];
-	uint16_t streamid;
-	SLSD lsd;
-	uint16_t framenumber;
-	uint8_t  payload[16];
-	uint16_t crc; 	//16 bit CRC
-}; // 4 + 2 + 28 + 2 + 16 + 2 = 54 bytes
-
-// includes extra bool (1 byte) for enforcing one-hop policy
-using SStreamModePeerPacket = struct __attribute__((__packed__)) peer_tag {
-	SStreamModeClientPacket frame;
-	bool relayed;
-}; // 4 + 2 + 28 + 2 + 16 + 2 + 1 = 55 bytes
 
 class CPacket
 {
 public:
 	CPacket() {}
-	CPacket(const uint8_t *buf, bool is_internal);
-	const CCallsign &GetDestCallsign() const;
-	char GetDestModule() const;
-	const CCallsign &GetSourceCallsign() const;
+	~CPacket() { data.clear(); }
+	void Fill(const uint8_t *buf, size_t size, bool bis);
+	const uint8_t *GetCDstAddress() const;
+	const uint8_t *GetCSrcAddress() const;
+	uint8_t *GetDstAddress();
 	uint16_t GetStreamId() const;
 	uint16_t GetFrameType() const;
-	uint16_t GetCRC() const;
-	void SetCRC(uint16_t crc);
-	void SetRelay(bool state);
-	bool GetRelay() const;
-	std::unique_ptr<CPacket> Duplicate(void) const;
-	bool IsFirstPacket() const;
-	bool IsLastPacket() const;
-	SStreamModePeerPacket &GetFrame();
+	void SetRelay();
+	void ClearRelay();
+	bool IsRelaySet() const;
+	uint16_t GetFrameNumber();
+	bool IsStreamPacket() const { return isstream; }
+	void CalcCRC();
+	const uint8_t *GetPData() const { return data.data(); }
+	size_t GetSize() const { return data.size(); }
 
 private:
-	CCallsign destination, source;
-	SStreamModePeerPacket m17;
+	bool isstream;
+	std::vector<uint8_t> data;
 };

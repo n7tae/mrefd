@@ -1,20 +1,20 @@
 //
 //  creflector.cpp
-//  M17Refd
+//  mrefd
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/10/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020,2022 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022-2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
-//    This file is part of M17Refd.
+//    This file is part of mrefd.
 //
-//    M17Refd is free software: you can redistribute it and/or modify
+//    mrefd is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    M17Refd is distributed in the hope that it will be useful,
+//    mrefd is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -221,7 +221,7 @@ bool CReflector::IsStreaming(char module)
 std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
 {
 	// check sid is not zero
-	if ( 0U == Header->GetStreamId() )
+	if ( Header->IsStreamPacket() and 0U == Header->GetStreamId() )
 	{
 		std::cerr << "Incoming stream has zero streamID" << std::endl;
 		return nullptr;
@@ -241,7 +241,8 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 	}
 
 	// get the module's queue
-	char module = Header->GetDestModule();
+	const CCallsign dst(Header->GetCDstAddress());
+	char module = dst.GetModule();
 
 	// check if no stream with same streamid already open
 	// to prevent loops
@@ -268,7 +269,11 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 		client->Heard();
 
 		// report
-		std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << std::dec << " by user " << Header->GetSourceCallsign() << std::endl;
+		const CCallsign src(Header->GetCSrcAddress());
+		if (Header->IsStreamPacket())
+			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << std::dec << " by user " << src << std::endl;
+		else
+			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
 
 		// and push header packet
 		stream->Push(std::move(Header));
