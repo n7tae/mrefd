@@ -41,13 +41,6 @@ public:
 			q.pop();
 	}
 
-	void Push(T &t)
-	{
-		std::lock_guard<std::mutex> lock(m);
-		q.push(std::move(t));
-		c.notify_one();
-	}
-
 	T Pop(void)
 	{
 		std::unique_lock<std::mutex> lock(m);
@@ -92,6 +85,13 @@ public:
 	{
 		std::unique_lock<std::mutex> lock(m);
 		return q.empty();
+	}
+
+	void Push(T &t)
+	{
+		std::lock_guard<std::mutex> lock(m);
+		q.push(std::move(t));
+		c.notify_one();
 	}
 
 private:

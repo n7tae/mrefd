@@ -277,6 +277,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 
 		// and push header packet
 		stream->Push(Header);
+		stream->Tickle();
 	}
 	return stream;
 }
@@ -331,7 +332,6 @@ void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 		// any packet in our input queue ?
 		packet = streamIn->PopWaitFor(100);
 
-		// route it
 		if ( packet != nullptr )
 		{
 			// and push it

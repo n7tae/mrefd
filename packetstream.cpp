@@ -24,18 +24,12 @@
 
 #include "packetstream.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructor
-
 CPacketStream::CPacketStream() : CPacketQueue()
 {
 	m_bOpen = false;
 	m_uiStreamId = 0;
 	m_OwnerClient = nullptr;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// open / close
 
 bool CPacketStream::OpenPacketStream(const CPacket &Header, std::shared_ptr<CClient>client)
 {
@@ -62,9 +56,6 @@ void CPacketStream::ClosePacketStream(void)
 	m_uiStreamId = 0;
 	m_OwnerClient = nullptr;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// get
 
 const CIp *CPacketStream::GetOwnerIp(void)
 {

@@ -154,7 +154,13 @@ void CProtocol::Task(void)
 
 	// any incoming packet ?
 	auto len = (*this.*Receive)(buf, ip, 20);
-	//if (len > 0) std::cout << "Received " << len << " bytes from " << ip << std::endl;
+#ifdef DEBUG
+	if (len > 0)
+	{
+		std::cout << "Received " << len << " bytes from " << ip << std::endl;
+		Dump("M17 Packet:", buf, len);
+	}
+#endif
 	switch (len)
 	{
 		default:
@@ -413,6 +419,7 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 
 		// and push the packet
 		stream->Push(packet);
+		stream->Tickle();
 
 		if (islast)
 			g_Reflector.CloseStream(stream);
@@ -861,6 +868,9 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 				stream = g_Reflector.OpenStream(packet, client);
 				if ( nullptr == stream )
 				{
+					#ifdef DEBUG
+					std::cout << "Stream from " << ip << " could not be opened" << std::endl;
+					#endif
 					packet.release();	// couldn't open the stream, so destroy the packet
 				}
 				else
@@ -973,6 +983,9 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, size_t size, std::unique_ptr<C
 	}
 	else
 	{
+		#ifdef DEBUG
+		Dump("CProtocol::IsValidPacket() unrecognized packet:", buf, size);
+		#endif
 		return false;
 	}
 	// check validity of packet
