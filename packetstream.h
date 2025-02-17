@@ -45,10 +45,7 @@ public:
 	bool OpenPacketStream(const CPacket &, std::shared_ptr<CClient>);
 	void ClosePacketStream(void);
 
-	// push & pop
-	void Push(std::unique_ptr<CPacket> packet);
 	void Tickle(void)                               { m_LastPacketTime.Start(); }
-	bool IsEmpty(void) const;
 
 	// get
 	std::shared_ptr<CClient> GetOwnerClient(void)   { return m_OwnerClient; }
@@ -61,7 +58,7 @@ protected:
 	// data
 	bool                     m_bOpen;
 	uint16_t                 m_uiStreamId;
-	CTimer               m_LastPacketTime;
+	CTimer                   m_LastPacketTime;
 	CPacket                  m_Header;
 	std::shared_ptr<CClient> m_OwnerClient;
 };

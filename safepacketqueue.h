@@ -34,7 +34,12 @@ class CSafePacketQueue
 public:
  	CSafePacketQueue(void) : q() , m() , c() {}
 
-	virtual ~CSafePacketQueue(void) {}
+	virtual ~CSafePacketQueue(void)
+	{
+		std::unique_lock<std::mutex> lock(m);
+		while (not q.empty())
+			q.pop();
+	}
 
 	void Push(T &t)
 	{

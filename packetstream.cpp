@@ -27,7 +27,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CPacketStream::CPacketStream()
+CPacketStream::CPacketStream() : CPacketQueue()
 {
 	m_bOpen = false;
 	m_uiStreamId = 0;
@@ -61,21 +61,6 @@ void CPacketStream::ClosePacketStream(void)
 	m_bOpen = false;
 	m_uiStreamId = 0;
 	m_OwnerClient = nullptr;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// push & pop
-
-void CPacketStream::Push(std::unique_ptr<CPacket> Packet)
-{
-	// update stream dependent packet data
-	m_LastPacketTime.Start();
-	Push(std::move(Packet));
-}
-
-bool CPacketStream::IsEmpty(void) const
-{
-	return IsEmpty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

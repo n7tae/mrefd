@@ -28,6 +28,8 @@ All other packet are made up of one, two or three parts:
 2. **Encoded Callsign:** This is a 6-byte encoded callsign. In all cases, this is the encoding callsign of the node that is sending the packet. This will be the encoded callsign of either an *mrefd* reflector or the callsign of the sending client.  See the *Address Encoding* appendix of the [M17 Specification](https://github/M17-Project/M17_spec).
 3. **Module(s):** This is either a single byte, an ASCII character from 'A' to 'Z' designating a reflector module, or a null-terminated string that is a list of possible reflector modules. A reflector can have up to 26 modules so, in this case, this third piece of the packet is 27 bytes in length in order to accommodate the maximum length possible, with a trailing null byte.
 
+A one part packet is 4 bytes long and just contains the magic value. A two part packet is 10 bytes long and contains the magic value and the sender's encoded callsign. A three part packet is either 11 or 37 bytes and includes the module(s) the sender
+
 ## 3. Packet Descriptions
 
 ### 3.1 `ACKN` is used to acknowledge a link or interlink request

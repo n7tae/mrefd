@@ -412,7 +412,7 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 			islast = true;
 
 		// and push the packet
-		stream->Push(std::move(packet));
+		stream->Push(packet);
 
 		if (islast)
 			g_Reflector.CloseStream(stream);

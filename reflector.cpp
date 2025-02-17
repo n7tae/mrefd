@@ -276,7 +276,7 @@ std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &
 			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
 
 		// and push header packet
-		stream->Push(std::move(Header));
+		stream->Push(Header);
 	}
 	return stream;
 }
