@@ -32,7 +32,7 @@ CFLAGS += -c -W -std=c++17 -MMD -c
 LDFLAGS=-pthread
 
 ifeq ($(DEBUG), true)
-CFLAGS += -ggdb3
+CFLAGS += -ggdb3 -DDEBUG
 endif
 
 ifeq ($(DHT), true)
