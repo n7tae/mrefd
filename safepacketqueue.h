@@ -43,7 +43,6 @@ public:
 
 	T Pop(void)
 	{
-//		std::unique_lock<std::mutex> lock(m);
 		std::lock_guard<std::mutex> lock(m);
 		if (q.empty())
 			return nullptr;
@@ -56,18 +55,15 @@ public:
 	}
 
 	// If the queue is empty, wait until an element is available.
-	T PopWait(void)
+	T PopWait()
 	{
 		std::unique_lock<std::mutex> lock(m);
-		while(q.empty())
-		{
-			// release lock as long as the wait and reacquire it afterwards.
-			c.wait(lock);
-		}
+		c.wait(lock, [this] { return not q.empty(); });
 		T val = std::move(q.front());
 		q.pop();
 		return val;
 	}
+
 
 	// wait for some time, or until an element is available.
 	T PopWaitFor(int ms)
@@ -84,16 +80,16 @@ public:
 
 	bool IsEmpty(void)
 	{
-//		std::unique_lock<std::mutex> lock(m);
 		std::lock_guard<std::mutex> lock(m);
 		return q.empty();
 	}
 
 	void Push(T &t)
 	{
-		std::unique_lock<std::mutex> lock(m);
-//		std::lock_guard<std::mutex> lock(m);
-		q.push(std::move(t));
+		{
+			std::lock_guard<std::mutex> lock(m);
+			q.push(std::move(t));
+		}
 		c.notify_one();
 	}
 
