@@ -36,14 +36,15 @@ public:
 
 	virtual ~CSafePacketQueue(void)
 	{
-		std::unique_lock<std::mutex> lock(m);
+		std::lock_guard<std::mutex> lock(m);
 		while (not q.empty())
 			q.pop();
 	}
 
 	T Pop(void)
 	{
-		std::unique_lock<std::mutex> lock(m);
+//		std::unique_lock<std::mutex> lock(m);
+		std::lock_guard<std::mutex> lock(m);
 		if (q.empty())
 			return nullptr;
 		else
@@ -83,13 +84,15 @@ public:
 
 	bool IsEmpty(void)
 	{
-		std::unique_lock<std::mutex> lock(m);
+//		std::unique_lock<std::mutex> lock(m);
+		std::lock_guard<std::mutex> lock(m);
 		return q.empty();
 	}
 
 	void Push(T &t)
 	{
-		std::lock_guard<std::mutex> lock(m);
+		std::unique_lock<std::mutex> lock(m);
+//		std::lock_guard<std::mutex> lock(m);
 		q.push(std::move(t));
 		c.notify_one();
 	}
