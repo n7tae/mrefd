@@ -210,11 +210,6 @@ void CReflector::Stop(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream opening & closing
 
-bool CReflector::IsStreaming(char module)
-{
-	return false;
-}
-
 // clients MUST have been locked by the caller so we can freely access it within the function
 std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
 {
@@ -328,12 +323,15 @@ void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
 	while (keep_running)
 	{
 		// any packet in our input queue ?
-		packet = streamIn->PopWaitFor(100);
+		packet = streamIn->Pop();
 
-		if ( packet != nullptr )
+		if ( packet )
 		{
-			// and push it
 			m_Protocol.m_Queue.Push(packet);
+		}
+		else
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 }

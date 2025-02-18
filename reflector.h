@@ -57,7 +57,6 @@ public:
 
 	// stream opening & closing
 	std::shared_ptr<CPacketStream> OpenStream(std::unique_ptr<CPacket> &, std::shared_ptr<CClient>);
-	bool IsStreaming(char);
 	void CloseStream(std::shared_ptr<CPacketStream>);
 
 	// users
