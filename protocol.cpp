@@ -419,7 +419,10 @@ void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 		stream->Tickle();
 
 		if (islast)
+		{
 			g_Reflector.CloseStream(stream);
+std::cout << "Last packet received!\n";
+		}
 	}
 }
 
@@ -454,6 +457,7 @@ void CProtocol::CheckStreamsTimeout(void)
 		if ( (*it)->IsExpired() )
 		{
 			// yes, close it
+std::cout << "Stream Timeout\n";
 			g_Reflector.CloseStream(*it);
 			// and remove it
 			it = m_Streams.erase(it);
