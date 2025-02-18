@@ -154,13 +154,13 @@ void CProtocol::Task(void)
 
 	// any incoming packet ?
 	auto len = (*this.*Receive)(buf, ip, 20);
-#ifdef DEBUG
-	if (len > 0)
+/*
+ 	if (len > 37)
 	{
 		std::cout << "Received " << len << " bytes from " << ip << std::endl;
 		Dump("M17 Packet:", buf, len);
 	}
-#endif
+ */
 	switch (len)
 	{
 		default:
@@ -175,10 +175,14 @@ void CProtocol::Task(void)
 						OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
 						if (pack)                  // the packet might have been erased
 						{                          // if it needed to open a new stream, but couldn't
-#ifdef DEBUG
+/*
 							if (not pack->IsStreamPacket())
-								std::cout << "Received PM packet from " << ip << " with " << len-38 << " byte payload" << std::endl;
-#endif
+							{
+								std::string title("PM Packet from ");
+								title += ip;
+								Dump(title, pack->GetPData(), pack->GetSize());
+							}
+*/
 							OnPacketIn(pack, ip);
 						}
 					}
@@ -273,9 +277,6 @@ void CProtocol::Task(void)
 						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
 					}
 					g_Reflector.ReleaseClients();
-#ifndef NO_DHT
-					g_Reflector.PutDHTClients();
-#endif
 				}
 				else
 				{
@@ -339,10 +340,6 @@ void CProtocol::Task(void)
 					removed_client = true;
 				}
 				g_Reflector.ReleaseClients();
-#ifndef NO_DHT
-				if (removed_client)
-					g_Reflector.PutDHTClients();
-#endif
 			}
 			else
 			{
@@ -704,10 +701,6 @@ void CProtocol::HandleKeepalives(void)
 
 	}
 	g_Reflector.ReleaseClients();
-#ifndef NO_DHT
-	if (removed_client)
-		g_Reflector.PutDHTClients();
-#endif
 
 	// iterate on peers
 	auto peers = g_Reflector.GetPeers();
@@ -830,7 +823,6 @@ void CProtocol::HandlePeerLinks(void)
 	if (publish)
 	{
 		g_Reflector.PutDHTPeers();
-		g_Reflector.PutDHTClients();
 		publish = false;
 	}
 #endif
@@ -868,9 +860,6 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 				stream = g_Reflector.OpenStream(packet, client);
 				if ( nullptr == stream )
 				{
-					#ifdef DEBUG
-					std::cout << "Stream from " << ip << " could not be opened" << std::endl;
-					#endif
 					packet.release();	// couldn't open the stream, so destroy the packet
 				}
 				else
@@ -886,9 +875,6 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 					ref.SetModule(d.GetModule());
 					g_Reflector.GetUsers()->Hearing(s, from, ref);
 					g_Reflector.ReleaseUsers();
-#ifndef NO_DHT
-					g_Reflector.PutDHTUsers();
-#endif
 				}
 			}
 		}
@@ -983,9 +969,6 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, size_t size, std::unique_ptr<C
 	}
 	else
 	{
-		#ifdef DEBUG
-		Dump("CProtocol::IsValidPacket() unrecognized packet:", buf, size);
-		#endif
 		return false;
 	}
 	// check validity of packet

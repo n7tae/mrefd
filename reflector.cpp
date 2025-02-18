@@ -491,56 +491,6 @@ void CReflector::PutDHTPeers()
 	);
 }
 
-void CReflector::PutDHTClients()
-{
-	const std::string cs(g_CFG.GetCallsign());
-	SMrefdClients1 c;
-	time(&c.timestamp);
-	c.sequence = clients_put_count++;
-	auto clients = GetClients();
-	for (auto cit=clients->cbegin(); cit!=clients->cend(); cit++)
-	{
-		c.list.emplace_back((*cit)->GetCallsign().GetCS(), std::string((*cit)->GetIp().GetAddress()), (*cit)->GetReflectorModule(), (*cit)->GetConnectTime(), (*cit)->GetLastHeardTime());
-	}
-	ReleaseClients();
-
-	auto nv = std::make_shared<dht::Value>(c);
-	nv->user_type.assign("mrefd-clients-1");
-	nv->id = toUType(EMrefdValueID::Clients);
-
-	node.putSigned(
-		refhash,
-		nv,
-		[](bool success){ std::cout << "PutDHTClients() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		false	// not permanent!
-	);
-}
-
-void CReflector::PutDHTUsers()
-{
-	const std::string cs(g_CFG.GetCallsign());
-	SMrefdUsers1 u;
-	time(&u.timestamp);
-	u.sequence = users_put_count++;
-	auto users = GetUsers();
-	for (auto uit=users->cbegin(); uit!=users->cend(); uit++)
-	{
-		u.list.emplace_back((*uit).GetSource(), std::string((*uit).GetDestination()), (*uit).GetReflector(), (*uit).GetLastHeardTime());
-	}
-	ReleaseUsers();
-
-	auto nv = std::make_shared<dht::Value>(u);
-	nv->user_type.assign("mrefd-users-1");
-	nv->id = toUType(EMrefdValueID::Users);
-
-	node.putSigned(
-		refhash,
-		nv,
-		[](bool success){ std::cout << "PutDHTUsers() " << (success ? "successful" : "unsuccessful") << std::endl; },
-		false	// not permanent!
-	);
-}
-
 void CReflector::PutDHTConfig()
 {
 	const std::string cs(g_CFG.GetCallsign());

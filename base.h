@@ -17,6 +17,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <string>
+
 class CBase
 {
 public:
@@ -24,5 +26,5 @@ public:
 	virtual ~CBase() {}
 
 protected:
-	void Dump(const char *title, const void *pointer, int length);
+	void Dump(const std::string &title, const void *pointer, int length);
 };

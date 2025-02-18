@@ -22,7 +22,7 @@
 
 #include "base.h"
 
-void CBase::Dump(const char *title, const void *pointer, int length)
+void CBase::Dump(const std::string &title, const void *pointer, int length)
 {
 	const unsigned char *data = (const unsigned char *)pointer;
 
