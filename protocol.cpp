@@ -107,6 +107,11 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		}
 	}
 
+	for (const auto &mod : g_CFG.GetModules())
+	{
+		m_streamMap[mod] = std::make_unique<CPacketStream>();
+	}
+
 	try {
 		m_Future = std::async(std::launch::async, &CProtocol::Thread, this);
 	}
@@ -350,7 +355,13 @@ void CProtocol::Task(void)
 
 	// handle queue from reflector
 	if (pack.GetSize())
-		SendPacket(pack);
+	{
+		SendToAllClients(pack);
+		if (m_lastPacketModule)
+		{
+			CloseStream(m_lastPacketModule);
+		}
+	}
 
 	// keep alive
 	if ( m_LastKeepaliveTime.Time() > M17_KEEPALIVE_PERIOD )
@@ -380,6 +391,7 @@ void CProtocol::Close(void)
 	{
 		m_Future.get();
 	}
+	m_streamMap.clear();
 	m_Socket4.Close();
 	m_Socket6.Close();
 }
@@ -393,9 +405,12 @@ void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 	auto stream = GetStream(packet.GetStreamId(), ip);
 	if ( stream )
 	{
-		bool islast = false;
+		m_lastPacketModule = '\0';
 		if (packet.IsStreamPacket() and (packet.GetFrameNumber() & 0x8000u))
-			islast = true;
+		{
+			const CCallsign dst(packet.GetCDstAddress());
+			m_lastPacketModule = dst.GetModule();
+		}
 
 		// restart timer
 		stream->Tickle();
@@ -569,7 +584,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendPacket(CPacket &packet)
+void CProtocol::SendToAllClients(CPacket &packet)
 {
 	// save the orginal relay value
 	auto relayIsSet = packet.IsRelaySet();

@@ -66,7 +66,7 @@ public:
 
 protected:
 	// queue helper
-	void SendPacket(CPacket &);
+	void SendToAllClients(CPacket &);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
@@ -141,6 +141,7 @@ protected:
 	bool publish;
 
 private:
+	char m_lastPacketModule;
 	std::regex clientRegEx, peerRegEx, lstnRegEx;
 	CCRC crc;
 };
