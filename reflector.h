@@ -55,10 +55,6 @@ public:
 	CPeers   *GetPeers(void)                        { m_Peers.Lock(); return &m_Peers; }
 	void      ReleasePeers(void)                    { m_Peers.Unlock(); }
 
-	// stream opening & closing
-	std::shared_ptr<CPacketStream> OpenStream(std::unique_ptr<CPacket> &, std::shared_ptr<CClient>);
-	void CloseStream(std::shared_ptr<CPacketStream>);
-
 	// users
 	CUsers  *GetUsers(void)                         { m_Users.Lock(); return &m_Users; }
 	void    ReleaseUsers(void)                      { m_Users.Unlock(); }
@@ -71,13 +67,8 @@ public:
 #endif
 
 protected:
-	// threads
-	void RouterThread(std::shared_ptr<CPacketStream>);
+	// thread
 	void XmlReportThread(void);
-	// streams
-	std::shared_ptr<CPacketStream> GetStream(char);
-	bool IsStreamOpen(const std::unique_ptr<CPacket> &);
-	char GetStreamModule(std::shared_ptr<CPacketStream>);
 
 	// xml helpers
 	void WriteXmlFile(std::ofstream &);
@@ -88,19 +79,15 @@ protected:
 	CClients  m_Clients;  // list of linked repeaters/nodes/peers's modules
 	CPeers    m_Peers;    // list of linked peers
 	CProtocol m_Protocol; // the only protocol
-	// queues
-	std::unordered_map<char, std::shared_ptr<CPacketStream>> m_Streams;
-	std::unordered_map<std::shared_ptr<CPacketStream>, char> m_RStreams;
 
 	// threads
 	std::atomic<bool> keep_running;
-	std::unordered_map<char, std::future<void>> m_ModuleFutures;
 	std::future<void> m_XmlReportFuture, m_JsonReportFuture;
 
 	// Distributed Hash Table
 #ifndef NO_DHT
 	dht::DhtRunner node;
 	dht::InfoHash refhash;
-	unsigned int peers_put_count, clients_put_count, users_put_count;
+	unsigned int peers_put_count;
 #endif
 };

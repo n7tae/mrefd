@@ -50,14 +50,7 @@ CProtocol::CProtocol() : keep_running(true), publish(true)
 
 CProtocol::~CProtocol()
 {
-	// kill threads
 	Close();
-
-	// empty queue
-	while ( !m_Queue.IsEmpty() )
-	{
-		m_Queue.Pop();
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -145,50 +138,39 @@ void CProtocol::Thread()
 
 void CProtocol::Task(void)
 {
-	uint8_t   buf[UDP_BUFFER_LENMAX];
 	CIp       ip;
 	CCallsign cs;
 	char      mod;
 	char      mods[27];
-	std::unique_ptr<CPacket> pack;
+	CPacket   pack;
 
 	// any incoming packet ?
-	auto len = (*this.*Receive)(buf, ip, 20);
-/*
- 	if (len > 37)
-	{
-		std::cout << "Received " << len << " bytes from " << ip << std::endl;
-		Dump("M17 Packet:", buf, len);
-	}
- */
+	auto len = (*this.*Receive)(pack.GetData(), ip, 20);
+
+ 	if (len < 0)
+		len = 0;
+
 	switch (len)
 	{
 		default:
 			if (len > ssize_t(sizeof(SInterConnect)))
 			{
-				// check that the source and dest c/s is correct, including dest module
-				if ( IsValidPacket(buf, len, pack) )
+				// check that the source and dest c/s is correct, including dest module,
+				// and also sets the packet size and type
+				if ( IsValidPacket(pack, len) )
 				{
-					const CCallsign src(pack->GetCSrcAddress());
+					const CCallsign src(pack.GetCSrcAddress());
 					if (g_GateKeeper.MayTransmit(src, ip))
 					{
 						OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-						if (pack)                  // the packet might have been erased
+						if (pack.GetSize())        // the packet might have been "erased"
 						{                          // if it needed to open a new stream, but couldn't
-/*
-							if (not pack->IsStreamPacket())
-							{
-								std::string title("PM Packet from ");
-								title += ip;
-								Dump(title, pack->GetPData(), pack->GetSize());
-							}
-*/
 							OnPacketIn(pack, ip);
 						}
 					}
-					else if (pack->IsStreamPacket())
+					else if (pack.IsStreamPacket())
 					{
-						if (pack->GetFrameNumber() & 0x8000f)
+						if (pack.GetFrameNumber() & 0x8000f)
 						{
 							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
 						}
@@ -201,7 +183,7 @@ void CProtocol::Task(void)
 			}
 			break;
 	case sizeof(SInterConnect):
-		if (IsValidInterlinkConnect(buf, cs, mods))
+		if (IsValidInterlinkConnect(pack.GetCData(), cs, mods))
 		{
 			//std::cout << "CON1 packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
@@ -216,12 +198,12 @@ void CProtocol::Task(void)
 			else
 			{
 				// deny the request
-				EncodeInterlinkNackPacket(buf);
-				Send(buf, 10, ip);
+				EncodeInterlinkNackPacket(pack.GetData());
+				Send(pack.GetCData(), 10, ip);
 			}
 
 		}
-		else if (IsValidInterlinkAcknowledge(buf, cs, mods))
+		else if (IsValidInterlinkAcknowledge(pack.GetCData(), cs, mods))
 		{
 			//std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
@@ -246,9 +228,9 @@ void CProtocol::Task(void)
 		}
 		break;
 	case 11:
-		if ( IsValidConnect(buf, cs, &mod) )
+		if ( IsValidConnect(pack.GetCData(), cs, &mod) )
 		{
-			bool isLstn = (0 == memcmp(buf, "LSTN", 4));
+			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
 
 			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
 
@@ -259,8 +241,8 @@ void CProtocol::Task(void)
 				if ( g_CFG.IsValidModule(mod) )
 				{
 					// acknowledge a normal request from a repeater/hot-spot/mvoice
-					EncodeConnectAckPacket(buf);
-					Send(buf, 4, ip);
+					EncodeConnectAckPacket(pack.GetData());
+					Send(pack.GetCData(), 4, ip);
 
 					// create the client and append
 					if (isLstn) {
@@ -268,8 +250,8 @@ void CProtocol::Task(void)
 							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
 
 							// deny the request
-							EncodeConnectNackPacket(buf);
-							Send(buf, 4, ip);
+							EncodeConnectNackPacket(pack.GetData());
+							Send(pack.GetCData(), 4, ip);
 						} else {
 							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
 						}
@@ -283,20 +265,20 @@ void CProtocol::Task(void)
 					std::cout << "Node " << cs << " connect attempt on non-existing module '" << mod << "'" << std::endl;
 
 					// deny the request
-					EncodeConnectNackPacket(buf);
-					Send(buf, 4, ip);
+					EncodeConnectNackPacket(pack.GetData());
+					Send(pack.GetCData(), 4, ip);
 				}
 			}
 			else
 			{
 				// deny the request
-				EncodeConnectNackPacket(buf);
-				Send(buf, 4, ip);
+				EncodeConnectNackPacket(pack.GetData());
+				Send(pack.GetCData(), 4, ip);
 			}
 		}
 		break;
 	case 10:
-		if ( IsValidKeepAlive(buf, cs) )
+		if ( IsValidKeepAlive(pack.GetCData(), cs) )
 		{
 			if (cs.GetCS(4).compare("M17-")) {
 				// find all clients with that callsign & ip and keep them alive
@@ -322,7 +304,7 @@ void CProtocol::Task(void)
 				g_Reflector.ReleasePeers();
 			}
 		}
-		else if ( IsValidDisconnect(buf, cs) )
+		else if ( IsValidDisconnect(pack.GetCData(), cs) )
 		{
 			std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
 			if (cs.GetCS(4).compare("M17-")) {
@@ -333,8 +315,8 @@ void CProtocol::Task(void)
 				if ( client != nullptr )
 				{
 					// ack disconnect packet
-					EncodeDisconnectedPacket(buf);
-					Send(buf, 4, ip);
+					EncodeDisconnectedPacket(pack.GetData());
+					Send(pack.GetCData(), 4, ip);
 					// and remove it
 					clients->RemoveClient(client);
 					removed_client = true;
@@ -356,7 +338,7 @@ void CProtocol::Task(void)
 				g_Reflector.ReleasePeers();
 			}
 		}
-		else if ( IsValidNAcknowledge(buf, cs))
+		else if ( IsValidNAcknowledge(pack.GetCData(), cs))
 		{
 			std::cout << "NACK packet received from " << cs << " at " << ip << std::endl;
 		}
@@ -367,7 +349,8 @@ void CProtocol::Task(void)
 	CheckStreamsTimeout();
 
 	// handle queue from reflector
-	HandleQueue();
+	if (pack.GetSize())
+		SendPacket(pack);
 
 	// keep alive
 	if ( m_LastKeepaliveTime.Time() > M17_KEEPALIVE_PERIOD )
@@ -404,44 +387,33 @@ void CProtocol::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-void CProtocol::OnPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
+void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 {
 	// find the stream
-	auto stream = GetStream(packet->GetStreamId(), ip);
+	auto stream = GetStream(packet.GetStreamId(), ip);
 	if ( stream )
 	{
 		bool islast = false;
-		if (packet->IsStreamPacket() and (packet->GetFrameNumber() & 0x8000u))
+		if (packet.IsStreamPacket() and (packet.GetFrameNumber() & 0x8000u))
 			islast = true;
 
-		// and push the packet
-		stream->Push(packet);
+		// restart timer
 		stream->Tickle();
-
-		if (islast)
-		{
-			g_Reflector.CloseStream(stream);
-std::cout << "Last packet received!\n";
-		}
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream handle helpers
 
-std::shared_ptr<CPacketStream> CProtocol::GetStream(uint16_t uiStreamId, const CIp &Ip)
+CPacketStream *CProtocol::GetStream(uint16_t uiStreamId, const CIp &Ip)
 {
-	for ( auto it=m_Streams.begin(); it!=m_Streams.end(); it++ )
+	for (const auto &pit : m_streamMap)
 	{
-		if ( (*it)->GetPacketStreamId() == uiStreamId )
+		if (pit.second->GetPacketStreamId() == uiStreamId)
 		{
-			// if Ip not nullptr, also check if IP match
-			if ( (*it)->GetOwnerIp() != nullptr )
+			if (pit.second->GetOwnerIp() == Ip)
 			{
-				if ( Ip == *((*it)->GetOwnerIp()) )
-				{
-					return *it;
-				}
+				return pit.second.get();
 			}
 		}
 	}
@@ -451,17 +423,11 @@ std::shared_ptr<CPacketStream> CProtocol::GetStream(uint16_t uiStreamId, const C
 
 void CProtocol::CheckStreamsTimeout(void)
 {
-	for ( auto it=m_Streams.begin(); it!=m_Streams.end(); )
+	for (auto &pit : m_streamMap)
 	{
 		// time out ?
-		if ( (*it)->IsExpired() )
-		{
-			// yes, close it
-std::cout << "Stream Timeout\n";
-			g_Reflector.CloseStream(*it);
-			// and remove it
-			it = m_Streams.erase(it);
-		}
+		if (pit.second->IsExpired())
+			CloseStream(pit.first);
 	}
 }
 
@@ -603,52 +569,47 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::HandleQueue(void)
+void CProtocol::SendPacket(CPacket &packet)
 {
-	auto packet = m_Queue.Pop();
-	while ( packet )
+	// save the orginal relay value
+	auto relayIsSet = packet.IsRelaySet();
+	// push it to all our clients linked to the module and who is not streaming in
+	auto clients = g_Reflector.GetClients();
+	auto it = clients->begin();
+	std::shared_ptr<CClient>client = nullptr;
+	while (nullptr != (client = clients->FindNextClient(it)))
 	{
-		// save the orginal relay value
-		auto relayIsSet = packet->IsRelaySet();
-		// push it to all our clients linked to the module and who is not streaming in
-		auto clients = g_Reflector.GetClients();
-		auto it = clients->begin();
-		std::shared_ptr<CClient>client = nullptr;
-		while (nullptr != (client = clients->FindNextClient(it)))
+		// is this client busy ?
+		const CCallsign dst(packet.GetCDstAddress());
+		if ( !client->IsTransmitting() && (client->GetReflectorModule() == dst.GetModule()) )
 		{
-			// is this client busy ?
-			const CCallsign dst(packet->GetCDstAddress());
-			if ( !client->IsTransmitting() && (client->GetReflectorModule() == dst.GetModule()) )
-			{
-				auto cs = client->GetCallsign();
+			auto cs = client->GetCallsign();
 
-				if (cs.GetCS(4).compare("M17-"))
-				{
-					// the client is not a reflector
-					packet->ClearRelay();
-					cs.CodeOut(packet->GetDstAddress());
-					packet->CalcCRC();
-					Send(packet->GetPData(), packet->GetSize(), client->GetIp());
-				}
-				else if (not packet->IsRelaySet())
-				{
-					// the client is a reflector and the packet hasn't yet been relayed
-					packet->SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
-					cs.SetModule(client->GetReflectorModule());
-					cs.CodeOut(packet->GetDstAddress());	      // set the destination
-					packet->CalcCRC(); // recalculate the crc
-					Send(packet->GetPData(), packet->GetSize(), client->GetIp());
-				}
+			if (cs.GetCS(4).compare("M17-"))
+			{
+				// the client is not a reflector
+				packet.ClearRelay();
+				cs.CodeOut(packet.GetDstAddress());
+				packet.CalcCRC();
+				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
 			}
-			// put the relay back to its original state
-			if (relayIsSet)
-				packet->SetRelay();
-			else
-				packet->ClearRelay();
+			else if (not packet.IsRelaySet())
+			{
+				// the client is a reflector and the packet hasn't yet been relayed
+				packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
+				cs.SetModule(client->GetReflectorModule());
+				cs.CodeOut(packet.GetDstAddress());	      // set the destination
+				packet.CalcCRC(); // recalculate the crc
+				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+			}
 		}
-		g_Reflector.ReleaseClients();
-		packet = m_Queue.Pop();
+		// put the relay back to its original state
+		if (relayIsSet)
+			packet.SetRelay();
+		else
+			packet.ClearRelay();
 	}
+	g_Reflector.ReleaseClients();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -835,12 +796,10 @@ void CProtocol::HandlePeerLinks(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
+void CProtocol::OnFirstPacketIn(CPacket &packet, const CIp &ip)
 {
-	std::shared_ptr<CPacketStream> stream;
-	// find the stream
-	stream = GetStream(packet->GetStreamId(), ip);
-	if ( stream )
+	auto stream = GetStream(packet.GetStreamId(), ip);
+	if (stream)
 	{
 		// stream already open
 		// skip packet, but tickle the stream
@@ -849,28 +808,29 @@ void CProtocol::OnFirstPacketIn(std::unique_ptr<CPacket> &packet, const CIp &ip)
 	else
 	{
 		// find this client
-		auto client = g_Reflector.GetClients()->FindClient(ip);
+		auto clients = g_Reflector.GetClients();
+		auto client = clients->FindClient(ip);
 		if ( client )
 		{
-			if ( client->IsListenOnly()) {
+			if ( client->IsListenOnly())
+			{
 				// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-				packet.release();	// LO client isn't allowed to open a stream, so destroy the packet
-			} else {
+				packet.SetSize(0u, true);	// LO client isn't allowed to open a stream, so destroy the packet
+			}
+			else
+			{
 				// save the source and destination module for Hearing().
 				// We're going to lose packet after the OpenStream() call.
-				const CCallsign s(packet->GetCSrcAddress());
-				const CCallsign d(packet->GetCDstAddress());
+				const CCallsign s(packet.GetCSrcAddress());
+				const CCallsign d(packet.GetCDstAddress());
 				// try to open the stream
-				stream = g_Reflector.OpenStream(packet, client);
+				stream = OpenStream(packet, client, clients);
 				if ( nullptr == stream )
 				{
-					packet.release();	// couldn't open the stream, so destroy the packet
+					packet.SetSize(0u, true);	// couldn't open the stream, so destroy the packet
 				}
 				else
 				{
-					// keep the handle
-					m_Streams.push_back(stream);
-
 					// update last heard
 					auto from = client->GetCallsign();
 					if (0 == from.GetCS(4).compare("M17-"))
@@ -957,32 +917,31 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
-bool CProtocol::IsValidPacket(const uint8_t *buf, size_t size, std::unique_ptr<CPacket> &packet)
+bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
 {
+	auto buf = packet.GetData();
 	if (memcmp(buf, "M17", 3))
 		return false;
 	if ((' ' == char(buf[3]) or '!' == char(buf[3])) and 54u == size and (0x01u == (0x01u & buf[19])))
 	{
-		packet = std::make_unique<CPacket>();
-		packet->Fill(buf, size, true);
+		packet.SetSize(size, true);
 	}
 	else if (('P' == char(buf[3]) or 'Q' == char(buf[3])) and 37u < size and size < 840 and (0x00u == (0x01u & buf[17])))
 	{
-		packet = std::make_unique<CPacket>();
-		packet->Fill(buf, size, false);
+		packet.SetSize(size, false);
 	}
 	else
 	{
 		return false;
 	}
 	// check validity of packet
-	const CCallsign dst(packet->GetDstAddress());
+	const CCallsign dst(packet.GetDstAddress());
 	if (g_CFG.IsValidModule(dst.GetModule()) && dst.HasSameCallsign(GetReflectorCallsign()))
 	{
-		const CCallsign src(packet->GetCSrcAddress());
+		const CCallsign src(packet.GetCSrcAddress());
 		if (std::regex_match(src.GetCS(), clientRegEx))
 		{	// looks like a valid source
-			if (0x18U & packet->GetFrameType())
+			if (0x18U & packet.GetFrameType())
 			{	// looks like this packet is encrypted
 				if (g_CFG.IsEncyrptionAllowed(dst.GetModule()))
 				{
@@ -990,7 +949,7 @@ bool CProtocol::IsValidPacket(const uint8_t *buf, size_t size, std::unique_ptr<C
 				}
 				else
 				{
-					if (0u == packet->GetFrameNumber())	// we only log this once
+					if (0u == packet.GetFrameNumber())	// we only log this once
 						std::cout << "Blocking " << src.GetCS() << " to module " << dst.GetModule() << " because it is encrypted!" << std::endl;
 				}
 			}
@@ -1109,4 +1068,96 @@ void CProtocol::EncodeDisconnectPacket(uint8_t *buf, char mod)
 void CProtocol::EncodeDisconnectedPacket(uint8_t *buf)
 {
 	memcpy(buf, "DISC", 4);
+}
+
+CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>client, CClients *clients)
+{
+	// if it is a stream packet, check sid is not zero
+	if ( Header.IsStreamPacket() and 0U == Header.GetStreamId() )
+	{
+		std::cerr << "Incoming stream has zero streamID" << std::endl;
+		return nullptr;
+	}
+
+	if ( client->IsTransmitting() )
+	{
+		std::cerr << "Client " << client->GetCallsign() << " is already a Master" << std::endl;
+		return nullptr;
+	}
+
+	// get the module's queue
+	const CCallsign dst(Header.GetCDstAddress());
+	const char module = dst.GetModule();
+
+	// check if no stream with same streamid already open
+	// to prevent loops
+	for (auto &pit : m_streamMap)
+	{
+		if (pit.second->IsOpen() and (Header.GetStreamId() == pit.second->GetPacketStreamId()))
+		{
+			std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << Header.GetStreamId() << std::endl;
+			return nullptr;
+		}
+	}
+
+	auto pit = m_streamMap.find(module);
+	if (m_streamMap.end() == pit)
+	{
+		std::cerr << "Can't get stream from module '" << module << "'" << std::endl;
+		return nullptr;
+	}
+
+	// is it available ?
+	if ( pit->second->OpenPacketStream(Header, client) )
+	{
+		// stream open, mark client as master
+		// so that it can't be deleted
+		client->SetTXModule(module);
+
+		// update last heard time
+		client->Heard();
+
+		// report
+		const CCallsign src(Header.GetCSrcAddress());
+		if (Header.IsStreamPacket())
+			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header.GetStreamId() << std::dec << " by user " << src << std::endl;
+		else
+			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
+
+		// and push header packet
+		pit->second->Tickle();
+		return pit->second.get();
+	}
+	return nullptr;
+}
+
+void CProtocol::CloseStream(char module)
+{
+	auto pit = m_streamMap.find(module);
+	if (m_streamMap.end() == pit)
+	{
+		std::cerr << "Protocol::CLoseStream can find a packet stream for moudule '" << module << "'" << std::endl;
+		return;
+	}
+	auto stream = pit->second.get();
+	if (stream)
+	{
+		g_Reflector.GetClients();	// lock clients
+
+		// get and check the master
+		std::shared_ptr<CClient>client = stream->GetOwnerClient();
+		if ( client != nullptr )
+		{
+			// client no longer a master
+			client->ClearTX();
+
+			std::cout << "Closing stream on module " << module << std::endl;
+		}
+
+		// release clients
+		g_Reflector.ReleaseClients();
+
+		// and stop the queue
+		stream->ClosePacketStream();
+	}
 }

@@ -20,7 +20,7 @@
 
 #include "packetstream.h"
 
-CPacketStream::CPacketStream() : CPacketQueue()
+CPacketStream::CPacketStream()
 {
 	m_bOpen = false;
 	m_uiStreamId = 0;
@@ -53,11 +53,7 @@ void CPacketStream::ClosePacketStream(void)
 	m_OwnerClient = nullptr;
 }
 
-const CIp *CPacketStream::GetOwnerIp(void)
+const CIp &CPacketStream::GetOwnerIp(void)
 {
-	if ( m_OwnerClient != nullptr )
-	{
-		return &(m_OwnerClient->GetIp());
-	}
-	return nullptr;
+	return m_OwnerClient->GetIp();
 }

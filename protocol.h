@@ -27,11 +27,12 @@
 
 #include <atomic>
 #include <future>
-#include <list>
-
+#include <unordered_map>
 #include <regex>
-#include "udpsocket.h"
+
 #include "packetstream.h"
+#include "udpsocket.h"
+#include "clients.h"
 #include "packet.h"
 #include "base.h"
 #include "crc.h"
@@ -63,26 +64,25 @@ public:
 	void Thread(void);
 	void Task(void);
 
-	// queue
-	CPacketQueue    m_Queue;
-
 protected:
 	// queue helper
-	void HandleQueue(void);
+	void SendPacket(CPacket &);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
 
 	// stream helpers
-	void OnPacketIn(std::unique_ptr<CPacket> &, const CIp &);
-	void OnFirstPacketIn(std::unique_ptr<CPacket> &, const CIp &);
+	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>, CClients *);
+	void CloseStream(char module);
+	void OnPacketIn(CPacket &, const CIp &);
+	void OnFirstPacketIn(CPacket &, const CIp &);
 
 	// packet decoding helpers
 	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(const uint8_t *, size_t size, std::unique_ptr<CPacket> &);
+	bool IsValidPacket(CPacket &packet, size_t size);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
@@ -98,7 +98,7 @@ protected:
 	void EncodeInterlinkNackPacket(uint8_t *);
 
 	// stream handle helpers
-	std::shared_ptr<CPacketStream> GetStream(uint16_t, const CIp &);
+	CPacketStream *GetStream(uint16_t, const CIp &);
 	void CheckStreamsTimeout(void);
 
 	// syntax helper
@@ -121,7 +121,7 @@ protected:
 	CUdpSocket m_Socket6;
 
 	// streams
-	std::list<std::shared_ptr<CPacketStream>> m_Streams;
+	std::unordered_map<char, std::unique_ptr<CPacketStream>> m_streamMap;
 
 	// thread
 	std::atomic<bool> keep_running;

@@ -47,7 +47,7 @@ extern CIFileMap g_IFile;
 CReflector::CReflector()
 {
 #ifndef NO_DHT
-	peers_put_count = clients_put_count = users_put_count = 0;
+	peers_put_count = 0;
 #endif
 	keep_running = true;
 }
@@ -61,13 +61,6 @@ CReflector::~CReflector()
 	if ( m_XmlReportFuture.valid() )
 	{
 		m_XmlReportFuture.get();
-	}
-	for (auto &f : m_ModuleFutures)
-	{
-		if (f.second.valid())
-		{
-			f.second.get();
-		}
 	}
 }
 
@@ -132,15 +125,6 @@ bool CReflector::Start(const char *cfgfilename)
 		return true;
 	}
 
-	// start one thread per reflector module
-	for (const auto &m : g_CFG.GetModules())
-	{
-		auto stream = std::make_shared<CPacketStream>();
-		m_Streams[m] = stream;
-		m_RStreams[stream] = m;
-		m_ModuleFutures[m] = std::async(std::launch::async, &CReflector::RouterThread, this, stream);
-	}
-
 	// start the reporting threads
 	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
 #ifndef NO_DHT
@@ -159,15 +143,6 @@ void CReflector::Stop(void)
 	if ( m_XmlReportFuture.valid() )
 	{
 		m_XmlReportFuture.get();
-	}
-
-	// stop & delete all router thread
-	for (auto &f : m_ModuleFutures)
-	{
-		if (f.second.valid() )
-		{
-			f.second.get();
-		}
 	}
 
 	// close protocols
@@ -208,135 +183,6 @@ void CReflector::Stop(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// stream opening & closing
-
-// clients MUST have been locked by the caller so we can freely access it within the function
-std::shared_ptr<CPacketStream> CReflector::OpenStream(std::unique_ptr<CPacket> &Header, std::shared_ptr<CClient>client)
-{
-	// check sid is not zero
-	if ( Header->IsStreamPacket() and 0U == Header->GetStreamId() )
-	{
-		std::cerr << "Incoming stream has zero streamID" << std::endl;
-		return nullptr;
-	}
-
-	// check if client is valid candidate
-	if ( ! m_Clients.IsClient(client) )
-	{
-		std::cerr << "can't find client " << client->GetCallsign() << std::endl;
-		return nullptr;
-	}
-
-	if ( client->IsTransmitting() )
-	{
-		std::cerr << "Client " << client->GetCallsign() << " is already a Master" << std::endl;
-		return nullptr;
-	}
-
-	// get the module's queue
-	const CCallsign dst(Header->GetCDstAddress());
-	char module = dst.GetModule();
-
-	// check if no stream with same streamid already open
-	// to prevent loops
-	if ( IsStreamOpen(Header) )
-	{
-		std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << Header->GetStreamId() << std::endl;
-		return nullptr;
-	}
-
-	auto stream = GetStream(module);
-	if ( stream == nullptr ) {
-		std::cerr << "Can't get stream from module '" << module << "'" << std::endl;
-		return nullptr;
-	}
-
-	// is it available ?
-	if ( stream->OpenPacketStream(*Header, client) )
-	{
-		// stream open, mark client as master
-		// so that it can't be deleted
-		client->SetTXModule(module);
-
-		// update last heard time
-		client->Heard();
-
-		// report
-		const CCallsign src(Header->GetCSrcAddress());
-		if (Header->IsStreamPacket())
-			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header->GetStreamId() << std::dec << " by user " << src << std::endl;
-		else
-			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
-
-		// and push header packet
-		stream->Push(Header);
-		stream->Tickle();
-	}
-	return stream;
-}
-
-void CReflector::CloseStream(std::shared_ptr<CPacketStream> stream)
-{
-	if ( stream != nullptr )
-	{
-		// wait queue is empty. this waits forever
-		bool bEmpty = false;
-		do
-		{
-			// do not use stream->IsEmpty() has this "may" never succeed
-			// and anyway, the DvLastFramPacket short-circuit the transcoder
-			// loop queues
-			bEmpty = stream->IsEmpty();
-			if ( !bEmpty )
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
-		while (!bEmpty);
-
-		GetClients();	// lock clients
-
-		// get and check the master
-		std::shared_ptr<CClient>client = stream->GetOwnerClient();
-		if ( client != nullptr )
-		{
-			// client no longer a master
-			client->ClearTX();
-
-			std::cout << "Closing stream on module " << GetStreamModule(stream) << std::endl;
-		}
-
-		// release clients
-		ReleaseClients();
-
-		// and stop the queue
-		stream->ClosePacketStream();
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// router threads
-
-void CReflector::RouterThread(std::shared_ptr<CPacketStream> streamIn)
-{
-	// get on input queue
-	std::unique_ptr<CPacket> packet;
-
-	while (keep_running)
-	{
-		// any packet in our input queue ?
-		packet = streamIn->Pop();
-
-		if ( packet )
-		{
-			m_Protocol.m_Queue.Push(packet);
-		}
-		else
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
 // report threads
 
 void CReflector::XmlReportThread()
@@ -364,37 +210,6 @@ void CReflector::XmlReportThread()
 		for (int i=0; i<XML_UPDATE_PERIOD && keep_running; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// modules & queues
-
-std::shared_ptr<CPacketStream> CReflector::GetStream(char module)
-{
-	auto it = m_Streams.find(module);
-	if (m_Streams.end() == it)
-		return nullptr;
-	else
-		return it->second;
-}
-
-bool CReflector::IsStreamOpen(const std::unique_ptr<CPacket> &DvHeader)
-{
-	for (auto &s : m_Streams)
-	{
-		if ( (s.second->GetPacketStreamId() == DvHeader->GetStreamId()) && (s.second->IsOpen()) )
-			return true;
-	}
-	return false;
-}
-
-char CReflector::GetStreamModule(std::shared_ptr<CPacketStream> stream)
-{
-	auto it = m_RStreams.find(stream);
-	if (m_RStreams.end() == it)
-		return '\0';
-	else
-		return it->second;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

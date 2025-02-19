@@ -22,16 +22,16 @@
 #include <cstdint>
 #include <string.h>
 #include <memory>
-#include <vector>
 
 #include "callsign.h"
+
+#define MAX_PACKET_SIZE 859
 
 class CPacket
 {
 public:
-	CPacket() {}
-	~CPacket() { data.clear(); }
-	void Fill(const uint8_t *buf, size_t size, bool bis);
+	CPacket();
+	void SetSize(size_t s, bool iss);
 	const uint8_t *GetCDstAddress() const;
 	const uint8_t *GetCSrcAddress() const;
 	uint8_t *GetDstAddress();
@@ -43,10 +43,12 @@ public:
 	uint16_t GetFrameNumber();
 	bool IsStreamPacket() const { return isstream; }
 	void CalcCRC();
-	const uint8_t *GetPData() const { return data.data(); }
-	size_t GetSize() const { return data.size(); }
+	uint8_t *GetData() { return data; }
+	const uint8_t *GetCData() const { return data; }
+	size_t GetSize() const { return size; }
 
 private:
 	bool isstream;
-	std::vector<uint8_t> data;
+	size_t size;
+	uint8_t data[MAX_PACKET_SIZE+1];
 };

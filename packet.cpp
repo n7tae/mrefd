@@ -24,26 +24,31 @@
 
 static const CCRC CRC;
 
-void CPacket::Fill(const uint8_t *buf, size_t size, bool bis)
+CPacket::CPacket()
 {
-	data.resize(size);
-	memcpy(data.data(), buf, size);
+	memset(data, MAX_PACKET_SIZE + 1, 0);
+	size = 0;
+}
+
+void CPacket::SetSize(size_t n, bool bis)
+{
+	size = n;
 	isstream = bis;
 }
 
 const uint8_t *CPacket::GetCDstAddress() const
 {
-	return data.data() + (isstream ? 6u : 4u);
+	return data + (isstream ? 6u : 4u);
 }
 
 uint8_t *CPacket::GetDstAddress()
 {
-	return data.data() + (isstream ? 6u : 4u);
+	return data + (isstream ? 6u : 4u);
 }
 
 const uint8_t *CPacket::GetCSrcAddress() const
 {
-	return data.data() + (isstream ? 12u : 10u);
+	return data + (isstream ? 12u : 10u);
 }
 
 // returns the StreamID in host byte order
@@ -91,13 +96,13 @@ void CPacket::CalcCRC()
 {
 	if (isstream)
 	{
-		auto crc = CRC.CalcCRC(data.data(), 52);
+		auto crc = CRC.CalcCRC(data, 52);
 		data[52] = uint8_t(crc >> 8);
 		data[53] = uint8_t(crc & 0xffu);
 	}
 	else
 	{	// set the CRC for the LSF
-		auto crc = CRC.CalcCRC(data.data(), 28);
+		auto crc = CRC.CalcCRC(data, 28);
 		data[32] = uint8_t(crc >> 8);
 		data[33] = uint8_t(crc & 0xffu);
 	}

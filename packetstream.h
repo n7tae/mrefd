@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "safepacketqueue.h"
 #include "timer.h"
 #include "packet.h"
 #include "client.h"
@@ -35,7 +34,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CPacketStream : public CPacketQueue
+class CPacketStream
 {
 public:
 	// constructor
@@ -49,7 +48,7 @@ public:
 
 	// get
 	std::shared_ptr<CClient> GetOwnerClient(void)   { return m_OwnerClient; }
-	const CIp       *GetOwnerIp(void);
+	const CIp       &GetOwnerIp(void);
 	bool             IsExpired(void) const          { return (m_LastPacketTime.Time() > STREAM_TIMEOUT); }
 	bool             IsOpen(void) const             { return m_bOpen; }
 	uint16_t         GetPacketStreamId(void) const  { return m_uiStreamId; }
