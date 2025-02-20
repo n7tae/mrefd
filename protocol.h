@@ -73,7 +73,7 @@ protected:
 	void HandleKeepalives(void);
 
 	// stream helpers
-	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>, CClients *);
+	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
 	void CloseStream(char module);
 	void OnPacketIn(CPacket &, const CIp &);
 	void OnFirstPacketIn(CPacket &, const CIp &);

@@ -839,7 +839,7 @@ void CProtocol::OnFirstPacketIn(CPacket &packet, const CIp &ip)
 				const CCallsign s(packet.GetCSrcAddress());
 				const CCallsign d(packet.GetCDstAddress());
 				// try to open the stream
-				stream = OpenStream(packet, client, clients);
+				stream = OpenStream(packet, client);
 				if ( nullptr == stream )
 				{
 					packet.SetSize(0u, true);	// couldn't open the stream, so destroy the packet
@@ -1085,7 +1085,7 @@ void CProtocol::EncodeDisconnectedPacket(uint8_t *buf)
 	memcpy(buf, "DISC", 4);
 }
 
-CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>client, CClients *clients)
+CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>client)
 {
 	// if it is a stream packet, check sid is not zero
 	if ( Header.IsStreamPacket() and 0U == Header.GetStreamId() )
@@ -1104,14 +1104,17 @@ CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>cl
 	const CCallsign dst(Header.GetCDstAddress());
 	const char module = dst.GetModule();
 
-	// check if no stream with same streamid already open
-	// to prevent loops
-	for (auto &pit : m_streamMap)
+	if (Header.IsStreamPacket())
 	{
-		if (pit.second->IsOpen() and (Header.GetStreamId() == pit.second->GetPacketStreamId()))
+		// check if no stream with same streamid already open
+		// to prevent loops
+		for (auto &pit : m_streamMap)
 		{
-			std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << Header.GetStreamId() << std::endl;
-			return nullptr;
+			if (pit.second->IsOpen() and (Header.GetStreamId() == pit.second->GetPacketStreamId()))
+			{
+				std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << Header.GetStreamId() << std::endl;
+				return nullptr;
+			}
 		}
 	}
 
