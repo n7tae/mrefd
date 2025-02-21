@@ -157,36 +157,36 @@ void CProtocol::Task(void)
 
 	switch (len)
 	{
-		default:
-			if (len > ssize_t(sizeof(SInterConnect)))
+	default:
+		if (len > ssize_t(sizeof(SInterConnect)))
+		{
+			// check that the source and dest c/s is correct, including dest module,
+			// and also sets the packet size and type
+			if ( IsValidPacket(pack, len) )
 			{
-				// check that the source and dest c/s is correct, including dest module,
-				// and also sets the packet size and type
-				if ( IsValidPacket(pack, len) )
+				const CCallsign src(pack.GetCSrcAddress());
+				if (g_GateKeeper.MayTransmit(src, ip))
 				{
-					const CCallsign src(pack.GetCSrcAddress());
-					if (g_GateKeeper.MayTransmit(src, ip))
-					{
-						OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-						if (pack.GetSize())        // the packet might have been "erased"
-						{                          // if it needed to open a new stream, but couldn't
-							OnPacketIn(pack, ip);
-						}
-					}
-					else if (pack.IsStreamPacket())
-					{
-						if (pack.GetFrameNumber() & 0x8000f)
-						{
-							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
-						}
-					}
-					else
-					{
-						std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
+					OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
+					if (pack.GetSize())        // the packet might have been "erased"
+					{                          // if it needed to open a new stream, but couldn't
+						OnPacketIn(pack, ip);
 					}
 				}
+				else if (pack.IsStreamPacket())
+				{
+					if (pack.GetFrameNumber() & 0x8000f)
+					{
+						std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
+					}
+				}
+				else
+				{
+					std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
+				}
 			}
-			break;
+		}
+		break;
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(pack.GetCData(), cs, mods))
 		{
