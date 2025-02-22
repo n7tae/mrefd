@@ -160,29 +160,43 @@ void CProtocol::Task(void)
 	default:
 		if (len > ssize_t(sizeof(SInterConnect)))
 		{
-			// check that the source and dest c/s is correct, including dest module,
-			// and also sets the packet size and type
+			// sets the packet type and size based on the magic value and the `len` value
+			// NOTE: this could be a packet from a simple client or another reflector
+			// check that the source callsign matches a licensed ham callsign,
+			// check that the desination is a configured module callsign, for example 'M17-M17 C'
+			// if the packet is a stream packet, and is encrypted, make sure the module is configured for it.
 			if ( IsValidPacket(pack, len) )
 			{
+				// make sure the SRC callsign is not blacklisted
 				const CCallsign src(pack.GetCSrcAddress());
 				if (g_GateKeeper.MayTransmit(src, ip))
 				{
-					OnFirstPacketIn(pack, ip); // might open a new stream, if it's the first packet
-					if (pack.GetSize())        // the packet might have been "erased"
-					{                          // if it needed to open a new stream, but couldn't
-						OnPacketIn(pack, ip);
+					// might open a new stream if it's the first packet
+					// the packet might be disabled (size set to zero) if there's a problem
+					OnPacketIn(pack, ip);
+					if (pack.GetSize() and pack.IsStreamPacket())
+					{
+						// if this is the final packet in stream mode, set the m_lastPacketModule
+						// so that the stream can be closed once it's distriubted to the other clients
+						MarkLastPacket(pack, ip);
 					}
 				}
 				else if (pack.IsStreamPacket())
 				{
+					// this voicestream is blocked
 					if (pack.GetFrameNumber() & 0x8000f)
 					{
+						// when the stream closes, log it.
 						std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
 					}
+					// disable it
+					pack.Disable();
 				}
 				else
 				{
+					// here is a blocked PM packet
 					std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
+					pack.Disable();
 				}
 			}
 		}
@@ -350,10 +364,12 @@ void CProtocol::Task(void)
 		break;
 	}
 
+	// Now we do all the other maintenance
+
 	// handle end of streaming timeout
 	CheckStreamsTimeout();
 
-	// handle queue from reflector
+	// if there's a packet, send it out to everyone
 	if (pack.GetSize())
 	{
 		SendToAllClients(pack);
@@ -399,10 +415,10 @@ void CProtocol::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
+void CProtocol::MarkLastPacket(CPacket &packet, const CIp &ip)
 {
 	// find the stream
-	auto stream = GetStream(packet.GetStreamId(), ip);
+	auto stream = GetStream(packet, ip);
 	if ( stream )
 	{
 		m_lastPacketModule = '\0';
@@ -420,16 +436,32 @@ void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream handle helpers
 
-CPacketStream *CProtocol::GetStream(uint16_t uiStreamId, const CIp &Ip)
+CPacketStream *CProtocol::GetStream(CPacket &packet, const CIp &Ip)
 {
-	for (const auto &pit : m_streamMap)
+	// this is only for stream mode packet
+	if (not packet.IsStreamPacket())
+		return nullptr;
+	// get the stream based on the DST module
+	const CCallsign dst(packet.GetCDstAddress());
+	const auto mod = dst.GetModule();
+	const auto pit = m_streamMap.find(mod);
+	// does the dst module exist?
+	if (m_streamMap.end() == pit)
 	{
-		if (pit.second->GetPacketStreamId() == uiStreamId)
+		#ifdef DEBUG
+		const CCallsign src(packet.GetCSrcAddress());
+		std::cout << "Bad incoming packet to " << dst.GetCS() << " from " << src.GetCS() << " at " << Ip << std::endl;
+		#endif
+		// this packet is bogus. deactivate it!
+		packet.Disable();
+		return nullptr;
+	}
+	if (pit->second->IsOpen())
+	{
+		// the stream is opened. do the SIDs match?
+		if (pit->second->GetPacketStreamId() == packet.GetStreamId())
 		{
-			if (pit.second->GetOwnerIp() == Ip)
-			{
-				return pit.second.get();
-			}
+			return pit->second.get();
 		}
 	}
 	// done
@@ -811,9 +843,9 @@ void CProtocol::HandlePeerLinks(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-void CProtocol::OnFirstPacketIn(CPacket &packet, const CIp &ip)
+void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 {
-	auto stream = GetStream(packet.GetStreamId(), ip);
+	auto stream = GetStream(packet, ip);
 	if (stream)
 	{
 		// stream already open
@@ -830,22 +862,20 @@ void CProtocol::OnFirstPacketIn(CPacket &packet, const CIp &ip)
 			if ( client->IsListenOnly())
 			{
 				// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-				packet.SetSize(0u, true);	// LO client isn't allowed to open a stream, so destroy the packet
+				packet.Disable();	// LO client isn't allowed to open a stream, so destroy the packet
 			}
 			else
 			{
-				// save the source and destination module for Hearing().
-				// We're going to lose packet after the OpenStream() call.
-				const CCallsign s(packet.GetCSrcAddress());
-				const CCallsign d(packet.GetCDstAddress());
 				// try to open the stream
 				stream = OpenStream(packet, client);
 				if ( nullptr == stream )
 				{
-					packet.SetSize(0u, true);	// couldn't open the stream, so destroy the packet
+					packet.Disable();	// couldn't open the stream, so disable the packet
 				}
 				else
 				{
+					const CCallsign d(packet.GetCDstAddress());
+					const CCallsign s(packet.GetCSrcAddress());
 					// update last heard
 					auto from = client->GetCallsign();
 					if (0 == from.GetCS(4).compare("M17-"))
@@ -939,11 +969,11 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
 		return false;
 	if ((' ' == char(buf[3]) or '!' == char(buf[3])) and 54u == size and (0x01u == (0x01u & buf[19])))
 	{
-		packet.SetSize(size, true);
+		packet.Initialize(size, true);
 	}
 	else if (('P' == char(buf[3]) or 'Q' == char(buf[3])) and 37u < size and size < 840 and (0x00u == (0x01u & buf[17])))
 	{
-		packet.SetSize(size, false);
+		packet.Initialize(size, false);
 	}
 	else
 	{
@@ -956,7 +986,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
 		const CCallsign src(packet.GetCSrcAddress());
 		if (std::regex_match(src.GetCS(), clientRegEx))
 		{	// looks like a valid source
-			if (0x18U & packet.GetFrameType())
+			if (packet.IsStreamPacket() and 0x18U & packet.GetFrameType())
 			{	// looks like this packet is encrypted
 				if (g_CFG.IsEncyrptionAllowed(dst.GetModule()))
 				{
@@ -1085,10 +1115,10 @@ void CProtocol::EncodeDisconnectedPacket(uint8_t *buf)
 	memcpy(buf, "DISC", 4);
 }
 
-CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>client)
+CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>client)
 {
 	// if it is a stream packet, check sid is not zero
-	if ( Header.IsStreamPacket() and 0U == Header.GetStreamId() )
+	if ( packet.IsStreamPacket() and 0U == packet.GetStreamId() )
 	{
 		std::cerr << "Incoming stream has zero streamID" << std::endl;
 		return nullptr;
@@ -1096,23 +1126,23 @@ CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>cl
 
 	if ( client->IsTransmitting() )
 	{
-		std::cerr << "Client " << client->GetCallsign() << " is already a Master" << std::endl;
+		std::cerr << "Client " << client->GetCallsign() << " is already transmitting" << std::endl;
 		return nullptr;
 	}
 
 	// get the module's queue
-	const CCallsign dst(Header.GetCDstAddress());
+	const CCallsign dst(packet.GetCDstAddress());
 	const char module = dst.GetModule();
 
-	if (Header.IsStreamPacket())
+	if (packet.IsStreamPacket())
 	{
 		// check if no stream with same streamid already open
 		// to prevent loops
 		for (auto &pit : m_streamMap)
 		{
-			if (pit.second->IsOpen() and (Header.GetStreamId() == pit.second->GetPacketStreamId()))
+			if (pit.second->IsOpen() and (packet.GetStreamId() == pit.second->GetPacketStreamId()))
 			{
-				std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << Header.GetStreamId() << std::endl;
+				std::cerr << "Detected stream loop on module " << module << " for client " << client->GetCallsign() << " with sid " << packet.GetStreamId() << std::endl;
 				return nullptr;
 			}
 		}
@@ -1126,7 +1156,7 @@ CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>cl
 	}
 
 	// is it available ?
-	if ( pit->second->OpenPacketStream(Header, client) )
+	if ( pit->second->OpenPacketStream(packet, client) )
 	{
 		// stream open, mark client as master
 		// so that it can't be deleted
@@ -1136,13 +1166,13 @@ CPacketStream *CProtocol::OpenStream(CPacket &Header, std::shared_ptr<CClient>cl
 		client->Heard();
 
 		// report
-		const CCallsign src(Header.GetCSrcAddress());
-		if (Header.IsStreamPacket())
-			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << Header.GetStreamId() << std::dec << " by user " << src << std::endl;
+		const CCallsign src(packet.GetCSrcAddress());
+		if (packet.IsStreamPacket())
+			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << packet.GetStreamId() << std::dec << " by user " << src << std::endl;
 		else
 			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
 
-		// and push header packet
+		// and push the packet
 		pit->second->Tickle();
 		return pit->second.get();
 	}

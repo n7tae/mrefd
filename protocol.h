@@ -75,8 +75,8 @@ protected:
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
 	void CloseStream(char module);
+	void MarkLastPacket(CPacket &, const CIp &);
 	void OnPacketIn(CPacket &, const CIp &);
-	void OnFirstPacketIn(CPacket &, const CIp &);
 
 	// packet decoding helpers
 	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
@@ -98,7 +98,7 @@ protected:
 	void EncodeInterlinkNackPacket(uint8_t *);
 
 	// stream handle helpers
-	CPacketStream *GetStream(uint16_t, const CIp &);
+	CPacketStream *GetStream(CPacket &, const CIp &);
 	void CheckStreamsTimeout(void);
 
 	// syntax helper

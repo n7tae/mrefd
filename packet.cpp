@@ -26,11 +26,11 @@ static const CCRC CRC;
 
 CPacket::CPacket()
 {
-	memset(data, MAX_PACKET_SIZE + 1, 0);
+	memset(data, MAX_PACKET_SIZE + 1, 0u);
 	size = 0;
 }
 
-void CPacket::SetSize(size_t n, bool bis)
+void CPacket::Initialize(size_t n, bool bis)
 {
 	size = n;
 	isstream = bis;

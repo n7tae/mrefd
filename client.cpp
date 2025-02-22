@@ -85,10 +85,10 @@ void CClient::Alive(void)
 
 bool CClient::operator ==(const CClient &client) const
 {
-	auto rval = (client.m_Callsign == m_Callsign) && (client.m_Ip == m_Ip) && (client.m_ReflectorModule == m_ReflectorModule);
-	if (g_CFG.GetMCClients())
-		rval = rval && (client.m_Ip.GetPort() == m_Ip.GetPort());
-	return rval;
+	return (client.m_Callsign == m_Callsign) and
+	       (client.m_Ip == m_Ip) and
+	       (client.m_ReflectorModule == m_ReflectorModule) and
+		   (client.m_Ip.GetPort() == m_Ip.GetPort());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

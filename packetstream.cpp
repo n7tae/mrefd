@@ -27,7 +27,7 @@ CPacketStream::CPacketStream()
 	m_OwnerClient = nullptr;
 }
 
-bool CPacketStream::OpenPacketStream(const CPacket &Header, std::shared_ptr<CClient>client)
+bool CPacketStream::OpenPacketStream(const CPacket &packet, std::shared_ptr<CClient>client)
 {
 	bool ok = false;
 
@@ -36,8 +36,7 @@ bool CPacketStream::OpenPacketStream(const CPacket &Header, std::shared_ptr<CCli
 	{
 		// update status
 		m_bOpen = true;
-		m_uiStreamId = Header.GetStreamId();
-		m_Header = Header;
+		m_uiStreamId = packet.GetStreamId();
 		m_OwnerClient = client;
 		m_LastPacketTime.Start();
 		ok = true;

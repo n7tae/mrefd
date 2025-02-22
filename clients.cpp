@@ -117,19 +117,12 @@ bool CClients::IsClient(std::shared_ptr<CClient> client) const
 
 std::shared_ptr<CClient> CClients::FindClient(const CIp &Ip)
 {
-	const bool mcclient = g_CFG.GetMCClients();
 	// find client
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		auto b = (*it)->GetIp() == Ip;
-		if (mcclient)
-		{
-			b = b && ((*it)->GetIp().GetPort() == Ip.GetPort());
-		}
-		if (b)
+		if (((*it)->GetIp() == Ip) && ((*it)->GetIp().GetPort() == Ip.GetPort()))
 			return *it;
 	}
-	// done
 	return nullptr;
 }
 
@@ -146,15 +139,9 @@ std::shared_ptr<CClient> CClients::FindNextClient(std::list<std::shared_ptr<CCli
 
 std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, const CIp &Ip, std::list<std::shared_ptr<CClient>>::iterator &it)
 {
-	const auto mcclient = g_CFG.GetMCClients();
 	while ( it != end() )
 	{
-		auto b = ((*it)->GetIp() == Ip) && (*it)->GetCallsign().HasSameCallsign(Callsign);
-		if (mcclient)
-		{
-			b = b && ((*it)->GetIp().GetPort() == Ip.GetPort());
-		}
-		if (b)
+		if (((*it)->GetIp() == Ip) and (*it)->GetCallsign().HasSameCallsign(Callsign) and ((*it)->GetIp().GetPort() == Ip.GetPort()))
 			return *it++;
 		it++;
 	}

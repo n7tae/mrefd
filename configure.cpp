@@ -126,7 +126,6 @@ bool CConfigure::ReadData(const std::string &path)
 // returns true on failure
 {
 	data.port = 17000U;
-	data.mcclients = false;
 	std::ifstream cfg(path.c_str(), std::ifstream::in);
 	if (! cfg.is_open()) {
 		std::cerr << path << " was not found!" << std::endl;
@@ -278,10 +277,6 @@ bool CConfigure::ReadData(const std::string &path)
 		else if (0 == key.compare("Port"))
 		{
 			data.port = std::stoul(value);
-		}
-		else if (0 == key.compare("MultiClient"))
-		{
-			data.mcclients = IS_TRUE(value[0]);
 		}
 		else
 		{
@@ -581,8 +576,6 @@ bool CConfigure::ReadData(const std::string &path)
 	{
 		std::cout << "Port=" << data.port << std::endl;
 	}
-
-	std::cout << "MultiClient=" << (data.mcclients ? "true" : "false") << std::endl;
 
 	return rval;
 }

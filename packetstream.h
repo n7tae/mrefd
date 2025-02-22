@@ -58,6 +58,5 @@ protected:
 	bool                     m_bOpen;
 	uint16_t                 m_uiStreamId;
 	CTimer                   m_LastPacketTime;
-	CPacket                  m_Header;
 	std::shared_ptr<CClient> m_OwnerClient;
 };

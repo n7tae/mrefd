@@ -31,7 +31,8 @@ class CPacket
 {
 public:
 	CPacket();
-	void SetSize(size_t s, bool iss);
+	void Disable() { size = 0u; }
+	void Initialize(size_t s, bool iss);
 	const uint8_t *GetCDstAddress() const;
 	const uint8_t *GetCSrcAddress() const;
 	uint8_t *GetDstAddress();
