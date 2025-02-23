@@ -109,7 +109,7 @@ void CPacket::CalcCRC()
 	}
 	else
 	{	// set the CRC for the LSF
-		auto crc = CRC.CalcCRC(data, 28);
+		auto crc = CRC.CalcCRC(data+4, 28);
 		data[32] = uint8_t(crc >> 8);
 		data[33] = uint8_t(crc & 0xffu);
 	}
