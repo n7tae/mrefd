@@ -84,12 +84,19 @@ bool CPacket::IsRelaySet() const
 	return 'Q' == char(data[3]);
 }
 
-uint16_t CPacket::GetFrameNumber()
+uint16_t CPacket::GetFrameNumber() const
 {
 	if (isstream)
 		return 0x100u * data[34] + data[35];
 	else
 		return 0u;
+}
+
+bool CPacket::IsLastPacket() const
+{
+	if (isstream and size)
+		return 0x8000u == (0x8000u & GetFrameNumber());
+	return false;
 }
 
 void CPacket::CalcCRC()

@@ -75,7 +75,6 @@ protected:
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
 	void CloseStream(char module);
-	void MarkLastPacket(CPacket &, const CIp &);
 	void OnPacketIn(CPacket &, const CIp &);
 
 	// packet decoding helpers
@@ -141,7 +140,6 @@ protected:
 	bool publish;
 
 private:
-	char m_lastPacketModule;
 	std::regex clientRegEx, peerRegEx, lstnRegEx;
 	CCRC crc;
 };

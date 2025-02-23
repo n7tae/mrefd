@@ -144,9 +144,9 @@ void CProtocol::Thread()
 void CProtocol::Task(void)
 {
 	CIp       ip;
-	CCallsign cs;
 	char      mod;
 	char      mods[27];
+	CCallsign cs;
 	CPacket   pack;
 
 	// any incoming packet ?
@@ -174,12 +174,6 @@ void CProtocol::Task(void)
 					// might open a new stream if it's the first packet
 					// the packet might be disabled (size set to zero) if there's a problem
 					OnPacketIn(pack, ip);
-					if (pack.GetSize() and pack.IsStreamPacket())
-					{
-						// if this is the final packet in stream mode, set the m_lastPacketModule
-						// so that the stream can be closed once it's distriubted to the other clients
-						MarkLastPacket(pack, ip);
-					}
 				}
 				else if (pack.IsStreamPacket())
 				{
@@ -372,10 +366,12 @@ void CProtocol::Task(void)
 	// if there's a packet, send it out to everyone
 	if (pack.GetSize())
 	{
+		const CCallsign dst(pack.GetCDstAddress());
+		const auto mod = dst.GetModule();
 		SendToAllClients(pack);
-		if (m_lastPacketModule)
+		if (pack.IsLastPacket()) // always returns false for PM packet
 		{
-			CloseStream(m_lastPacketModule);
+			CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
 		}
 	}
 
@@ -410,27 +406,6 @@ void CProtocol::Close(void)
 	m_streamMap.clear();
 	m_Socket4.Close();
 	m_Socket6.Close();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// streams helpers
-
-void CProtocol::MarkLastPacket(CPacket &packet, const CIp &ip)
-{
-	// find the stream
-	auto stream = GetStream(packet, ip);
-	if ( stream )
-	{
-		m_lastPacketModule = '\0';
-		if (packet.IsStreamPacket() and (packet.GetFrameNumber() & 0x8000u))
-		{
-			const CCallsign dst(packet.GetCDstAddress());
-			m_lastPacketModule = dst.GetModule();
-		}
-
-		// restart timer
-		stream->Tickle();
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1170,7 +1145,7 @@ CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>cl
 		if (packet.IsStreamPacket())
 			std::cout << "Opening stream on module " << module << " for client " << client->GetCallsign() << " with id 0x" << std::hex << packet.GetStreamId() << std::dec << " by user " << src << std::endl;
 		else
-			std::cout << "Packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
+			std::cout << "Opening packet on module " << module << " for client " << client->GetCallsign() << " by user " << src << std::endl;
 
 		// and push the packet
 		pit->second->Tickle();

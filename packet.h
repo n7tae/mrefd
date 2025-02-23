@@ -41,8 +41,9 @@ public:
 	void SetRelay();
 	void ClearRelay();
 	bool IsRelaySet() const;
-	uint16_t GetFrameNumber();
+	uint16_t GetFrameNumber() const;
 	bool IsStreamPacket() const { return isstream; }
+	bool IsLastPacket() const;
 	void CalcCRC();
 	uint8_t *GetData() { return data; }
 	const uint8_t *GetCData() const { return data; }
