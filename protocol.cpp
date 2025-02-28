@@ -624,8 +624,8 @@ if (not packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", 
 				cs.CodeOut(packet.GetDstAddress());	      // set the destination
 				packet.CalcCRC(); // recalculate the crc
 				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-if (not packet.IsStreamPacket()) std::cout << "Sent modified packet to " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
 			}
+if (not packet.IsStreamPacket()) std::cout << "Sent modified packet to " << cs << " at " << client->GetIp() << std::endl;
 		}
 		// put the relay back to its original state
 		if (relayIsSet)
