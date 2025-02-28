@@ -198,7 +198,7 @@ void CProtocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(pack.GetCData(), cs, mods))
 		{
-			//std::cout << "CON1 packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
+			//std::cout << "INTR packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip, mods) )
@@ -593,6 +593,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 
 void CProtocol::SendToAllClients(CPacket &packet)
 {
+if (packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
 	// save the orginal relay value
 	auto relayIsSet = packet.IsRelaySet();
 	// push it to all our clients linked to the module and who is not streaming in
@@ -623,6 +624,7 @@ void CProtocol::SendToAllClients(CPacket &packet)
 				cs.CodeOut(packet.GetDstAddress());	      // set the destination
 				packet.CalcCRC(); // recalculate the crc
 				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+if (packet.IsStreamPacket()) std::cout << "Sent modified packet to " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
 			}
 		}
 		// put the relay back to its original state
@@ -992,7 +994,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
 
 bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char *mods)
 {
-	if (memcmp(buf, "CON1", 4))
+	if (memcmp(buf, "INTR", 4))
 		return false;
 
 	cs.CodeIn(buf + 4);
@@ -1047,7 +1049,7 @@ void CProtocol::EncodeKeepAlivePacket(uint8_t *buf)
 void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
 {
 	memset(conn.magic, 0, sizeof(SInterConnect));
-	memcpy(conn.magic, "CON1", 4);
+	memcpy(conn.magic, "INTR", 4);
 	GetReflectorCallsign().CodeOut(conn.fromcs);
 	memcpy(conn.mods, mods.c_str(), mods.size());
 }
