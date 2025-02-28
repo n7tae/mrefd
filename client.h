@@ -37,7 +37,7 @@ class CClient
 public:
 	// constructors
 	CClient();
-	CClient(const CClient &);
+	CClient(const CClient &) = delete;
 	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly = false);
 
 	// destructor
@@ -52,11 +52,9 @@ public:
 	char GetModule(void) const               { return m_Callsign.GetModule(); }
 	std::time_t GetConnectTime(void) const   { return m_ConnectTime; }
 	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
-	bool HasReflectorModule(void) const      { return m_ReflectorModule != ' '; }
 	char GetReflectorModule(void) const      { return m_ReflectorModule; }
 
 	// set
-	void SetModule(char c)                   { m_Callsign.SetModule(c); }
 	void SetReflectorModule(char c)          { m_ReflectorModule = c; }
 
 	// identity
@@ -67,9 +65,9 @@ public:
 	// status
 	void Alive(void);
 	bool IsAlive(void) const;
-	bool IsTransmitting(void) const          { return (m_TXModule != ' '); }
-	void SetTXModule(char c)                 { m_TXModule = c; }
-	void ClearTX(void)                       { m_TXModule = ' '; }
+	bool IsTransmitting(void) const          { return (m_isTXing); }
+	void SetTX(void)                         { m_isTXing = true; }
+	void ClearTX(void)                       { m_isTXing = false; }
 	void Heard(void)                         { m_LastHeardTime = std::time(nullptr); }
 
 	// reporting
@@ -84,7 +82,7 @@ protected:
 	char        m_ReflectorModule;
 
 	// status
-	char        m_TXModule;	// ' ' means client is not transmitting
+	bool        m_isTXing;
 	CTimer		m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;

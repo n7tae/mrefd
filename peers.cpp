@@ -61,7 +61,7 @@ void CPeers::AddPeer(std::shared_ptr<CPeer> peer)
 		}
 	}
 
-	// if not, append to the vector (put them in alphabetical order)
+	// if not, append to the list (put in alphabetical order)
 	auto pit = m_Peers.begin();
 	for ( ; pit!=m_Peers.end(); pit++)
 	{

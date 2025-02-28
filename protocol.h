@@ -78,7 +78,7 @@ protected:
 	void OnPacketIn(CPacket &, const CIp &);
 
 	// packet decoding helpers
-	bool IsValidConnect(const uint8_t *, CCallsign &, char *);
+	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
 	bool IsValidPacket(CPacket &packet, size_t size);

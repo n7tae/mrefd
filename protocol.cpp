@@ -241,7 +241,7 @@ void CProtocol::Task(void)
 		}
 		break;
 	case 11:
-		if ( IsValidConnect(pack.GetCData(), cs, &mod) )
+		if ( IsValidConnect(pack.GetCData(), cs, mod) )
 		{
 			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
 
@@ -593,7 +593,15 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 
 void CProtocol::SendToAllClients(CPacket &packet)
 {
-if (not packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
+	#ifdef DEBUG
+	if (not packet.IsStreamPacket())
+	{
+		Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
+		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
+	}
+	#endif
+	// save the destination module
+	const auto destmod = CCallsign(packet.GetCDstAddress()).GetModule();
 	// save the orginal relay value
 	auto relayIsSet = packet.IsRelaySet();
 	// push it to all our clients linked to the module and who is not streaming in
@@ -602,36 +610,50 @@ if (not packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", 
 	std::shared_ptr<CClient>client = nullptr;
 	while (nullptr != (client = clients->FindNextClient(it)))
 	{
-		// is this client busy ?
-		const CCallsign dst(packet.GetCDstAddress());
-		if ( !client->IsTransmitting() && (client->GetReflectorModule() == dst.GetModule()) )
+		// is this client on the module?
+		if (client->GetReflectorModule() == destmod)
 		{
-			auto cs = client->GetCallsign();
+			// is he not TXing?
+			if (not client->IsTransmitting())
+			{
+				auto cs = client->GetCallsign();
 
-			if (cs.GetCS(4).compare("M17-"))
+				if (cs.GetCS(4).compare("M17-"))
+				{
+					// the client is not a reflector
+					packet.ClearRelay();
+					cs.CodeOut(packet.GetDstAddress());
+					packet.CalcCRC();
+					Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+				}
+				else if (not packet.IsRelaySet())
+				{
+					// the client is a reflector and the packet hasn't yet been relayed
+					packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
+					cs.SetModule(client->GetReflectorModule());
+					cs.CodeOut(packet.GetDstAddress());	      // set the destination
+					packet.CalcCRC(); // recalculate the crc
+					Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+				}
+				#ifdef DEBUG
+				if (not packet.IsStreamPacket())
+					std::cout << "Sent modified packet to " << cs << " at " << client->GetIp() << std::endl;
+				#endif
+			}
+			#ifdef DEBUG
+			else
 			{
-				// the client is not a reflector
+				if (not packet.IsStreamPacket())
+					std::cout << client->GetCallsign() << " is transmitting" << std::endl;
+			}
+			#endif
+
+			// put the relay back to its original state
+			if (relayIsSet)
+				packet.SetRelay();
+			else
 				packet.ClearRelay();
-				cs.CodeOut(packet.GetDstAddress());
-				packet.CalcCRC();
-				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-			}
-			else if (not packet.IsRelaySet())
-			{
-				// the client is a reflector and the packet hasn't yet been relayed
-				packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
-				cs.SetModule(client->GetReflectorModule());
-				cs.CodeOut(packet.GetDstAddress());	      // set the destination
-				packet.CalcCRC(); // recalculate the crc
-				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-			}
-if (not packet.IsStreamPacket()) std::cout << "Sent modified packet to " << cs << " at " << client->GetIp() << std::endl;
 		}
-		// put the relay back to its original state
-		if (relayIsSet)
-			packet.SetRelay();
-		else
-			packet.ClearRelay();
 	}
 	g_Reflector.ReleaseClients();
 }
@@ -872,15 +894,15 @@ void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 ////////////////////////////////////////////////////////////////////////////////////////
 // packet decoding helpers
 
-bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
+bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char &mod)
 {
 	if (0 == memcmp(buf, "CONN", 4))
 	{
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), clientRegEx))
 		{
-			*mod = buf[10];
-			if (IsLetter(*mod))
+			mod = buf[10];
+			if (IsLetter(mod))
 			{
 				return true;
 			}
@@ -895,8 +917,8 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char *mod)
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), lstnRegEx))
 		{
-			*mod = buf[10];
-			if (IsLetter(*mod))
+			mod = buf[10];
+			if (IsLetter(mod))
 			{
 				return true;
 			}
@@ -1137,7 +1159,7 @@ CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>cl
 	{
 		// stream open, mark client as master
 		// so that it can't be deleted
-		client->SetTXModule(module);
+		client->SetTX();
 
 		// update last heard time
 		client->Heard();

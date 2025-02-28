@@ -40,7 +40,7 @@ extern CConfigure g_CFG;
 CClient::CClient()
 {
 	m_ReflectorModule = ' ';
-	m_TXModule = ' ';
+	m_isTXing = false;
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
@@ -52,24 +52,13 @@ CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule,
 	m_ReflectorModule = reflectorModule;
 	m_Callsign = callsign;
 	m_Ip = ip;
-	m_TXModule = ' ';
+	m_isTXing = false;
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
 	m_ListenOnly = listenOnly;
 }
 
-CClient::CClient(const CClient &client)
-{
-	m_Callsign = client.m_Callsign;
-	m_Ip = client.m_Ip;
-	m_ReflectorModule = client.m_ReflectorModule;
-	m_TXModule = client.m_TXModule;
-	m_LastKeepaliveTime = client.m_LastKeepaliveTime;
-	m_ConnectTime = client.m_ConnectTime;
-	m_LastHeardTime = client.m_LastHeardTime;
-	m_ListenOnly = false;
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // status
