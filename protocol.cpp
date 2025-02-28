@@ -593,7 +593,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 
 void CProtocol::SendToAllClients(CPacket &packet)
 {
-if (packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
+if (not packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
 	// save the orginal relay value
 	auto relayIsSet = packet.IsRelaySet();
 	// push it to all our clients linked to the module and who is not streaming in
@@ -624,7 +624,7 @@ if (packet.IsStreamPacket()) Dump("Incoming SendToAllClients() PM packet:", pack
 				cs.CodeOut(packet.GetDstAddress());	      // set the destination
 				packet.CalcCRC(); // recalculate the crc
 				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-if (packet.IsStreamPacket()) std::cout << "Sent modified packet to " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
+if (not packet.IsStreamPacket()) std::cout << "Sent modified packet to " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
 			}
 		}
 		// put the relay back to its original state
