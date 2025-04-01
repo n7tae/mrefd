@@ -160,38 +160,63 @@ void CProtocol::Task(void)
 	default:
 		if (len > ssize_t(sizeof(SInterConnect)))
 		{
-			// sets the packet type and size based on the magic value and the `len` value
-			// NOTE: this could be a packet from a simple client or another reflector
-			// check that the source callsign matches a licensed ham callsign,
-			// check that the desination is a configured module callsign, for example 'M17-M17 C'
-			// if the packet is a stream packet, and is encrypted, make sure the module is configured for it.
-			if ( IsValidPacket(pack, len) )
+			// we're going to need the module right away, so we'll find out who is sending this packet
+			auto client = g_Reflector.GetClients()->FindClient(ip);
+			g_Reflector.ReleaseClients();
+			if (client)
 			{
-				// make sure the SRC callsign is not blacklisted
-				const CCallsign src(pack.GetCSrcAddress());
-				if (g_GateKeeper.MayTransmit(src, ip))
+				mod = client->GetReflectorModule();
+				// sets the packet type and size based on the magic value and the `len` value
+				// NOTE: this could be a packet from a simple client or another reflector
+				// check that the source callsign matches a licensed ham callsign,
+				// check that the desination is a configured module callsign, for example 'M17-M17 C'
+				// if the packet is a stream packet, and is encrypted, make sure the module is configured for it.
+				if ( IsValidPacket(pack, len, mod) )
 				{
-					// might open a new stream if it's the first packet
-					// the packet might be disabled (size set to zero) if there's a problem
-					OnPacketIn(pack, ip);
-				}
-				else if (pack.IsStreamPacket())
-				{
-					// this voicestream is blocked
-					if (pack.GetFrameNumber() & 0x8000f)
+					// make sure the SRC callsign is not blacklisted
+					const CCallsign src(pack.GetCSrcAddress());
+					if (g_GateKeeper.MayTransmit(src, ip))
 					{
-						// when the stream closes, log it.
-						std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
+						// might open a new stream if it's the first packet
+						// the packet might be disabled (size set to zero) if there's a problem
+						if (OnPacketIn(pack, client))
+							pack.Disable();
 					}
-					// disable it
-					pack.Disable();
+					else if (pack.IsStreamPacket())
+					{
+						// this voicestream is blocked, so
+						if (pack.GetFrameNumber() & 0x8000f)
+						{
+							// when the stream closes, log it.
+							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
+						}
+						// disable it
+						pack.Disable();
+					}
+					else
+					{
+						// here is a blocked PM packet
+						std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
+						pack.Disable();
+					}
 				}
 				else
 				{
-					// here is a blocked PM packet
-					std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
 					pack.Disable();
 				}
+			}
+			else
+			{
+				pack.Disable();
+			}
+		}
+		// if there's a packet, send it out to everyone
+		if (pack.GetSize())
+		{
+			SendToAllClients(pack, mod);
+			if (pack.IsLastPacket()) // always returns false for PM packet
+			{
+				CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
 			}
 		}
 		break;
@@ -363,18 +388,6 @@ void CProtocol::Task(void)
 	// handle end of streaming timeout
 	CheckStreamsTimeout();
 
-	// if there's a packet, send it out to everyone
-	if (pack.GetSize())
-	{
-		const CCallsign dst(pack.GetCDstAddress());
-		const auto mod = dst.GetModule();
-		SendToAllClients(pack);
-		if (pack.IsLastPacket()) // always returns false for PM packet
-		{
-			CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
-		}
-	}
-
 	// keep alive
 	if ( m_LastKeepaliveTime.Time() > M17_KEEPALIVE_PERIOD )
 	{
@@ -411,21 +424,21 @@ void CProtocol::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream handle helpers
 
-CPacketStream *CProtocol::GetStream(CPacket &packet, const CIp &Ip)
+CPacketStream *CProtocol::GetStream(CPacket &packet, const std::shared_ptr<CClient> client)
 {
 	// this is only for stream mode packet
 	if (not packet.IsStreamPacket())
 		return nullptr;
 	// get the stream based on the DST module
-	const CCallsign dst(packet.GetCDstAddress());
-	const auto mod = dst.GetModule();
+	const auto mod = client->GetReflectorModule();
 	const auto pit = m_streamMap.find(mod);
 	// does the dst module exist?
 	if (m_streamMap.end() == pit)
 	{
 		#ifdef DEBUG
+		const CCallsign dst(packet.GetCDstAddress());
 		const CCallsign src(packet.GetCSrcAddress());
-		std::cout << "Bad incoming packet to " << dst.GetCS() << " from " << src.GetCS() << " at " << Ip << std::endl;
+		std::cout << "Bad incoming packet on module '" << mod << "' to " << dst.GetCS() << " from " << src.GetCS() << std::endl;
 		#endif
 		// this packet is bogus. deactivate it!
 		packet.Disable();
@@ -591,68 +604,43 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendToAllClients(CPacket &packet)
+void CProtocol::SendToAllClients(CPacket &packet, const char mod)
 {
-	#ifdef DEBUG
-	if (not packet.IsStreamPacket())
-	{
-		Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
-		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
-	}
-	#endif
-	// save the destination module
-	const auto destmod = CCallsign(packet.GetCDstAddress()).GetModule();
 	// save the orginal relay value
-	auto relayIsSet = packet.IsRelaySet();
+	const auto relayIsSet = packet.IsRelaySet();
+	// if the packet dst looks like an M17 reflector, change the dst to @ALL
+	const CCallsign dst(packet.GetCDstAddress());
+	if (0 == dst.GetCS(4).compare("M17-"))
+	{
+		if (relayIsSet) packet.ClearRelay();
+		const CCallsign broadcast("@ALL");
+		broadcast.CodeOut(packet.GetDstAddress());
+		packet.CalcCRC();
+		if (relayIsSet) packet.SetRelay();
+	}
 	// push it to all our clients linked to the module and who is not streaming in
+	std::shared_ptr<CClient>client = nullptr;
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
-	std::shared_ptr<CClient>client = nullptr;
-	while (nullptr != (client = clients->FindNextClient(it)))
+	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
-		// is this client on the module?
-		if (client->GetReflectorModule() == destmod)
+		// is he not TXing?
+		if (not client->IsTransmitting())
 		{
-			// is he not TXing?
-			if (not client->IsTransmitting())
-			{
-				auto cs = client->GetCallsign();
+			const auto cs = client->GetCallsign();
 
-				if (cs.GetCS(4).compare("M17-"))
-				{
-					// the client is not a reflector
-					packet.ClearRelay();
-					cs.CodeOut(packet.GetDstAddress());
-					packet.CalcCRC();
-					Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-				}
-				else if (not packet.IsRelaySet())
-				{
-					// the client is a reflector and the packet hasn't yet been relayed
-					packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
-					cs.SetModule(client->GetReflectorModule());
-					cs.CodeOut(packet.GetDstAddress());	      // set the destination
-					packet.CalcCRC(); // recalculate the crc
-					Send(packet.GetCData(), packet.GetSize(), client->GetIp());
-				}
-				#ifdef DEBUG
-				if (not packet.IsStreamPacket())
-					std::cout << "Sent modified packet to " << cs << " at " << client->GetIp() << std::endl;
-				#endif
-			}
-			#ifdef DEBUG
-			else
+			if (cs.GetCS(4).compare("M17-"))
 			{
-				if (not packet.IsStreamPacket())
-					std::cout << client->GetCallsign() << " is transmitting" << std::endl;
-			}
-			#endif
-
-			// put the relay back to its original state
-			if (relayIsSet)
-				packet.SetRelay();
-			else
+				// this client is not a reflector
 				packet.ClearRelay();
+				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+			}
+			else if (not relayIsSet)
+			{
+				// this client is a reflector and the packet hasn't yet been relayed
+				packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
+				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+			}
 		}
 	}
 	g_Reflector.ReleaseClients();
@@ -842,9 +830,10 @@ void CProtocol::HandlePeerLinks(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
+// returns true if the was a problem and the packet should be disabled;
+bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> client)
 {
-	auto stream = GetStream(packet, ip);
+	auto stream = GetStream(packet, client);
 	if (stream)
 	{
 		// stream already open
@@ -853,42 +842,35 @@ void CProtocol::OnPacketIn(CPacket &packet, const CIp &ip)
 	}
 	else
 	{
-		// find this client
-		auto clients = g_Reflector.GetClients();
-		auto client = clients->FindClient(ip);
-		if ( client )
+		if ( client->IsListenOnly())
 		{
-			if ( client->IsListenOnly())
+			// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+			return true;
+		}
+		else
+		{
+			// try to open the stream
+			stream = OpenStream(packet, client);
+			if ( nullptr == stream )
 			{
-				// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-				packet.Disable();	// LO client isn't allowed to open a stream, so destroy the packet
+				return true;
 			}
 			else
 			{
-				// try to open the stream
-				stream = OpenStream(packet, client);
-				if ( nullptr == stream )
-				{
-					packet.Disable();	// couldn't open the stream, so disable the packet
-				}
-				else
-				{
-					const CCallsign d(packet.GetCDstAddress());
-					const CCallsign s(packet.GetCSrcAddress());
-					// update last heard
-					auto from = client->GetCallsign();
-					if (0 == from.GetCS(4).compare("M17-"))
-						from.SetModule(d.GetModule());
-					auto ref = GetReflectorCallsign();
-					ref.SetModule(d.GetModule());
-					g_Reflector.GetUsers()->Hearing(s, from, ref);
-					g_Reflector.ReleaseUsers();
-				}
+				const CCallsign d(packet.GetCDstAddress());
+				const CCallsign s(packet.GetCSrcAddress());
+				// update last heard
+				auto from = client->GetCallsign();
+				if (0 == from.GetCS(4).compare("M17-"))
+					from.SetModule(d.GetModule());
+				auto ref = GetReflectorCallsign();
+				ref.SetModule(d.GetModule());
+				g_Reflector.GetUsers()->Hearing(s, from, ref);
+				g_Reflector.ReleaseUsers();
 			}
 		}
-		// release
-		g_Reflector.ReleaseClients();
 	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -961,7 +943,7 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	return false;
 }
 
-bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
+bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 {
 	auto buf = packet.GetData();
 	if (memcmp(buf, "M17", 3))
@@ -979,37 +961,29 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size)
 		return false;
 	}
 	// check validity of packet
-	const CCallsign dst(packet.GetDstAddress());
-	if (g_CFG.IsValidModule(dst.GetModule()) && dst.HasSameCallsign(GetReflectorCallsign()))
-	{
-		const CCallsign src(packet.GetCSrcAddress());
-		if (std::regex_match(src.GetCS(), clientRegEx))
-		{	// looks like a valid source
-			if (packet.IsStreamPacket() and 0x18U & packet.GetFrameType())
-			{	// looks like this packet is encrypted
-				if (g_CFG.IsEncyrptionAllowed(dst.GetModule()))
-				{
-					return true;
-				}
-				else
-				{
-					if (0u == packet.GetFrameNumber())	// we only log this once
-						std::cout << "Blocking " << src.GetCS() << " to module " << dst.GetModule() << " because it is encrypted!" << std::endl;
-				}
+	const CCallsign src(packet.GetCSrcAddress());
+	if (std::regex_match(src.GetCS(), clientRegEx))
+	{	// looks like a valid source
+		if (packet.IsStreamPacket() and 0x18U & packet.GetFrameType())
+		{	// looks like this packet is encrypted
+			if (g_CFG.IsEncyrptionAllowed(mod))
+			{
+				return true;
 			}
 			else
 			{
-				return true;
+				if (0u == packet.GetFrameNumber())	// we only log this once
+					std::cout << "Blocking " << src.GetCS() << " to module " << mod << " because it is encrypted!" << std::endl;
 			}
 		}
 		else
 		{
-			std::cout << src.GetCS() << " Source C/S FAILED RegEx test" << std::endl;
+			return true;
 		}
 	}
 	else
 	{
-		std::cout << "Destination " << dst << " is invalid" << std::endl;
+		std::cout << src.GetCS() << " Source C/S FAILED RegEx test" << std::endl;
 	}
 	return false;
 }

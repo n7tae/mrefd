@@ -40,6 +40,11 @@ CCallsign::CCallsign(const uint8_t *in)
 
 void CCallsign::CSIn(const std::string &callsign)
 {
+	if (0 == callsign.compare("@ALL"))
+	{
+		coded = 0xffffffffffffu;
+		return;
+	}
 	const std::string m17_alphabet(M17CHARACTERS);
 	memset(cs, 0, sizeof(cs));
 	memcpy(cs, callsign.c_str(), (callsign.size()<10) ? callsign.size() : 9);	// no more than 9 chars

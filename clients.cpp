@@ -137,6 +137,17 @@ std::shared_ptr<CClient> CClients::FindNextClient(std::list<std::shared_ptr<CCli
 	return nullptr;
 }
 
+std::shared_ptr<CClient> CClients::FindNextClient(const char mod, std::list<std::shared_ptr<CClient>>::iterator &it)
+{
+	while ( it != end() )
+	{
+		if (mod == (*it)->GetReflectorModule())
+			return *it++;
+		it++;
+	}
+	return nullptr;
+}
+
 std::shared_ptr<CClient> CClients::FindNextClient(const CCallsign &Callsign, const CIp &Ip, std::list<std::shared_ptr<CClient>>::iterator &it)
 {
 	while ( it != end() )

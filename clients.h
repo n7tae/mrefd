@@ -66,6 +66,7 @@ public:
 
 	// iterate on clients
 	std::shared_ptr<CClient> FindNextClient(std::list<std::shared_ptr<CClient>>::iterator &);
+	std::shared_ptr<CClient> FindNextClient(const char, std::list<std::shared_ptr<CClient>>::iterator &);
 	std::shared_ptr<CClient> FindNextClient(const CCallsign &, const CIp &, std::list<std::shared_ptr<CClient>>::iterator &);
 
 protected:

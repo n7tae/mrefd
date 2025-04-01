@@ -66,7 +66,7 @@ public:
 
 protected:
 	// queue helper
-	void SendToAllClients(CPacket &);
+	void SendToAllClients(CPacket &, const char);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
@@ -75,13 +75,15 @@ protected:
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
 	void CloseStream(char module);
-	void OnPacketIn(CPacket &, const CIp &);
+	bool OnPacketIn(CPacket &, const std::shared_ptr<CClient>);
+	CPacketStream *GetStream(CPacket &, const std::shared_ptr<CClient>);
+	void CheckStreamsTimeout(void);
 
 	// packet decoding helpers
 	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(CPacket &packet, size_t size);
+	bool IsValidPacket(CPacket &packet, size_t size, const char mod);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
@@ -95,10 +97,6 @@ protected:
 	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
 	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
 	void EncodeInterlinkNackPacket(uint8_t *);
-
-	// stream handle helpers
-	CPacketStream *GetStream(CPacket &, const CIp &);
-	void CheckStreamsTimeout(void);
 
 	// syntax helper
 	bool IsNumber(char) const;
