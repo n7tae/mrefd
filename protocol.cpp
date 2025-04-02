@@ -606,6 +606,13 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 
 void CProtocol::SendToAllClients(CPacket &packet, const char mod)
 {
+	#ifdef DEBUG
+	if (not packet.IsStreamPacket())
+	{
+		Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
+		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
+	}
+	#endif
 	// save the orginal relay value
 	const auto relayIsSet = packet.IsRelaySet();
 	// if the packet dst looks like an M17 reflector, change the dst to @ALL
@@ -1104,8 +1111,7 @@ CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>cl
 	}
 
 	// get the module's queue
-	const CCallsign dst(packet.GetCDstAddress());
-	const char module = dst.GetModule();
+	const char module = client->GetReflectorModule();
 
 	if (packet.IsStreamPacket())
 	{
