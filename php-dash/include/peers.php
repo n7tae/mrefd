@@ -25,7 +25,6 @@ fclose($Result);
 		<th>M17 Peer</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
-		<th>Protocol</th>
 		<th>Module</th><?php
 
 if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
@@ -58,8 +57,7 @@ for ($i=0;$i<$Reflector->PeerCount();$i++) {
 	}
 	echo '
 	<td>'.date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()).'</td>
-	<td>'.elapsedTime($Reflector->Peers[$i]->GetConnectTime()).' ago</td>
-	<td>'.$Reflector->Peers[$i]->GetProtocol().'</td>
+	<td>'.date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()).'</td>
 	<td>'.$Reflector->Peers[$i]->GetLinkedModule().'</td>';
 	if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
 		echo '<td>';

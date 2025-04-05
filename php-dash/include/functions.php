@@ -45,7 +45,7 @@ function FormatSeconds($seconds) {
 } 
 
 function CreateCode ($laenge) {   
-	$zeichen = "1234567890abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNAOPQRSTUVWYXZ";   
+	$zeichen = "1234567890abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWYXZ";   
 	mt_srand( (double) microtime() * 1000000); 
 	$out = "";
 	for ($i=1;$i<=$laenge;$i++){ 

@@ -50,8 +50,8 @@ for ($i=0;$i<$Reflector->NodeCount();$i++) {
 		}
 	}
 	echo '</td>
-	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()).' ago</td>
-	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetConnectTime()).' ago</td>
+	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()).'</td>
+	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetConnectTime()).'</td>
 	<td>'.$Reflector->Nodes[$i]->GetListenOnly().'</td>
 	<td>'.$Reflector->Nodes[$i]->GetLinkedModule().'</td>';
 	if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {

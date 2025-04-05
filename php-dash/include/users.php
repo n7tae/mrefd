@@ -150,7 +150,7 @@ if (isset($_GET['do'])) {
                                 echo ' / ' . $Reflector->Stations[$i]->GetPeer();
                             }
                             echo '</td>
-                            <td>' . @date("Y-m-d H:i", $Reflector->Stations[$i]->GetLastHeardTime()) . '<br />' . elapsedTime($Reflector->Stations[$i]->GetLastHeardTime()) . ' ago</td>
+                            <td>' . @date("Y-m-d H:i", $Reflector->Stations[$i]->GetLastHeardTime()) . '<br />' . elapsedTime($Reflector->Stations[$i]->GetLastHeardTime()) . '</td>
                             <td class="align-middle">' . $Reflector->Stations[$i]->GetModule() . '</td>
                         </tr>';
                 }
