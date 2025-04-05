@@ -28,21 +28,22 @@
 
 #include "callsign.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
+enum class EMode { pm, sm }; // stream or packet mode
 
 class CUser
 {
 public:
 	// constructor
 	CUser();
-	CUser(const CCallsign &, const CCallsign &, const CCallsign &);
+	CUser(const CCallsign &, const CCallsign &, const CCallsign &, EMode);
 	CUser(const CUser &);
 
 	// get data
 	std::string GetSource(void)        const { return m_Source.GetCS(); }
 	std::string GetDestination(void)   const { return m_Destination.GetCS(); }
 	std::string GetReflector(void)     const { return m_Reflector.GetCS(); }
-	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime;}
+	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
+	bool IsStreamMode(void)            const { return m_Mode == EMode::sm; }
 
 	// operation
 	void HeardNow(void)     { m_LastHeardTime = std::time(nullptr); }
@@ -56,6 +57,7 @@ public:
 
 protected:
 	// data
+	EMode       m_Mode;
 	CCallsign   m_Source;
 	CCallsign   m_Destination;
 	CCallsign   m_Reflector;

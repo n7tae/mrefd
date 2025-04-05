@@ -872,7 +872,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 					from.SetModule(d.GetModule());
 				auto ref = GetReflectorCallsign();
 				ref.SetModule(d.GetModule());
-				g_Reflector.GetUsers()->Hearing(s, from, ref);
+				g_Reflector.GetUsers()->Hearing(s, from, ref, (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
 				g_Reflector.ReleaseUsers();
 			}
 		}

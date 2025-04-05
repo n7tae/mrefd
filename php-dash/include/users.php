@@ -84,31 +84,12 @@ if (isset($_GET['do'])) {
             <th>#</th>
             <th>Flag</th>
             <th>Callsign</th>
-            <th>Suffix</th>
+            <th>Mode</th>
             <th>Via / Peer</th>
             <th>Last heard</th>
             <th><img src="./images/ear.png" alt="Listening on" /></th>
          </tr>
         <?php
-            // function elapsedTime($time) {
-            //     $time = time() - $time; // to get the time since that moment
-            //     $time = ($time<1)? 1 : $time;
-            //     $tokens = array (
-            //         31536000 => 'year',
-            //         2592000 => 'month',
-            //         604800 => 'week',
-            //         86400 => 'day',
-            //         3600 => 'hour',
-            //         60 => 'minute',
-            //         1 => 'second'
-            //     );
-            
-            //     foreach ($tokens as $unit => $text) {
-            //         if ($time < $unit) continue;
-            //         $numberOfUnits = floor($time / $unit);
-            //         return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
-            //     }
-            // }
             $Reflector->LoadFlags();
             for ($i=0;$i<$Reflector->StationCount();$i++) {
                 $ShowThisStation = true;
@@ -144,7 +125,7 @@ if (isset($_GET['do'])) {
                                 }
                             echo '</td>
                             <td class="align-middle"><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank">' . $Reflector->Stations[$i]->GetCallsignOnly() . '</a></td>
-                            <td class="align-middle">' . $Reflector->Stations[$i]->GetSuffix() . '</td>
+                            <td class="align-middle">' . $Reflector->Stations[$i]->GetMode() . '</td>
                             <td class="align-middle">' . $Reflector->Stations[$i]->GetVia();
                             if ($Reflector->Stations[$i]->GetPeer() != $Reflector->GetReflectorName()) {
                                 echo ' / ' . $Reflector->Stations[$i]->GetPeer();

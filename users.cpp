@@ -52,9 +52,9 @@ void CUsers::AddUser(const CUser &user)
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation
 
-void CUsers::Hearing(const CCallsign &source, const CCallsign &destination, const CCallsign &reflector)
+void CUsers::Hearing(const CCallsign &source, const CCallsign &destination, const CCallsign &reflector, EMode mode)
 {
-	CUser heard(source, destination, reflector);
+	CUser heard(source, destination, reflector, mode);
 
 	// first check if this user is already listed. If so, erase him.
 	for ( auto it=begin(); it!=end(); it++ )
