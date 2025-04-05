@@ -1110,7 +1110,7 @@ CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>cl
 		return nullptr;
 	}
 
-	// get the module's queue
+	// get the module's packet stream queue
 	const char module = client->GetReflectorModule();
 
 	if (packet.IsStreamPacket())
