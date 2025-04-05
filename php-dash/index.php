@@ -120,9 +120,9 @@ $Reflector->LoadXML();
         <div class="row">
             <?php
                 switch ($_GET['show']) {
-                    case 'users':
-                        require_once("./include/users.php");
-                        break;
+					case 'users':
+						require_once("./include/users.php");
+						break;
 					case 'links':
 						require_once("./include/links.php");
 						break;
