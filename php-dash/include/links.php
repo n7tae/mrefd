@@ -6,7 +6,7 @@
 		<th>Via</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
-		<th>Protocol</th>
+		<th>ListenOnly</th>
 		<th>Module</th><?php
 
 if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {
@@ -50,9 +50,9 @@ for ($i=0;$i<$Reflector->NodeCount();$i++) {
 		}
 	}
 	echo '</td>
-	<td>'.date("m-d-Y H:i", $Reflector->Nodes[$i]->GetLastHeardTime()).'</td>
+	<td>'.date("m-d-Y H:i", $Reflector->Nodes[$i]->GetLastHeardTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()).'</td>
 	<td>'.date("m-d-Y H:i", $Reflector->Nodes[$i]->GetConnectTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetConnectTime()).' ago</td>
-	<td>'.$Reflector->Nodes[$i]->GetProtocol().'</td>
+	<td>'.$Reflector->Nodes[$i]->GetListenOnly().'</td>
 	<td>'.$Reflector->Nodes[$i]->GetLinkedModule().'</td>';
 	if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {
 		echo '<td>';

@@ -54,7 +54,7 @@ class xReflector {
          $tmpNodes          = $XML->GetAllElements($AllNodesString, "NODE");
 
          for ($i=0;$i<count($tmpNodes);$i++) {
-             $Node = new Node($XML->GetElement($tmpNodes[$i], 'CALLSIGN'), $XML->GetElement($tmpNodes[$i], 'IP'), $XML->GetElement($tmpNodes[$i], 'LINKEDMODULE'), $XML->GetElement($tmpNodes[$i], 'PROTOCOL'), $XML->GetElement($tmpNodes[$i], 'LISTENONLY'), $XML->GetElement($tmpNodes[$i], 'CONNECTTIME'), $XML->GetElement($tmpNodes[$i], 'LASTHEARDTIME'), CreateCode(16));
+             $Node = new Node($XML->GetElement($tmpNodes[$i], 'CALLSIGN'), $XML->GetElement($tmpNodes[$i], 'IP'), $XML->GetElement($tmpNodes[$i], 'LINKEDMODULE'), $XML->GetElement($tmpNodes[$i], 'LISTENONLY'), $XML->GetElement($tmpNodes[$i], 'CONNECTTIME'), $XML->GetElement($tmpNodes[$i], 'LASTHEARDTIME'), CreateCode(16));
              $this->AddNode($Node);
          }
          $AllStationsString = $XML->GetElement($this->XMLContent, "STATIONS");

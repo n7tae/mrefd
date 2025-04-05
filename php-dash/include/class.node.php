@@ -5,18 +5,18 @@ class Node {
    private $Callsign;
    private $IP;
    private $LinkedModule;
-   private $Protocol;
+   private $ListenOnly;
    private $ConnectTime;
    private $LastHeardTime;
    private $Suffix;
    private $Prefix;
    private $RandomID;
 
-   public function __construct($Callsign, $IP, $LinkedModule, $Protocol, $ConnectTime, $LastHeardTime, $RandomID) {
+   public function __construct($Callsign, $IP, $LinkedModule, $ListenOnly, $ConnectTime, $LastHeardTime, $RandomID) {
 
       $this->IP            = $IP;
 
-      $this->Protocol      = $Protocol;
+      $this->ListenOnly      = $ListenOnly;
       $this->ConnectTime   = ParseTime($ConnectTime);
       $this->LastHeardTime = ParseTime($LastHeardTime);
    
@@ -43,7 +43,7 @@ class Node {
    public function GetCallsign()             { return $this->Callsign;       }
    public function GetIP()                   { return $this->IP;             }
    public function GetLinkedModule()         { return $this->LinkedModule;   }
-   public function GetProtocol()             { return $this->Protocol;       }
+   public function GetListenOnly()           { return $this->ListenOnly;     }
    public function GetConnectTime()          { return $this->ConnectTime;    }
    public function GetLastHeardTime()        { return $this->LastHeardTime;  }
    public function GetSuffix()               { return $this->Suffix;         }
