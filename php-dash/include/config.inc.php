@@ -15,16 +15,15 @@ $Service     = array();
 $CallHome    = array();
 $PageOptions = array();
 
-$PageOptions['ContactEmail']                         = 'n7tae@tearly.net';                            // Support E-Mail address
-$PageOptions['IPV4']                                 = '76.159.205.74';                     // Reflector IPV4 Address
-$PageOptions['IPV6']                                 = 'null';                     // Reflector IPV6 Address - if none use NONE
-$PageOptions['Homepage']                             = 'http://m17.tearly.net:3000';                // Link to homepage for logo
-$PageOptions['Logo']                                 = 'm17_logo.svg';                          // Logo image - SVG preferred - place in /images/
+$PageOptions['ContactEmail']                         = 'n7tae@tearly.net';                 // Support E-Mail address
+$PageOptions['IPV4']                                 = '76.159.205.74';                    // Reflector IPV4 Address
+$PageOptions['IPV6']                                 = 'NONE';                             // Reflector IPV6 Address - if none use NONE
+$PageOptions['Homepage']                             = 'http://m17.tearly.net:3000';       // Link to homepage for logo
+$PageOptions['Logo']                                 = 'm17_logo.svg';                     // Logo image - SVG preferred - place in /images/
 
-$PageOptions['LocalModification']                    = '';                                      // If you modify the dashboard code, you can say so here
-                                                                                                // with your mod version number, otherwise leave blank
+$PageOptions['LocalModification']                    = '';                                 // If you modify the dashboard code, you can say so here with your mod version number, otherwise leave blank
 
-$CallHome['GUID']                                    = '';                                      // Health Check GUID
+$CallHome['GUID']                                    = '';                                 // Health Check GUID
 
 $PageOptions['PageRefreshActive']                    = true;                               // Activate automatic refresh
 $PageOptions['PageRefreshDelay']                     = '10000';                            // Page refresh time in miliseconds
