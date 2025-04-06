@@ -1,10 +1,10 @@
 *.o
 *.d
 .vscode
+php-dash/include/config.inc.php
 *.blacklist
 *.whitelist
 *.interlink
-mrefd.cfg
-mrefd.mk
+mrefd.*
 mrefd
 test-all
