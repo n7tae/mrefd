@@ -23,7 +23,7 @@ for ($i=0;$i<$Reflector->PeerCount();$i++) {
 	echo '
 	<tr class="table-center">
 	<td>'.($i+1).'</td>';
-	echo '<td>'.$$Reflector->Peers[$i]->GetCallSign().'</td>';
+	echo '<td>'.$Reflector->Peers[$i]->GetCallSign().'</td>';
 	echo '
 	<td>'.date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()).'</td>
 	<td>'.date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()).'</td>
