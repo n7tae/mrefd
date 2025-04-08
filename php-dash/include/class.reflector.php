@@ -191,40 +191,18 @@ class xReflector {
             $FoundStationInList = false;
             $i                  = 0;
 
-            $tmp = strtok($StationObject->GetSource(), " -/.");
-            $RealCallsign       = trim($tmp[0]);
-
             while (!$FoundStationInList && $i<$this->StationCount()) {
-               if ($this->Stations[$i]->GetCallsignOnly() == $RealCallsign) {
+               if ($this->Stations[$i]->GetSource() == $StationObject->GetSource()) {
                   $FoundStationInList = true;
                }
                $i++;
             }
 
             if (!$FoundStationInList) {
-               if (strlen(trim($RealCallsign)) > 3) {
-                  $this->Stations[] = $StationObject;
-               }
-            }
-
-         }
-      }
-   }
-
-   public function GetSuffixOfRepeater($Repeater, $LinkedModul, $StartWithIndex = 0) {
-      $suffix = "";
-      $found  = false;
-      $i      = $StartWithIndex;
-      while (!$found && $i < $this->NodeCount()) {
-         if ($this->Nodes[$i]->GetLinkedModule() == $LinkedModul) {
-            if (strpos($this->Nodes[$i]->GetCallSign(), $Repeater) !== false) {
-               $suffix = $this->Nodes[$i]->GetSuffix();
-               $found = true;
+               $this->Stations[] = $StationObject;
             }
          }
-         $i++;
       }
-      return $suffix;
    }
 
    public function GetCallsignAndSuffixByID($RandomId) {
