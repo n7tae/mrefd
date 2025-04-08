@@ -37,25 +37,24 @@
 CPeer::CPeer()
 {
 	m_ConnectTime = std::time(nullptr);
-	m_LastHeardTime = std::time(nullptr);
 }
 
-CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules)
+CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules) : CPeer()
 {
 	m_Callsign = callsign;
 	m_Ip = ip;
 	m_ReflectorModules.assign(modules);
 	m_LastKeepaliveTime.Start();
-	m_ConnectTime = std::time(nullptr);
-	m_LastHeardTime = std::time(nullptr);
 
 	std::cout << "Adding M17 peer " << callsign << " module(s) " << modules << std::endl;
 
 	// and construct the M17 clients
-	for (auto p=modules; *p; p++)
+	for (const auto mod : m_ReflectorModules)
 	{
-		// create and append to vector
-		m_Clients.push_back(std::make_shared<CClient>(callsign, ip, *p));
+		CCallsign clientcs(callsign);
+		clientcs.SetModule(mod);
+		// create and append to list
+		m_Clients.push_back(std::make_shared<CClient>(clientcs, ip, mod));
 	}
 }
 
@@ -120,6 +119,13 @@ void CPeer::Alive(void)
 
 void CPeer::WriteXml(std::ofstream &xmlFile)
 {
+	time_t lht = 0;
+	for (auto &client : m_Clients)
+	{
+		auto t = client->GetLastHeardTime();
+		if (t > lht)
+			lht = t;
+	}
 	xmlFile << "<PEER>" << std::endl;
 	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;
 	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
@@ -130,7 +136,7 @@ void CPeer::WriteXml(std::ofstream &xmlFile)
 	{
 		xmlFile << "\t<CONNECTTIME>" << mbstr << "</CONNECTTIME>" << std::endl;
 	}
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime)))
+	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&lht)))
 	{
 		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
 	}

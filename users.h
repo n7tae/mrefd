@@ -49,7 +49,7 @@ public:
 	std::list<CUser>::const_iterator cend()    { return m_Users.cend(); }
 
 	// operation
-	void   Hearing(const CCallsign &, const CCallsign &, const CCallsign &, EMode);
+	void   Hearing(const CCallsign &, const CCallsign &, const CCallsign &, char, EMode);
 
 protected:
 	// data

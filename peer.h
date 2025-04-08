@@ -70,7 +70,6 @@ public:
 	bool IsTransmitting(void) const;
 	void Alive(void);
 	bool IsAlive(void) const;
-	void Heard(void)                            { m_LastHeardTime = std::time(nullptr); }
 
 	// clients access
 	int     GetNbClients(void) const                    { return (int)m_Clients.size(); }
@@ -95,5 +94,4 @@ protected:
 	// status
 	CTimer      m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
-	std::time_t m_LastHeardTime;
 };

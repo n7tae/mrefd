@@ -25,8 +25,10 @@
 #pragma once
 
 #include <ctime>
+#include <memory>
 
 #include "callsign.h"
+#include "client.h"
 
 enum class EMode { pm, sm }; // stream or packet mode
 
@@ -35,15 +37,16 @@ class CUser
 public:
 	// constructor
 	CUser();
-	CUser(const CCallsign &, const CCallsign &, const CCallsign &, EMode);
-	CUser(const CUser &);
+	CUser(const std::string, const std::string, const std::string, char, EMode);
 
 	// get data
-	std::string GetSource(void)        const { return m_Source.GetCS(); }
-	std::string GetDestination(void)   const { return m_Destination.GetCS(); }
-	std::string GetReflector(void)     const { return m_Reflector.GetCS(); }
+	const std::string &GetSource(void)        const { return m_Source; }
+	const std::string &GetDestination(void)   const { return m_Destination; }
+	const std::string &GetClient(void)        const { return m_ClientCS; }
 	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
 	bool IsStreamMode(void)            const { return m_Mode == EMode::sm; }
+	std::string GetClientCS(void)      const { return m_ClientCS; }
+	char GetModule(void)               const { return m_OnModule; }
 
 	// operation
 	void HeardNow(void)     { m_LastHeardTime = std::time(nullptr); }
@@ -57,9 +60,8 @@ public:
 
 protected:
 	// data
-	EMode       m_Mode;
-	CCallsign   m_Source;
-	CCallsign   m_Destination;
-	CCallsign   m_Reflector;
+	const std::string m_Source, m_Destination, m_ClientCS;
+	char m_OnModule;
+	EMode m_Mode;
 	std::time_t m_LastHeardTime;
 };

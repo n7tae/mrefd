@@ -35,22 +35,14 @@ CUser::CUser()
 	m_LastHeardTime = std::time(nullptr);
 }
 
-CUser::CUser(const CCallsign &source, const CCallsign &destination, const CCallsign &reflector, EMode mode)
+CUser::CUser(const std::string src, const std::string dst, const std::string cli, char mod, EMode mode)
+: m_Source(src)
+, m_Destination(dst)
+, m_ClientCS(cli)
+, m_OnModule(mod)
+, m_Mode(mode)
 {
-	m_Mode = mode;
-	m_Source = source;
-	m_Destination = destination;
-	m_Reflector = reflector;
 	m_LastHeardTime = std::time(nullptr);
-}
-
-CUser::CUser(const CUser &user)
-{
-	m_Mode = user.m_Mode;
-	m_Source = user.m_Source;
-	m_Destination = user.m_Destination;
-	m_Reflector = user.m_Reflector;
-	m_LastHeardTime = user.m_LastHeardTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +50,7 @@ CUser::CUser(const CUser &user)
 
 bool CUser::operator ==(const CUser &user) const
 {
-	return ((user.m_Source == m_Source) and (user.m_Destination == m_Destination) and (user.m_Reflector == m_Reflector));
+	return ((user.m_Source == m_Source) and (user.m_Destination == m_Destination) and (user.m_ClientCS == m_ClientCS));
 }
 
 
@@ -74,16 +66,16 @@ bool CUser::operator <(const CUser &user) const
 void CUser::WriteXml(std::ofstream &xmlFile)
 {
 	xmlFile << "<STATION>" << std::endl;
-	xmlFile << "\t<CALLSIGN>" << m_Source << "</CALLSIGN>" << std::endl;
-	xmlFile << "\t<VIANODE>" << m_Destination << "</VIANODE>" << std::endl;
+	xmlFile << "\t<SOURCE>" << m_Source << "</SOURCE>" << std::endl;
+	xmlFile << "\t<DESTINATION>" << m_Destination << "</DESTINATION>" << std::endl;
 	xmlFile << "\t<MODE>";
 	if (m_Mode == EMode::sm)
 		xmlFile << "Stream";
 	else
 		xmlFile << "Packet";
 	xmlFile << "</MODE>" << std::endl;
-	xmlFile << "\t<ONMODULE>" << m_Reflector.GetModule() << "</ONMODULE>" << std::endl;
-	xmlFile << "\t<VIAPEER>" << m_Reflector.GetCS(7) << "</VIAPEER>" << std::endl;
+	xmlFile << "\t<VIA>" << m_ClientCS << "</VIA>" << std::endl;
+	xmlFile << "\t<ONMODULE>" << m_OnModule << "</ONMODULE>" << std::endl;
 
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime)))

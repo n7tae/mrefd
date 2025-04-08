@@ -1,7 +1,6 @@
 <?php
 
 class xReflector {
-
    public $Nodes                    = null;
    public $Stations                 = null;
    public $Peers                    = null;
@@ -57,14 +56,17 @@ class xReflector {
              $Node = new Node($XML->GetElement($tmpNodes[$i], 'CALLSIGN'), $XML->GetElement($tmpNodes[$i], 'IP'), $XML->GetElement($tmpNodes[$i], 'LINKEDMODULE'), $XML->GetElement($tmpNodes[$i], 'LISTENONLY'), $XML->GetElement($tmpNodes[$i], 'CONNECTTIME'), $XML->GetElement($tmpNodes[$i], 'LASTHEARDTIME'), CreateCode(16));
              $this->AddNode($Node);
          }
+
          $AllStationsString = $XML->GetElement($this->XMLContent, "STATIONS");
          $tmpStations       = $XML->GetAllElements($AllStationsString, "STATION");
+
          for ($i=0;$i<count($tmpStations);$i++) {
-             $Station = new Station($XML->GetElement($tmpStations[$i], 'CALLSIGN'), $XML->GetElement($tmpStations[$i], 'MODE'), $XML->GetElement($tmpStations[$i], 'VIANODE'), $XML->GetElement($tmpStations[$i], 'ONMODULE'), $XML->GetElement($tmpStations[$i], 'VIAPEER'), $XML->GetElement($tmpStations[$i], 'LASTHEARDTIME'));
+             $Station = new Station($XML->GetElement($tmpStations[$i], 'SOURCE'), $XML->GetElement($temStations[$i], 'DESTINATION'),$XML->GetElement($tmpStations[$i], 'MODE'), $XML->GetElement($tmpStations[$i], 'VIA'), $XML->GetElement($tmpStations[$i], 'ONMODULE'), $XML->GetElement($tmpStations[$i], 'LASTHEARDTIME'));
              $this->AddStation($Station, false);
          }
          $AllPeersString    = $XML->GetElement($this->XMLContent, "PEERS");
          $tmpPeers          = $XML->GetAllElements($AllPeersString, "PEER");
+
          for ($i=0;$i<count($tmpPeers);$i++) {
              $Peer = new Peer($XML->GetElement($tmpPeers[$i], 'CALLSIGN'), $XML->GetElement($tmpPeers[$i], 'IP'), $XML->GetElement($tmpPeers[$i], 'LINKEDMODULE'), $XML->GetElement($tmpPeers[$i], 'CONNECTTIME'), $XML->GetElement($tmpPeers[$i], 'LASTHEARDTIME'));
              $this->AddPeer($Peer, false);

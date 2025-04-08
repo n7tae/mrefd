@@ -22,12 +22,14 @@ $Reflector->LoadFlags();
 for ($i=0;$i<$Reflector->PeerCount();$i++) {
 	echo '
 	<tr class="table-center">
-	<td>'.($i+1).'</td>';
-	echo '<td>'.$Reflector->Peers[$i]->GetCallSign().'</td>';
+	<td>' . ($i+1).'</td>';
+	echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
 	echo '
-	<td>'.date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()).'</td>
-	<td>'.date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()).'</td>
-	<td>'.$Reflector->Peers[$i]->GetLinkedModule().'</td>';
+	<td>' . date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()) . '<br />'
+	. elapsedTime($Reflector->Peers[$i]->GetLastHeardTime()) . '</td>
+	<td>' . date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()) . '<br />'
+	. elapsedTime($Reflector->Peers[$i]->GetConnectTime()) . '</td>
+	<td>' . $Reflector->Peers[$i]->GetLinkedModule() . '</td>';
 	if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
 		echo '<td>';
 		$Bytes = explode(".", $Reflector->Peers[$i]->GetIP());

@@ -615,16 +615,6 @@ void CProtocol::SendToAllClients(CPacket &packet, const char mod)
 	#endif
 	// save the orginal relay value
 	const auto relayIsSet = packet.IsRelaySet();
-	// if the packet dst looks like an M17 reflector, change the dst to @ALL
-	const CCallsign dst(packet.GetCDstAddress());
-	if (0 == dst.GetCS(4).compare("M17-"))
-	{
-		if (relayIsSet) packet.ClearRelay();
-		const CCallsign broadcast("@ALL");
-		broadcast.CodeOut(packet.GetDstAddress());
-		packet.CalcCRC();
-		if (relayIsSet) packet.SetRelay();
-	}
 	// push it to all our clients linked to the module and who is not streaming in
 	std::shared_ptr<CClient>client = nullptr;
 	auto clients = g_Reflector.GetClients();
@@ -840,6 +830,19 @@ void CProtocol::HandlePeerLinks(void)
 // returns true if the was a problem and the packet should be disabled;
 bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> client)
 {
+	// if the packet dst looks like an M17 reflector, change the dst to @ALL
+	const auto relayIsSet = packet.IsRelaySet();
+	CCallsign dst(packet.GetCDstAddress());
+	if (0 == dst.GetCS(4).compare("M17-"))
+	{
+		packet.ClearRelay();
+		dst.CSIn("@ALL");
+		dst.CodeOut(packet.GetDstAddress());
+		packet.CalcCRC();
+		if (relayIsSet)
+			packet.SetRelay();
+	}
+
 	auto stream = GetStream(packet, client);
 	if (stream)
 	{
@@ -864,15 +867,10 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			}
 			else
 			{
-				const CCallsign d(packet.GetCDstAddress());
-				const CCallsign s(packet.GetCSrcAddress());
 				// update last heard
-				auto from = client->GetCallsign();
-				if (0 == from.GetCS(4).compare("M17-"))
-					from.SetModule(d.GetModule());
-				auto ref = GetReflectorCallsign();
-				ref.SetModule(d.GetModule());
-				g_Reflector.GetUsers()->Hearing(s, from, ref, (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
+				CCallsign src(packet.GetCSrcAddress());
+				auto cli = client->GetCallsign();
+				g_Reflector.GetUsers()->Hearing(dst, src, cli, client->GetReflectorModule(), (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
 				g_Reflector.ReleaseUsers();
 			}
 		}

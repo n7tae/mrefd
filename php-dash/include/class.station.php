@@ -2,28 +2,28 @@
 
 class Station {
    
-   private $Callsign;
+   private $Source;
+   private $Destination;
    private $Via;
    private $LastHeardTime;
    private $Mode;
    private $CallsignOnly;
-   private $Peer;
    private $OnModule;
       
-   public function __construct($Callsign, $Mode, $Via, $OnModule, $Peer, $LastHeardTime) {
-      $this->Callsign      = trim($Callsign);
+   public function __construct($Source, $Destination, $Mode, $Via, $OnModule, $LastHeardTime) {
+      $this->Source        = trim($Source);
+	  $this->Destination   = trim($Destination);
       $this->Via           = trim($Via);
       $this->Peer          = trim($Peer);
       $this->LastHeardTime = ParseTime($LastHeardTime);
       $this->Mode          = $Mode;
-      $tmp = explode(" ", $Callsign);
-      $this->CallsignOnly  = $tmp[0];
+      $this->CallsignOnly  = strtok($Source, " -/.");
       $this->OnModule      = $OnModule;
    }
  
-   public function GetCallsign()             { return $this->Callsign;       }
+   public function GetSource()               { return $this->Callsign;       }
+   public function GetDestination()          { return $this->Destination;    }
    public function GetVIA()                  { return $this->Via;            }
-   public function GetPeer()                 { return $this->Peer;           }
    public function GetLastHeardTime()        { return $this->LastHeardTime;  }
    public function GetMode()                 { return $this->Mode;           }
    public function GetCallsignOnly()         { return $this->CallsignOnly;   }

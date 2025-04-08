@@ -83,11 +83,12 @@ if (isset($_GET['do'])) {
          <tr class="table-center">   
             <th>#</th>
             <th>Flag</th>
-            <th>Callsign</th>
+            <th>Source</th>
+			<th<Destination</th>
             <th>Mode</th>
             <th>Via / Peer</th>
             <th>Last heard</th>
-            <th><img src="./images/ear.png" alt="Listening on" /></th>
+            <th>Module</th>
          </tr>
         <?php
             $Reflector->LoadFlags();
@@ -124,13 +125,10 @@ if (isset($_GET['do'])) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
                             echo '</td>
-                            <td class="align-middle"><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank">' . $Reflector->Stations[$i]->GetCallsignOnly() . '</a></td>
+                            <td class="align-middle"><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank">' . $Reflector->Stations[$i]->GetSource() . '</a></td>
+							<td class="align_middle">' . $Reflector->Stations[$i]->GetDestination() . '</td>
                             <td class="align-middle">' . $Reflector->Stations[$i]->GetMode() . '</td>
-                            <td class="align-middle">' . $Reflector->Stations[$i]->GetVia();
-                            if ($Reflector->Stations[$i]->GetPeer() != $Reflector->GetReflectorName()) {
-                                echo ' / ' . $Reflector->Stations[$i]->GetPeer();
-                            }
-                            echo '</td>
+                            <td class="align-middle">' . $Reflector->Stations[$i]->GetVia() . '</td>
                             <td>' . @date("Y-m-d H:i", $Reflector->Stations[$i]->GetLastHeardTime()) . '<br />' . elapsedTime($Reflector->Stations[$i]->GetLastHeardTime()) . ' ago</td>
                             <td class="align-middle">' . $Reflector->Stations[$i]->GetModule() . '</td>
                         </tr>';
