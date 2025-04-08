@@ -14,7 +14,6 @@ class Station {
       $this->Source        = trim($Source);
 	  $this->Destination   = trim($Destination);
       $this->Via           = trim($Via);
-      $this->Peer          = trim($Peer);
       $this->LastHeardTime = ParseTime($LastHeardTime);
       $this->Mode          = $Mode;
       $this->CallsignOnly  = strtok($Source, " -/.");

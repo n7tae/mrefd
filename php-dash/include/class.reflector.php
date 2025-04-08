@@ -61,7 +61,7 @@ class xReflector {
          $tmpStations       = $XML->GetAllElements($AllStationsString, "STATION");
 
          for ($i=0;$i<count($tmpStations);$i++) {
-             $Station = new Station($XML->GetElement($tmpStations[$i], 'SOURCE'), $XML->GetElement($temStations[$i], 'DESTINATION'),$XML->GetElement($tmpStations[$i], 'MODE'), $XML->GetElement($tmpStations[$i], 'VIA'), $XML->GetElement($tmpStations[$i], 'ONMODULE'), $XML->GetElement($tmpStations[$i], 'LASTHEARDTIME'));
+             $Station = new Station($XML->GetElement($tmpStations[$i], 'SOURCE'), $XML->GetElement($tmpStations[$i], 'DESTINATION'),$XML->GetElement($tmpStations[$i], 'MODE'), $XML->GetElement($tmpStations[$i], 'VIA'), $XML->GetElement($tmpStations[$i], 'ONMODULE'), $XML->GetElement($tmpStations[$i], 'LASTHEARDTIME'));
              $this->AddStation($Station, false);
          }
          $AllPeersString    = $XML->GetElement($this->XMLContent, "PEERS");
