@@ -191,7 +191,7 @@ class xReflector {
             $FoundStationInList = false;
             $i                  = 0;
 
-            $tmp = explode(" ", $StationObject->GetCallsign());
+            $tmp = strtok(" -/.", $StationObject->GetSource());
             $RealCallsign       = trim($tmp[0]);
 
             while (!$FoundStationInList && $i<$this->StationCount()) {
