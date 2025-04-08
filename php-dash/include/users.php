@@ -84,7 +84,7 @@ if (isset($_GET['do'])) {
             <th>#</th>
             <th>Flag</th>
             <th>Source</th>
-			<th<Destination</th>
+			<th>Destination</th>
             <th>Mode</th>
             <th>Via / Peer</th>
             <th>Last heard</th>

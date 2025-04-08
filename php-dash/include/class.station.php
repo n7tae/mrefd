@@ -20,7 +20,7 @@ class Station {
       $this->OnModule      = $OnModule;
    }
  
-   public function GetSource()               { return $this->Callsign;       }
+   public function GetSource()               { return $this->Source;         }
    public function GetDestination()          { return $this->Destination;    }
    public function GetVIA()                  { return $this->Via;            }
    public function GetLastHeardTime()        { return $this->LastHeardTime;  }
