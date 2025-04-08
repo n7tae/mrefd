@@ -137,7 +137,6 @@ if (isset($_GET['do'])) {
                     $i = $Reflector->StationCount() + 1;
                 }
             }
-			echo "<tr><td>DEBUG</td><td>i</td><td>is</td><td>$i</td><td></td><td></td><td></td><td></td></tr>"
         ?>
     </table>
 </div>
