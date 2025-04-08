@@ -120,7 +120,7 @@ if (isset($_GET['do'])) {
                                 }
                             echo '</td>
                             <td class="align-middle">';
-                                list ($Flag, $Name) = $Reflector->GetFlag($Reflector->Stations[$i]->GetCallSign());
+                                list ($Flag, $Name) = $Reflector->GetFlag($Reflector->Stations[$i]->GetCallSignOnly());
                                 if (file_exists("./images/flags/" . $Flag . ".svg")) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
