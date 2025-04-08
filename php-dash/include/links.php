@@ -3,7 +3,6 @@
 		<th>#</th>
 		<th>Flag</th>
 		<th>DV Station</th>
-		<th>Via</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
 		<th>ListenOnly</th>
@@ -31,27 +30,9 @@ for ($i=0;$i<$Reflector->NodeCount();$i++) {
 	}
 	echo '</td>
 	<td>'.$Reflector->Nodes[$i]->GetCallSign();
-	if ($Reflector->Nodes[$i]->GetSuffix() != "") { echo '-'.$Reflector->Nodes[$i]->GetSuffix(); }
 	echo '</td>
-	<td>';
-	if ($Reflector->Nodes[$i]->GetPrefix() == 'M17') {
-		switch ($Reflector->Nodes[$i]->GetPrefix()) {
-			case 'M17'  : echo 'M17-Link'; break;
-		}
-	}
-	else {
-		switch ($Reflector->Nodes[$i]->GetSuffix()) {
-			case 'A' : echo '23cm'; break;
-			case 'B' : echo '70cm'; break;
-			case 'C' : echo '2m'; break;
-			case 'D' : echo 'DV Client'; break;
-			case 'G' : echo 'Internet-Gateway'; break;
-			default  : echo '';
-		}
-	}
-	echo '</td>
-	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()).' ago</td>
-	<td>'.date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()).'<br />'.elapsedTime($Reflector->Nodes[$i]->GetConnectTime()).'</td>
+	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()) . '<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()) . ' ago</td>
+	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()) . '<br />for ' . elapsedTime($Reflector->Nodes[$i]->GetConnectTime()) . '</td>
 	<td>'.$Reflector->Nodes[$i]->GetListenOnly().'</td>
 	<td>'.$Reflector->Nodes[$i]->GetLinkedModule().'</td>';
 	if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {

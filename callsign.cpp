@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2020 by Thomas A. Early N7TAE
+ *   Copyright (c) 2020,2025 by Thomas A. Early N7TAE
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -40,13 +40,14 @@ CCallsign::CCallsign(const uint8_t *in)
 
 void CCallsign::CSIn(const std::string &callsign)
 {
+	memset(cs, 0, sizeof(cs));
 	if (0 == callsign.compare("@ALL"))
 	{
+		strncpy(cs, "@ALL", 4);
 		coded = 0xffffffffffffu;
 		return;
 	}
 	const std::string m17_alphabet(M17CHARACTERS);
-	memset(cs, 0, sizeof(cs));
 	memcpy(cs, callsign.c_str(), (callsign.size()<10) ? callsign.size() : 9);	// no more than 9 chars
 	coded = 0;
 	for( int i=int(callsign.size()-1); i>=0; i-- ) {
