@@ -205,18 +205,13 @@ class xReflector {
       }
    }
 
-   public function GetCallsignAndSuffixByID($RandomId) {
+   public function GetCallsignByID($RandomId) {
       $suffix   = "";
       $callsign = "";
       $i        = 0;
       while ($i < $this->NodeCount()) {
          if ($this->Nodes[$i]->GetRandomID() == $RandomId) {
-            if (trim($this->Nodes[$i]->GetSuffix()) == "") {
-               return $this->Nodes[$i]->GetCallSign();
-            }
-            else {
-               return $this->Nodes[$i]->GetCallSign().'-'.$this->Nodes[$i]->GetSuffix();
-            }
+            return $this->Nodes[$i]->GetCallSign();
          }
          $i++;
       }

@@ -167,7 +167,7 @@ if (isset($_GET['do'])) {
                 echo '<td><table class="table table-hover">';
                 $UserCheckedArray = array();
                 for ($j=0;$j<count($Users);$j++) {
-                    $Displayname = $Reflector->GetCallsignAndSuffixByID($Users[$j]);
+                    $Displayname = $Reflector->GetCallsignByID($Users[$j]);
                     echo '
                         <tr>
                             <td>'.$Displayname.'</td>
