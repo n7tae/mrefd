@@ -101,6 +101,9 @@ $Reflector->LoadXML();
     include_once("tracking.php");
 } ?>
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+    <nav class="navbar-circular-container">
+    <img style="background-color:white;" src="images/icons/favicon-96x96.png" class="navbar-circular-image">
+    </img> </nav>&nbsp;&nbsp;
     <a class="navbar-brand" href="#"><?php echo $Reflector->GetReflectorName(); ?> Reflector</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

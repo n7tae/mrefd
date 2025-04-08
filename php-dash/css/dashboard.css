@@ -66,6 +66,18 @@ a.tip:hover span {
   color: #9d9d9d;
 }
 
+.navbar-circular-container {
+  width: 42px; /* Set the desired width of the container */
+  height: 42px; /* Set the desired height of the container */
+  overflow: hidden; /* Hide any overflowing parts of the image */
+  border-radius: 50%; /* Make the container circular */
+}
+
+.navbar-circular-image {
+  width: 100%; /* Make the image fill the container */
+  height: 100%; /* Make the image fill the container */
+}
+
 /*
  * Sidebar
  */
