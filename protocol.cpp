@@ -870,7 +870,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 				// update last heard
 				CCallsign src(packet.GetCSrcAddress());
 				auto cli = client->GetCallsign();
-				g_Reflector.GetUsers()->Hearing(dst, src, cli, client->GetReflectorModule(), (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
+				g_Reflector.GetUsers()->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
 				g_Reflector.ReleaseUsers();
 			}
 		}
