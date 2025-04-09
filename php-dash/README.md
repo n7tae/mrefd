@@ -1,46 +1,54 @@
-# [MREFD](https://github.com/n7tae/mrefd) ref-dash
+# [MREFD](https://github.com/n7tae/mrefd) php-dash
 
-This is the dashboard as seen on [M17-M17 Reflector](https://ref.m17.link) to be used with mrefd.
+This dashboard is a php alternative to the GO based "gomrefdash" dashboard.
 
-### Version 1.3.0 - mrefd v0.3.0 and introducing health checks!
+### Version 1.4.0
 
-Non-breaking change to config.inc.php - if you intend on using the health checks, either create a new config file from config.inc.php.dist or insert the line containing $CallHome['GUID'] to your existing configuration file. Follow the instructions below for setting up health checks!
-
-### Clone dashboard to /var/www
+You will need to install webserver software (such as Apache, nginx, lighttpd, and others) on the system hosting your reflector to use this dash. In addition, you will 
+need the php/php-fpm packages as well. You can use the following instructions to install lighttpd and php on a debian based operating system:
 
 ```bash
-sudo rm /var/www/html
-sudo git clone https://github.com/m17-project/ref-dash /var/www/html     # or where ever your system www root is located
+sudo apt update ; sudo apt install -y lighttpd php php-fpm
 ```
 
-Please note that your www root directory might be some place else. There is one file that needs configuration. Edit the copied files, not the ones from the repository:
+Once the necessary packages are installed, issue the following commands, taking note that you will need to modify the ln command to point to the location that you have
+cloned mrefd. /opt/mrefd is used in the example, so be sure to update this to the correct location of your mrefd installation.
+
+```bash
+sudo rm -rf /var/www/html
+sudo lighttpd-enable-mod fastcgi-php-fpm
+ln -s /opt/mrefd/php-dash /var/www/html
+sudo systemctl restart lighttpd
+```
+
+### Files to edit
+
+There is one file that needs configuration. Edit the copied files, not the ones from the repository:
 
 ```bash
 cd /var/www/html/include
 sudo cp config.inc.php.dist config.inc.php
 ```
+You can use nano, vi, or any editor of your choice to edit the newly created config.inc.php file.
 
-### Customizations
-- Homepage link
-  - edit config.ini.php to change the logo to link to your homepage. Defaults to the M17 website.
-- Logo file
-  - place your logo in /images (SVG preferred) and edit config.ini.php to change the logo image. Defaults to the M17 logo.
-
-### Health Checks - DEPRECATED AS OF 31 JAN 2021
-The new reflectors list [https://reflectors.m17.link](https://reflectors.m17.link) is being coded to provide active checks from the M17 Reflectors server.
-
-When this feature is finished, a status update will show here as well as be announced on the M17 Twitter feed.
-
-### Files to edit
-- **include/config.inc.php** 
-  - ContactEmail - set this to the sysop's email address
+- **/config.inc.php** 
+  - ContactEmail - set this to the reflector owers emailaddress
   - IPV4 - set this to the IPv4 address of the reflector
   - IPV6 - set this to the IPv6 address of the reflector, if not used, enter NONE
-  - Homepage - set this to your homepage, defaults to m17project
-  - Logo - set this to the filename of your logo, defaults to M17 logo
   - LocalModification - set this to your local modification version number if you modify the main code
-  <!-- - CallHome GUID - Set this to your assigned Health Check GUID -->
+  - ModuleNames has a description for each module. Feel free to change the default values. 
 
+If you have configured more than A, B, C, and D modules, you can add more by following the same format. Please take note of the format of each line when adding additional 
+modules.
+
+### Important Note
+
+This is a very basic configuration of a light weight http server. This will not provide you with https (encrypted/secured) connections. That is outside of the scope of this tutorial.
+With popular free certificate authorities such as ZeroSSL and LetsEncrypt available to all, and tools such as acme.sh to automate certificate renewal, we suggest configuring https for 
+your reflector dashboard.
+
+If you wish to use something other than lighttpd, feel free. Any of them should work, and this dashboard has been tested with Apache, nginx, and lighttpd.
+ 
 ### Caveat
 
-If you notice that the formatting of the page does not look correct, please be sure to clear your browser's cache!
+If you notice that the formatting of the page does not look correct, please be sure to clear your browser's cache! 
