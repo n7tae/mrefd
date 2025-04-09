@@ -45,7 +45,7 @@ $Reflector->LoadXML();
     <meta name="keywords" content="<?php echo $PageOptions['MetaKeywords']; ?>"/>
     <meta name="author" content="<?php echo $PageOptions['MetaAuthor']; ?>"/>
     <meta name="revisit" content="<?php echo $PageOptions['MetaRevisit']; ?>"/>
-    <meta name="robots" content="<?php echo $PageOptions['MetaAuthor']; ?>"/>
+    <meta name="robots" content="<?php echo $PageOptions['MetaRobots']; ?>"/>
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title><?php echo $Reflector->GetReflectorName(); ?> Reflector Dashboard</title>
