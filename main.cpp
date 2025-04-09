@@ -71,10 +71,14 @@ int main(int argc, char *argv[])
 	std::cout << "Starting mrefd version #" << g_Version << std::endl;
 
 	// and let it run
-	if ( g_Reflector.Start(argv[1]) )
+	int tries = 1;
+	while(g_Reflector.Start(argv[1]))
 	{
+		if (tries++ > 10)
+			return EXIT_FAILURE;
 		std::cout << "Error starting reflector" << std::endl;
-		return EXIT_FAILURE;
+		std::cout << "Sleep for 10 (sec), then try it again..." << std::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(10));
 	}
 	std::cout << "Reflector " << g_CFG.GetCallsign()  << " started and listening" << std::endl;
 
