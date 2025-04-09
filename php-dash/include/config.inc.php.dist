@@ -1,14 +1,21 @@
 <?php
-/*
-Possible values for IPModus
 
-HideIP
-ShowFullIP
-ShowLast1ByteOfIP
-ShowLast2ByteOfIP
-ShowLast3ByteOfIP
+// Possible values for IPModus
 
-*/
+// HideIP
+// ShowFullIP
+// ShowLast1ByteOfIP
+// ShowLast2ByteOfIP
+// ShowLast3ByteOfIP
+
+// Specify timezone for your dashboard.
+// Make sure you have an /etc/timezone file!
+
+date_default_timezone_set(trim(file_get_contents("/etc/timezone")));
+
+// You can force the TZ, and reduce overhead, by spelling it out. For example in Tuscon, AZ, I would use:
+// date_default_timezone_set("America/Phoenix");
+// For a list of PHP-approved timezones, see https://www.php.net/manual/en/timezones.php
 
 $Service     = array();
 $CallHome    = array();
@@ -16,12 +23,14 @@ $PageOptions = array();
 
 $PageOptions['ContactEmail']                         = 'your_email';                            // Support E-Mail address
 $PageOptions['IPV4']                                 = 'refl_ipv4_address';                     // Reflector IPV4 Address
-$PageOptions['IPV6']                                 = 'refl_ipv6_address';                     // Reflector IPV6 Address - if none use NONE
+$PageOptions['IPV6']                                 = 'refl_ipv6_address';                     // Reflector IPV6 Address
+                                                                                                // if none use NONE or null
 $PageOptions['Homepage']                             = 'https://m17project.org';                // Link to homepage for logo
-$PageOptions['Logo']                                 = 'm17_logo.svg';                          // Logo image - SVG preferred - place in /images/
+$PageOptions['Logo']                                 = 'm17_logo.svg';                          // Logo image - SVG preferred
+                                                                                                // place in /images/
 
-$PageOptions['LocalModification']                    = '';                                      // If you modify the dashboard code, you can say so here
-                                                                                                // with your mod version number, otherwise leave blank
+$PageOptions['LocalModification']                    = '';                 // If you modify the dashboard code, you can say so here
+                                                                           // with your mod version number, otherwise leave blank
 
 $CallHome['GUID']                                    = '';                                      // Health Check GUID
 
@@ -48,25 +57,16 @@ $PageOptions['ModuleNames']['B']                     = 'Regional';
 $PageOptions['ModuleNames']['C']                     = 'National';
 $PageOptions['ModuleNames']['D']                     = '';
 
+// meta tags are useful for Search Engines
+$PageOptions['MetaDescription']                      = 'MREFD is an M17 Reflector System for Ham Radio Operators.';
+$PageOptions['MetaKeywords']                         = 'Ham Radio, M17, Reflector, ';
+$PageOptions['MetaAuthor']                           = 'N7TAE;W1BSB';
+$PageOptions['MetaRevisit']                          = 'After 30 Days';
+$PageOptions['MetaRobots']                           = 'index,follow';
 
-$PageOptions['MetaDescription']                      = 'MREFD is an M17 Reflector System for Ham Radio Operators.';  // Meta Tag Values, useful for Search Engines
-$PageOptions['MetaKeywords']                         = 'Ham Radio, M17, XReflector, ';                               // Meta Tag Values, useful for Search Engines
-$PageOptions['MetaAuthor']                           = 'KC1AWV';                                                     // Meta Tag Values, useful for Search Engines
-$PageOptions['MetaRevisit']                          = 'After 30 Days';                                              // Meta Tag Values, useful for Search Engines
-$PageOptions['MetaRobots']                           = 'index,follow';                                               // Meta Tag Values, useful for Search Engines
-
-$PageOptions['UserPage']['ShowFilter']               = true;                                                         // Show Filter on Users page
+$PageOptions['UserPage']['ShowFilter']               = true;                                 // Show Filter on Users page
 
 $Service['PIDFile']                                  = '/var/run/mrefd.pid';
 $Service['XMLFile']                                  = '/var/log/mrefd.xml';
-
-/*
-  include an extra config file for people who dont like to mess with shipped config.inc.php
-  this makes updating dashboard from git a little bit easier
-*/
-
-if (file_exists("../config.inc.php")) {
-  include ("../config.inc.php");
-}
 
 ?>
