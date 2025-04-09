@@ -7,10 +7,6 @@ class xReflector {
    private $Flagarray               = null;
    private $Flagarray_DXCC          = null;
    private $Flagfile                = null;
-   private $CallingHomeActive       = null;
-   private $CallingHomeHash         = null;
-   private $CallingHomeDashboardURL = null;
-   private $CallingHomeServerURL    = null;
    private $ReflectorName           = null;
    private $ServiceUptime           = null;
    private $ProcessIDFile           = null;
@@ -18,21 +14,13 @@ class xReflector {
    private $XMLFile                 = null;
    private $ServiceName             = null;
    private $Version                 = null;
-   private $CallingHomeCountry      = null;
-   private $CallingHomeComment      = null;
-   private $CallingHomeOverrideIP   = null;
-   private $Transferinterlink       = null;
-   private $Interlinkfile           = null;
    public $Interlinks               = null;
-   private $InterlinkXML            = null;
-   private $ReflectorXML            = null;
 
    public function __construct() {
       $this->Nodes             = array();
       $this->Stations          = array();
       $this->Peers             = array();
       $this->Interlinks        = array();
-      $this->Transferinterlink = false;
    }
 
    public function LoadXML() {
@@ -263,16 +251,6 @@ class xReflector {
       return $out;
    }
 
-   public function GetCallSignsInModules($Module) {
-      $out = array();
-      for ($i=0;$i<$this->NodeCount();$i++) {
-          if ($this->Nodes[$i]->GetLinkedModule() == $Module) {
-             $out[] = $this->Nodes[$i]->GetCallsign();
-          }
-      }
-      return $out;
-   }
-
    public function GetNodesInModulesById($Module) {
       $out = array();
       for ($i=0;$i<$this->NodeCount();$i++) {
@@ -283,59 +261,6 @@ class xReflector {
       return $out;
    }
 
-   public function ReadInterlinkFile() {
-      if (file_exists($this->Interlinkfile) && (is_readable($this->Interlinkfile))) {
-         $this->Interlinks   = array();
-         $this->InterlinkXML = "";
-         $Interlinkfilecontent = file($this->Interlinkfile);
-         for ($i=0;$i<count($Interlinkfilecontent);$i++) {
-             if (substr($Interlinkfilecontent[$i], 0, 1) != '#') {
-                $Interlink = explode(" ", $Interlinkfilecontent[$i]);
-                $this->Interlinks[] = new Interlink();
-                if (isset($Interlink[0])) { $this->Interlinks[count($this->Interlinks)-1]->SetName(trim($Interlink[0]));    }
-                if (isset($Interlink[1])) { $this->Interlinks[count($this->Interlinks)-1]->SetAddress(trim($Interlink[1])); }
-                if (isset($Interlink[2])) {
-                   $Modules = str_split(trim($Interlink[2]), 1);
-                   for ($j=0;$j<count($Modules);$j++) {
-                       $this->Interlinks[count($this->Interlinks)-1]->AddModule($Modules[$j]);
-                   }
-                }
-             }
-         }
-         return true;
-      }
-      return false;
-   }
-
-   public function PrepareInterlinkXML() {
-      $xml = '
-<interlinks>';
-      for ($i=0;$i<count($this->Interlinks);$i++) {
-          $xml .= '
-   <interlink>
-      <name>'.$this->Interlinks[$i]->GetName().'</name>
-      <address>'.$this->Interlinks[$i]->GetAddress().'</address>
-      <modules>'.$this->Interlinks[$i]->GetModules().'</modules>
-   </interlink>';
-      }
-      $xml .= '
-</interlinks>';
-      $this->InterlinkXML = $xml;
-   }
-
-   public function PrepareReflectorXML() {
-      $this->ReflectorXML = '
-<reflector>
-   <name>'.$this->ReflectorName.'</name>
-   <uptime>'.$this->ServiceUptime.'</uptime>
-   <hash>'.$this->CallingHomeHash.'</hash>
-   <url>'.$this->CallingHomeDashboardURL.'</url>
-   <country>'.$this->CallingHomeCountry.'</country>
-   <comment>'.$this->CallingHomeComment.'</comment>
-   <ip>'.$this->CallingHomeOverrideIP.'</ip>
-   <reflectorversion>'.$this->Version.'</reflectorversion>
-</reflector>';
-   }
 
    public function InterlinkCount() {
       return count($this->Interlinks);
@@ -344,21 +269,6 @@ class xReflector {
    public function GetInterlink($Index) {
       if (isset($this->Interlinks[$Index])) return $this->Interlinks[$Index];
       return array();
-   }
-
-   public function IsInterlinked($Reflectorname) {
-      $i = -1;
-      $f = false;
-      while (!$f && $i<$this->InterlinkCount()) {
-         $i++;
-         if (isset($this->Interlinks[$i])) {
-            if ($this->Interlinks[$i]->GetName() == $Reflectorname) {
-               $f = true;
-               return $i;
-            }
-         }
-      }
-      return -1;
    }
 
 }
