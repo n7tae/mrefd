@@ -31,7 +31,7 @@ sudo cp config.inc.php.dist config.inc.php
 ```
 You can use nano, vi, or any editor of your choice to edit the newly created config.inc.php file.
 
-- **/config.inc.php** 
+- **config.inc.php** 
   - ContactEmail - set this to the reflector owers emailaddress
   - IPV4 - set this to the IPv4 address of the reflector
   - IPV6 - set this to the IPv6 address of the reflector, if not used, enter NONE
