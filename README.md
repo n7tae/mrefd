@@ -17,8 +17,6 @@ Encrypted voice streams will pass through an *mrefd* channel, but **only** if th
 4. Last heard users - A limited list of last heard users is in this part.
 Any node on the network can read an mrefd document. The key to the *mrefd* document is the reflector's callsign. either the entire document or any part of the document may be retrieved.
 
-The dashboard for *mrefd* is available [here](https://github.com/kc1awv/gomrefdash.git).
-
 Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
 
 ## A few words about valid client callsigns
@@ -80,7 +78,7 @@ make
 sudo make install
 ```
 
-Please note that there is no easy way to uninstall OpenDHT once it's been installed.
+Please note that if you end up building the OpenDHT library, there is no easy way to uninstall it once it's been installed.
 
 ### Download the *mrefd* repository and enter the directory
 
@@ -155,6 +153,10 @@ git clone https://github.com/kc1awv/gomrefdash.git
 ```
 
 This a a dashboard based on the `go` programming language. If you don't have it, you will need to install it first. Follow the instructions on that repo for getting your dashboard up and running.
+
+### An aternative dashboard is also available
+
+Also include in this repo is a simple php-based dashboard that's easy to install any use. This dashboard is the `php-dash` directory and contains a `README.md` file explaining how to configure and install it. There is an example of setting up a simple web server included in the readme.
 
 ## Updating mrefd
 
