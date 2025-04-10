@@ -24,7 +24,6 @@ if (!class_exists('Node')) require_once("./include/class.node.php");
 if (!class_exists('xReflector')) require_once("./include/class.reflector.php");
 if (!class_exists('Station')) require_once("./include/class.station.php");
 if (!class_exists('Peer')) require_once("./include/class.peer.php");
-if (!class_exists('Interlink')) require_once("./include/class.interlink.php");
 
 $Reflector = new xReflector();
 $Reflector->SetFlagFile("./include/country.csv");
