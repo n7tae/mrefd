@@ -349,7 +349,6 @@ void CProtocol::Task(void)
 				// find the regular client & remove it
 				auto clients = g_Reflector.GetClients();
 				auto client = clients->FindClient(ip);
-				bool removed_client = false;
 				if ( client != nullptr )
 				{
 					// ack disconnect packet
@@ -357,7 +356,6 @@ void CProtocol::Task(void)
 					Send(pack.GetCData(), 4, ip);
 					// and remove it
 					clients->RemoveClient(client);
-					removed_client = true;
 				}
 				g_Reflector.ReleaseClients();
 			}
@@ -655,7 +653,6 @@ void CProtocol::HandleKeepalives(void)
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	std::shared_ptr<CClient> client;
-	bool removed_client = false;
 	while ( nullptr != (client = clients->FindNextClient(it)) )
 	{
 		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
@@ -690,7 +687,6 @@ void CProtocol::HandleKeepalives(void)
 				// remove it
 				std::cout << "Client " << client->GetCallsign() << " keepalive timeout" << std::endl;
 				clients->RemoveClient(client);
-				removed_client = true;
 			}
 			g_Reflector.ReleasePeers();
 		}

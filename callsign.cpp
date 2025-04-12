@@ -43,7 +43,7 @@ void CCallsign::CSIn(const std::string &callsign)
 	memset(cs, 0, sizeof(cs));
 	if (0 == callsign.compare("@ALL"))
 	{
-		strncpy(cs, "@ALL", 4);
+		strncpy(cs, "@ALL", sizeof(cs));
 		coded = 0xffffffffffffu;
 		return;
 	}
@@ -86,9 +86,9 @@ void CCallsign::CodeIn(const uint8_t *in)
 		coded = (coded << 8) | in[i];
 	if (coded > 0xee6b27ffffffu) {
 		if (0xffffffffffffu == coded)
-			strncpy(cs, "@ALL", 4);
+			strncpy(cs, "@ALL", sizeof(cs));
 		else
-			strncpy(cs, "uncodable", 9);
+			strncpy(cs, "uncodable", sizeof(cs));
 		return;
 	}
 	auto c = coded;

@@ -47,7 +47,6 @@ bool CBWSet::LoadFromFile(const char *filename)
 {
 	bool ok = false;
 	char sz[256];
-	char szStar[2] = "*";
 
 	// and load
 	std::ifstream file (filename);

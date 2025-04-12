@@ -23,6 +23,7 @@
 #include <regex>
 #include <sys/stat.h>
 #include <csignal>
+#include <thread>
 
 #include "reflector.h"
 #include "configure.h"

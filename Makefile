@@ -28,7 +28,7 @@ else
 CPORLN = cp -f
 endif
 
-CFLAGS += -c -W -std=c++17 -MMD -c
+CFLAGS += -c -Wall -Wextra -Werror -std=c++17 -MMD -c
 LDFLAGS=-pthread
 
 ifeq ($(DEBUG), true)

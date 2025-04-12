@@ -118,7 +118,7 @@ bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, char *module
 	return ok;
 }
 
-bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &ip) const
+bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &/*ip*/) const
 {
 	return IsNodeListedOk(callsign);
 }

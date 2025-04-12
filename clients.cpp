@@ -79,7 +79,6 @@ void CClients::AddClient(std::shared_ptr<CClient> client)
 void CClients::RemoveClient(std::shared_ptr<CClient> client)
 {
 	// look for the client
-	bool found = false;
 	for ( auto it=begin(); it!=end(); it++ )
 	{
 		// compare object pointers

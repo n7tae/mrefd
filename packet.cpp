@@ -26,7 +26,7 @@ static const CCRC CRC;
 
 CPacket::CPacket()
 {
-	memset(data, MAX_PACKET_SIZE + 1, 0u);
+	memset(data, 0, MAX_PACKET_SIZE + 1);
 	size = 0;
 }
 
