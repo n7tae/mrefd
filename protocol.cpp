@@ -185,7 +185,7 @@ void CProtocol::Task(void)
 					else if (pack.IsStreamPacket())
 					{
 						// this voicestream is blocked, so
-						if (pack.GetFrameNumber() & 0x8000f)
+						if (pack.GetFrameNumber() & 0x8000u)
 						{
 							// when the stream closes, log it.
 							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
