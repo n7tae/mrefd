@@ -178,9 +178,15 @@ void CProtocol::Task(void)
 					if (g_GateKeeper.MayTransmit(src, ip))
 					{
 						// might open a new stream if it's the first packet
-						// the packet might be disabled (size set to zero) if there's a problem
+						// if there is a problem, return false
 						if (OnPacketIn(pack, client))
-							pack.Disable();
+						{
+							SendToAllClients(pack, client, mod);
+							if (pack.IsLastPacket()) // always returns false for PM packet
+							{
+								CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
+							}
+						}				
 					}
 					else if (pack.IsStreamPacket())
 					{
@@ -190,33 +196,13 @@ void CProtocol::Task(void)
 							// when the stream closes, log it.
 							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
 						}
-						// disable it
-						pack.Disable();
 					}
 					else
 					{
 						// here is a blocked PM packet
 						std::cout << "Blocked Packet from " << src <<  " at " << ip << std::endl;
-						pack.Disable();
 					}
 				}
-				else
-				{
-					pack.Disable();
-				}
-			}
-			else
-			{
-				pack.Disable();
-			}
-		}
-		// if there's a packet, send it out to everyone
-		if (pack.GetSize())
-		{
-			SendToAllClients(pack, mod);
-			if (pack.IsLastPacket()) // always returns false for PM packet
-			{
-				CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
 			}
 		}
 		break;
@@ -438,8 +424,6 @@ CPacketStream *CProtocol::GetStream(CPacket &packet, const std::shared_ptr<CClie
 		const CCallsign src(packet.GetCSrcAddress());
 		std::cout << "Bad incoming packet on module '" << mod << "' to " << dst.GetCS() << " from " << src.GetCS() << std::endl;
 		#endif
-		// this packet is bogus. deactivate it!
-		packet.Disable();
 		return nullptr;
 	}
 	if (pit->second->IsOpen())
@@ -602,7 +586,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t po
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendToAllClients(CPacket &packet, const char mod)
+void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient> &txclient, const char mod)
 {
 	#ifdef DEBUG
 	if (not packet.IsStreamPacket())
@@ -620,7 +604,7 @@ void CProtocol::SendToAllClients(CPacket &packet, const char mod)
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
 		// is he not TXing?
-		if (not client->IsTransmitting())
+		if (client != txclient)
 		{
 			const auto cs = client->GetCallsign();
 
@@ -823,7 +807,7 @@ void CProtocol::HandlePeerLinks(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // streams helpers
 
-// returns true if the was a problem and the packet should be disabled;
+// returns true if the packet is ready for distribution
 bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> client)
 {
 	// if the packet dst looks like an M17 reflector, change the dst to @ALL
@@ -851,7 +835,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		if ( client->IsListenOnly())
 		{
 			// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-			return true;
+			return false;
 		}
 		else
 		{
@@ -859,7 +843,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			stream = OpenStream(packet, client);
 			if ( nullptr == stream )
 			{
-				return true;
+				return false;
 			}
 			else
 			{
@@ -871,7 +855,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			}
 		}
 	}
-	return false;
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

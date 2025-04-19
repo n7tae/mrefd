@@ -66,7 +66,7 @@ public:
 
 protected:
 	// queue helper
-	void SendToAllClients(CPacket &, const char);
+	void SendToAllClients(CPacket &, const std::shared_ptr<CClient> &, const char);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
