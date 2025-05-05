@@ -355,7 +355,7 @@ bool CConfigure::ReadData(const std::string &path)
 				// there's an external address
 				if (std::regex_match(data.ipv4extaddr, IPv4RegEx))
 				{
-					std::cout << "IPv4 Bind='" << data.ipv4bindaddr << "; External='" << data.ipv4extaddr << "'" << std::endl;
+					std::cout << "IPv4 Bind='" << data.ipv4bindaddr << "'; External='" << data.ipv4extaddr << "'" << std::endl;
 				}
 				else
 				{
@@ -413,7 +413,7 @@ bool CConfigure::ReadData(const std::string &path)
 				// there's an external address
 				if (std::regex_match(data.ipv6extaddr, IPv6RegEx))
 				{
-					std::cout << "IPv6 Bind='" << data.ipv6bindaddr << "; External='" << data.ipv6extaddr << "'" << std::endl;
+					std::cout << "IPv6 Bind='" << data.ipv6bindaddr << "'; External='" << data.ipv6extaddr << "'" << std::endl;
 				}
 				else
 				{
