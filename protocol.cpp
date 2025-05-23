@@ -8,12 +8,12 @@
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
 //
-//    mrefd is free software: you can redistribute it and/or modify
+//    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    mrefd is distributed in the hope that it will be useful,
+//    This program is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -440,11 +440,28 @@ CPacketStream *CProtocol::GetStream(CPacket &packet, const std::shared_ptr<CClie
 
 void CProtocol::CheckStreamsTimeout(void)
 {
-	for (auto &pit : m_streamMap)
+	// check the packetstreams for each module
+	for (auto &it : m_streamMap)
 	{
 		// time out ?
-		if (pit.second->IsExpired())
-			CloseStream(pit.first);
+		if (it.second->IsExpired())
+			CloseStream(it.first);
+	}
+
+	// check each item in the parrot map
+	for (auto pit = parrotMap.begin(); pit != parrotMap.end();)
+	{
+		if (pit->second->IsDone())
+		{
+			pit->second.reset();        // destroy the parrot object
+			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
+		}
+		else if (pit->second->IsExpired())
+		{
+			if (not pit->second->IsPlaying())
+				pit->second->Play();
+			pit++;
+		}
 	}
 }
 
@@ -603,8 +620,8 @@ void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient>
 	auto it = clients->begin();
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
-		// is he not TXing?
-		if (client != txclient)
+		// he not TXing and he is not doing a parrot
+		if ((client != txclient) and (parrotMap.end() == parrotMap.find(client)))
 		{
 			const auto cs = client->GetCallsign();
 
@@ -813,7 +830,8 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 	// if the packet dst looks like an M17 reflector, change the dst to @ALL
 	const auto relayIsSet = packet.IsRelaySet();
 	CCallsign dst(packet.GetCDstAddress());
-	if (0 == dst.GetCS(4).compare("M17-"))
+	auto cs = dst.GetCS();
+	if (0 == cs.compare(0, 4, "M17-"))
 	{
 		packet.ClearRelay();
 		dst.CSIn("@ALL");
@@ -821,6 +839,30 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		packet.CalcCRC();
 		if (relayIsSet)
 			packet.SetRelay();
+	}
+	else if (0 == cs.compare("PARROT"))
+	{
+		auto item = parrotMap.find(client);
+		if (parrotMap.end() == item)
+		{
+			const auto ft = packet.GetFrameType();
+			if (not packet.IsLastPacket() and ((ft & 0x1du) == 0x5u))
+			{
+				// it is not the last packet and it is a stream packet and it is not enrypted
+				parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client->GetIp(), (ft & 0x2u) ? false : true);
+				parrotMap[client]->Add(packet.GetCVoice());
+			}
+		}
+		else
+		{
+			if (not item->second->IsPlaying())
+			{
+				item->second->Add(packet.GetCVoice());
+				if (packet.IsLastPacket())
+					item->second->Play();
+			}
+		}
+		return false;
 	}
 
 	auto stream = GetStream(packet, client);

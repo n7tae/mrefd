@@ -3,12 +3,12 @@
 //
 // ----------------------------------------------------------------------------
 //
-//    m17ref is free software: you can redistribute it and/or modify
+//    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    m17ref is distributed in the hope that it will be useful,
+//    This program is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -35,18 +35,24 @@ public:
 	const uint8_t *GetCDstAddress() const;
 	const uint8_t *GetCSrcAddress() const;
 	uint8_t *GetDstAddress();
+	uint8_t *GetSrcAddress();
 	uint16_t GetStreamId() const;
+	void SetStreamId(uint16_t sid);
 	uint16_t GetFrameType() const;
+	void SetFrameType(uint16_t ft);
 	void SetRelay();
 	void ClearRelay();
 	bool IsRelaySet() const;
 	uint16_t GetFrameNumber() const;
+	void SetFrameNumber(uint16_t fn);
 	bool IsStreamPacket() const { return isstream; }
 	bool IsLastPacket() const;
 	void CalcCRC();
 	uint8_t *GetData() { return data; }
 	const uint8_t *GetCData() const { return data; }
 	size_t GetSize() const { return size; }
+	uint8_t *GetVoice();
+	const uint8_t *GetCVoice() const;
 
 private:
 	bool isstream;

@@ -12,7 +12,7 @@ sudo apt update ; sudo apt install -y lighttpd php php-fpm
 ```
 
 Once the necessary packages are installed, issue the following commands, taking note that you will need to modify the ln command to point to the location that you have
-cloned mrefd. /opt/mrefd is used in the example, so be sure to update this to the correct location of your mrefd installation.
+cloned mrefd. /opt/This program is used in the example, so be sure to update this to the correct location of your mrefd installation.
 
 ```bash
 sudo rm -rf /var/www/html

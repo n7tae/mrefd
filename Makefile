@@ -49,7 +49,7 @@ ifeq ("$(OS)","Windows_NT")
 CFLAGS += -D_GNU_SOURCE
 endif
 
-SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.cpp gatekeeper.cpp ifile.cpp ifileitem.cpp ip.cpp packet.cpp packetstream.cpp peer.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
+SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.cpp gatekeeper.cpp ifile.cpp ifileitem.cpp ip.cpp packet.cpp packetstream.cpp parrot.cpp peer.cpp peers.cpp protocol.cpp reflector.cpp udpsocket.cpp user.cpp users.cpp version.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)

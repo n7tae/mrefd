@@ -9,12 +9,12 @@
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
 //
-//    mrefd is free software: you can redistribute it and/or modify
+//    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
 //
-//    mrefd is distributed in the hope that it will be useful,
+//    This program is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
@@ -34,8 +34,8 @@
 #include "udpsocket.h"
 #include "clients.h"
 #include "packet.h"
+#include "parrot.h"
 #include "base.h"
-#include "crc.h"
 
 
 using SInterConnect = struct __attribute__((__packed__)) interconnect_tag {
@@ -71,6 +71,7 @@ protected:
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
+	void CheckParrots(void);
 
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
@@ -139,5 +140,5 @@ protected:
 
 private:
 	std::regex clientRegEx, peerRegEx, lstnRegEx;
-	CCRC crc;
+	std::unordered_map<std::shared_ptr<CClient>, std::unique_ptr<CParrot>> parrotMap;
 };

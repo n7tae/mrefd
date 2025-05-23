@@ -1,8 +1,7 @@
-//  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
+//
 //  Copyright © 2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
-//    This file is part of mrefd.
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -18,41 +17,22 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-#include "packetstream.h"
+#pragma once
 
-CPacketStream::CPacketStream()
+#include <random>
+#include <chrono>
+#include <cstdint>
+
+class CNewStreamID
 {
-	m_bOpen = false;
-	m_uiStreamId = 0;
-	m_OwnerClient = nullptr;
-}
+public:
+	CNewStreamID() { srandom(std::chrono::system_clock::now().time_since_epoch().count()); }
 
-bool CPacketStream::OpenPacketStream(const CPacket &packet, std::shared_ptr<CClient>client)
-{
-	bool ok = false;
-
-	// not already open?
-	if ( !m_bOpen )
+	uint16_t Make()
 	{
-		// update status
-		m_bOpen = true;
-		m_uiStreamId = packet.GetStreamId();
-		m_OwnerClient = client;
-		m_LastPacketTime.Start();
-		ok = true;
+		uint16_t rv = 0;
+		while (0 == rv)
+			rv = 0xffffU & random();
+		return rv;
 	}
-	return ok;
-}
-
-void CPacketStream::ClosePacketStream(void)
-{
-	// update status
-	m_bOpen = false;
-	m_uiStreamId = 0;
-	m_OwnerClient = nullptr;
-}
-
-const CIp &CPacketStream::GetOwnerIp(void)
-{
-	return m_OwnerClient->GetIp();
-}
+};
