@@ -10,14 +10,18 @@ The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be con
 
 Encrypted voice streams will pass through an *mrefd* channel, but **only** if that channel configured for it.
 
-*mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a four-part document on the DHT network. The four parts:
+*mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a two-part document on the DHT network. The two parts:
 1. Configuration - Connecting clients can use this to know how to connect.
 2. Peers - Other mrefd reflectors that are interlinked is in this part.
-3. Clients - Any node listing to any configured module is in this part. This includes simple clients, listen-only clients, and interlinked reflector modules.
-4. Last heard users - A limited list of last heard users is in this part.
-Any node on the network can read an mrefd document. The key to the *mrefd* document is the reflector's callsign. either the entire document or any part of the document may be retrieved.
+Either the entire document or a single part of the document may be retrieved.
 
 Only systemd-based operating systems are supported. Debian or Ubuntu is recommended. If you want to install this on a non-systemd based OS, you are on your own. This repository is designed so that you don't have to modify any file in the repository when you build your system. Any file you need to modify to properly configure your reflector will be a file you copy from you locally cloned repo. This makes it easier to update the source code when this repository is updated. Follow the instructions below to build your M17 reflector.
+
+## Parroting
+
+Once a client connects to a module, that client can send a parrot voice stream to reflector that will be echoed back to that client. To perform a parrot make sure your client is connected to any module, set the DST callsign to `PARROT`, then key up and send an up to 10 second voice stream to the reflector. Anything past 10 seconds (250 M17 Stream Mode packets) will be ignored. Try something like "This is (your-callsign) testing parrot."
+
+When you stop transmitting, the voice data will be returned to your client. This returned Stream Mode packets will have a BROADCAST destination address but will only be sent to your client. And the source callsign will not be changed for the returned stream. While you are transmitting and receiving your PARROT stream, you won't hear regular traffic on the module that might be taking place at the same time. The reflector will begin sending the received stream back to your client about 40 milliseconds after it received your last packet. Your transmission will timeout if a Stream Mode packet has not been received for 1.6 seconds since the last packet was received. Whatever has been received up to that point will be sent back to your client after the timeout has occurred.
 
 ## A few words about valid client callsigns
 
@@ -154,7 +158,7 @@ git clone https://github.com/kc1awv/gomrefdash.git
 
 This a a dashboard based on the `go` programming language. If you don't have it, you will need to install it first. Follow the instructions on that repo for getting your dashboard up and running.
 
-### An aternative dashboard is also available
+### An alternative dashboard is also available
 
 Also include in this repo is a simple php-based dashboard that's easy to install any use. This dashboard is the `php-dash` directory and contains a `README.md` file explaining how to configure and install it. There is an example of setting up a simple web server included in the readme.
 
