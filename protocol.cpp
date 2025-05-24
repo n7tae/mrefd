@@ -453,13 +453,17 @@ void CProtocol::CheckStreamsTimeout(void)
 	{
 		if (pit->second->IsDone())
 		{
+			std::cout << pit->second->GetSize() << " packet parrot stream from " << pit->second->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
 			pit->second.reset();        // destroy the parrot object
 			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
 		}
 		else if (pit->second->IsExpired())
 		{
 			if (not pit->second->IsPlaying())
+			{
+				std::cout << "Parrot stream from " << pit->second->GetSRC() << " timed out! Playing..." << std::endl;
 				pit->second->Play();
+			}
 			pit++;
 		}
 	}
@@ -846,11 +850,20 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		if (parrotMap.end() == item)
 		{
 			const auto ft = packet.GetFrameType();
-			if (not packet.IsLastPacket() and ((ft & 0x1du) == 0x5u))
+			if (not packet.IsLastPacket())
 			{
-				// it is not the last packet and it is a stream packet and it is not enrypted
-				parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client->GetIp(), (ft & 0x2u) ? false : true);
-				parrotMap[client]->Add(packet.GetCVoice());
+				const CCallsign src(packet.GetCSrcAddress());
+				if ((ft & 0x1du) == 0x5u)
+				{
+					// it is not the last packet and it is a stream packet and it is not enrypted
+					std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
+					parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client->GetIp(), (ft & 0x2u) ? false : true);
+					parrotMap[client]->Add(packet.GetCVoice());
+				}
+				else
+				{
+					std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " was rejected because it was entrypted" << std::endl;
+				}
 			}
 		}
 		else
@@ -859,7 +872,10 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			{
 				item->second->Add(packet.GetCVoice());
 				if (packet.IsLastPacket())
+				{
+					std::cout << "Parrot stream 0x" << std::hex << packet.GetStreamId() << std::dec << " closed, playing..." << std::endl;
 					item->second->Play();
+				}
 			}
 		}
 		return false;

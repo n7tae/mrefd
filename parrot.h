@@ -37,6 +37,8 @@ public:
 	bool IsPlaying() const { return fut.valid(); }
 	bool IsDone();
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
+	size_t GetSize() const { return size; }
+	const CCallsign &GetSRC() const { return src; }
 
 private:
 	const CCallsign src;
