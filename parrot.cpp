@@ -54,17 +54,15 @@ void CParrot::playThread()
 	auto clock = std::chrono::steady_clock::now();
 	CUdpSocket sock;
 	const auto size = data.size();
-	for (size_t fn=0; fn<size; fn++)
+	for (size_t n=0; n<size; n++)
 	{
-		memcpy(pack.GetVoice(), data[fn].data(), is3200 ? 16 : 8);
-		if ((size - fn) == 1)
-			fn |= 0x8000u;
-		pack.SetFrameNumber(uint8_t(fn));
+		memcpy(pack.GetVoice(), data[n].data(), is3200 ? 16 : 8);
+		pack.SetFrameNumber((size-n == 1) ? 0x8000u + n : n);
 		pack.CalcCRC();
 		clock = clock + std::chrono::milliseconds(40);
 		std::this_thread::sleep_until(clock);
 		sock.Send(pack.GetCData(), pack.GetSize(), ip);
-		data[fn].clear();
+		data[n].clear();
 	}
 	data.clear();
 	state = EParrotState::done;
