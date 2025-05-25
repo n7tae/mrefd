@@ -29,12 +29,12 @@ static CNewStreamID NewSID;
 
 void CParrot::Add(const uint8_t *voice)
 {
-	if (size < 250u)
+	if (pos < 250u)
 	{
-		size_t size = is3200 ? 16 : 8;
-		data[size].resize(size);
-		memcpy(data[size].data(), voice, size);
-		size++;
+		size_t length = is3200 ? 16 : 8;
+		data[pos].resize(length);
+		memcpy(data[pos].data(), voice, length);
+		pos++;
 	}
 	lastHeard.Start();
 }
@@ -54,10 +54,10 @@ void CParrot::playThread()
 	pack.SetFrameType(is3200 ? 0x5u : 0x7u);
 	auto clock = std::chrono::steady_clock::now();
 	CUdpSocket sock;
-	for (size_t fn=0; fn<size; fn++)
+	for (size_t fn=0; fn<pos; fn++)
 	{
 		memcpy(pack.GetVoice(), data[fn].data(), is3200 ? 16 : 8);
-		if (size - fn == 1)
+		if ((pos - fn) == 1)
 			fn |= 0x8000u;
 		pack.SetFrameNumber(uint8_t(fn));
 		pack.CalcCRC();

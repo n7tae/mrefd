@@ -31,13 +31,13 @@
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, const CIp &rip, bool isvoiceonly) : src(src_addr), ip(rip), is3200(isvoiceonly), isDone(false), size(0u) {}
+	CParrot(const uint8_t *src_addr, const CIp &rip, bool isvoiceonly) : src(src_addr), ip(rip), is3200(isvoiceonly), isDone(false), pos(0u) {}
 	void Add(const uint8_t *v);
 	void Play();
 	bool IsPlaying() const { return fut.valid(); }
 	bool IsDone();
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
-	size_t GetSize() const { return size; }
+	size_t GetSize() const { return pos; }
 	const CCallsign &GetSRC() const { return src; }
 
 private:
@@ -46,7 +46,7 @@ private:
 	std::vector<std::vector<uint8_t>> data;
 	const bool is3200;
 	std::atomic_bool isDone;
-	size_t size;
+	size_t pos;
 	std::future<void> fut;
 	CTimer lastHeard;
 
