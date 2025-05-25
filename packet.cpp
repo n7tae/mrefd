@@ -66,8 +66,8 @@ void CPacket::SetStreamId(uint16_t sid)
 {
 	if (isstream)
 	{
-		data[4] = (sid >> 8) & 0xffu;
-		data[5] = sid & 0xffu;
+		data[4] = 0xffu & (sid >> 8);
+		data[5] = 0xffu & sid;
 	}
 }
 
@@ -83,8 +83,8 @@ uint16_t CPacket::GetFrameType() const
 void CPacket::SetFrameType(uint16_t ft)
 {
 	int offset = isstream ? 18 : 16;
-	data[offset] = (ft >> 8) & 0xffu;
-	data[offset+1] = ft & 0xffu;
+	data[offset]   = 0xffu & (ft >> 8);
+	data[offset+1] = 0xffu & ft;
 }
 
 void CPacket::SetRelay()
@@ -117,8 +117,8 @@ void CPacket::SetFrameNumber(uint16_t fn)
 {
 	if (isstream)
 	{
-		data[34] = (fn >> 8) & 0xffu;
-		data[35] = fn & 0xffu;
+		data[34] = 0xffu & (fn >> 8);
+		data[35] = 0xffu & fn;
 	}
 }
 
@@ -134,18 +134,18 @@ void CPacket::CalcCRC()
 	if (isstream)
 	{
 		auto crc = CRC.CalcCRC(data, 52);
-		data[52] = uint8_t(crc >> 8);
-		data[53] = uint8_t(crc & 0xffu);
+		data[52] = 0xffu & (crc >> 8);
+		data[53] = 0xffu & crc;
 	}
 	else
 	{	// set the CRC for the LSF
 		auto crc = CRC.CalcCRC(data+4, 28);
-		data[32] = uint8_t(crc >> 8);
-		data[33] = uint8_t(crc & 0xffu);
+		data[32] = 0xffu & (crc >> 8);
+		data[33] = 0xffu & crc;
 		// now for the payload
 		crc = CRC.CalcCRC(data+34, size-36);
-		data[size-2] = uint8_t(crc >> 8);
-		data[size-1] = uint8_t(crc & 0xffu);
+		data[size-2] = 0xffu & (crc >> 8);
+		data[size-1] = 0xffu & crc;
 	}
 }
 
