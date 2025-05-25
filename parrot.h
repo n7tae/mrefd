@@ -38,7 +38,7 @@ public:
 	void Play();
 	EParrotState GetState() const { return state; }
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
-	size_t GetSize() const { return data.size(); }
+	size_t GetSize() const { return size; }
 	const CCallsign &GetSRC() const { return src; }
 	void Quit() { if (fut.valid()) fut.get(); }
 
