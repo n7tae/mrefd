@@ -53,7 +53,7 @@ void CParrot::playThread()
 	pack.SetFrameType(is3200 ? 0x5u : 0x7u);
 	auto clock = std::chrono::steady_clock::now();
 	CUdpSocket sock;
-	const auto size = data.size();
+	size = data.size();
 	for (size_t n=0; n<size; n++)
 	{
 		memcpy(pack.GetVoice(), data[n].data(), is3200 ? 16 : 8);

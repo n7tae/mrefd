@@ -50,6 +50,7 @@ private:
 	std::atomic<EParrotState> state;
 	std::future<void> fut;
 	CTimer lastHeard;
+	size_t size;
 
 	void playThread();
 };
