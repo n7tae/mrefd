@@ -467,6 +467,8 @@ void CProtocol::CheckStreamsTimeout(void)
 			pit->second.reset();        // destroy the parrot object
 			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
 			break;
+		default:
+			break;
 		}
 	}
 }
