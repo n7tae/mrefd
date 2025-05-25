@@ -988,14 +988,15 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 
 bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 {
-	auto buf = packet.GetData();
+	auto buf = packet.GetCData();
 	if (memcmp(buf, "M17", 3))
 		return false;
-	if ((' ' == char(buf[3]) or '!' == char(buf[3])) and 54u == size and (0x01u == (0x01u & buf[19])))
+	auto uc = buf[3];
+	if (((' ' == char(uc)) or ('!' == char(uc))) and (54u == size) and (0x1u == (0x1u & buf[19])))
 	{
 		packet.Initialize(size, true);
 	}
-	else if (('P' == char(buf[3]) or 'Q' == char(buf[3])) and 37u < size and size < 840 and (0x00u == (0x01u & buf[17])))
+	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size < 840u)) and (0x0u == (0x01u & buf[17])))
 	{
 		packet.Initialize(size, false);
 	}
@@ -1003,11 +1004,12 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	{
 		return false;
 	}
+	*(packet.GetData()+3) = uc;
 	// check validity of packet
 	const CCallsign src(packet.GetCSrcAddress());
 	if (std::regex_match(src.GetCS(), clientRegEx))
 	{	// looks like a valid source
-		if (packet.IsStreamPacket() and 0x18U & packet.GetFrameType())
+		if (packet.IsStreamPacket() and (0x18u & packet.GetFrameType()))
 		{	// looks like this packet is encrypted
 			if (g_CFG.IsEncyrptionAllowed(mod))
 			{
