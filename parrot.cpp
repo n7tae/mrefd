@@ -44,6 +44,7 @@ void CParrot::Play()
 
 void CParrot::playThread()
 {
+	state = EParrotState::play;
 	CPacket pack;
 	pack.Initialize(54u, true);
 	pack.SetStreamId(NewSID.Make());
@@ -66,15 +67,5 @@ void CParrot::playThread()
 		data[fn].clear();
 	}
 	data.clear();
-	isDone = true;
-}
-
-bool CParrot::IsDone()
-{
-	if (isDone)
-	{
-		if (fut.valid())
-			fut.get();
-	}
-	return isDone;
+	state = EParrotState::done;
 }

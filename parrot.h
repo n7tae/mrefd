@@ -28,24 +28,26 @@
 #include "ip.h"
 #include "timer.h"
 
+enum class EParrotState { record, play, done };
+
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, const CIp &rip, bool isvoiceonly) : src(src_addr), ip(rip), is3200(isvoiceonly), isDone(false) {}
+	CParrot(const uint8_t *src_addr, const CIp &rip, bool isvoiceonly) : src(src_addr), ip(rip), is3200(isvoiceonly), state(EParrotState::record) {}
 	void Add(const uint8_t *v);
 	void Play();
-	bool IsPlaying() const { return fut.valid(); }
-	bool IsDone();
+	EParrotState GetState() const { return state; }
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
 	size_t GetSize() const { return data.size(); }
 	const CCallsign &GetSRC() const { return src; }
+	void Quit() { if (fut.valid()) fut.get(); }
 
 private:
 	const CCallsign src;
 	const CIp &ip;
 	std::vector<std::vector<uint8_t>> data;
 	const bool is3200;
-	std::atomic_bool isDone;
+	std::atomic<EParrotState> state;
 	std::future<void> fut;
 	CTimer lastHeard;
 

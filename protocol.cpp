@@ -451,20 +451,22 @@ void CProtocol::CheckStreamsTimeout(void)
 	// check each item in the parrot map
 	for (auto pit = parrotMap.begin(); pit != parrotMap.end();)
 	{
-		if (pit->second->IsDone())
+		switch (pit->second->GetState())
 		{
-			std::cout << pit->second->GetSize() << " packet parrot stream from " << pit->second->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
-			pit->second.reset();        // destroy the parrot object
-			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
-		}
-		else if (pit->second->IsExpired())
-		{
-			if (not pit->second->IsPlaying())
+		case EParrotState::record:
+			if (pit->second->IsExpired())
 			{
 				std::cout << "Parrot stream from " << pit->second->GetSRC() << " timed out! Playing..." << std::endl;
 				pit->second->Play();
 			}
 			pit++;
+			break;
+		case EParrotState::done:
+			std::cout << pit->second->GetSize() << " packet parrot stream from " << pit->second->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
+			pit->second->Quit();        // get() the future
+			pit->second.reset();        // destroy the parrot object
+			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
+			break;
 		}
 	}
 }
@@ -868,7 +870,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		}
 		else
 		{
-			if (not item->second->IsPlaying())
+			if (EParrotState::record == item->second->GetState())
 			{
 				item->second->Add(packet.GetCVoice());
 				if (packet.IsLastPacket())
