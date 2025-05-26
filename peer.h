@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 10/12/2016.
 //  Copyright © 2016 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020,2022 Thomas A. Early, N7TAE
+//  Copyright © 2020,2022,2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -46,7 +46,7 @@ class CPeer
 public:
 	// constructors
 	CPeer() = delete;
-	CPeer(const CCallsign cs, const CIp ip, const char *mods, CUdpSocket sock);
+	CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket &sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor

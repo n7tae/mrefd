@@ -1,10 +1,10 @@
 //
-//  version.h
+//  version.cpp
 //  mrefd
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 05/01/2018.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 202-2025 Thomas A. Early N7TAE.
+//  Copyright © 2022-2025 Thomas A. Early N7TAE.
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.

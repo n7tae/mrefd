@@ -37,7 +37,7 @@ extern CConfigure g_CFG;
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructors
 
-CClient::CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket sock, bool lo) : m_Callsign(cs), m_Ip(ip), m_ReflectorModule(mod), m_Sock(sock), m_ListenOnly(lo)
+CClient::CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket &sock, bool lo) : m_Callsign(cs), m_Ip(ip), m_ReflectorModule(mod), m_Sock(sock), m_ListenOnly(lo)
 {
 	m_isTXing = false;
 	m_LastKeepaliveTime.Start();

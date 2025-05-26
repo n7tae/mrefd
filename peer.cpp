@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 10/12/2016.
 //  Copyright © 2016 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2020,2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -33,7 +33,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CPeer::CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket sock) : m_Callsign(cs), m_Ip(ip)
+CPeer::CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip)
 {
 	m_ReflectorModules.assign(mods);
 	m_LastKeepaliveTime.Start();

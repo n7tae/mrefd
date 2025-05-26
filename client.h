@@ -40,7 +40,7 @@ public:
 	// constructors
 	CClient() = delete;
 	CClient(const CClient &) = delete;
-	CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket sock, bool listenOnly = false);
+	CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket &sock, bool listenOnly = false);
 
 	// destructor
 	virtual ~CClient() {};
@@ -75,11 +75,11 @@ public:
 	void WriteXml(std::ofstream &);
 
 protected:
-	const CCallsign  m_Callsign;
-	const CIp        m_Ip;
-	const char       m_ReflectorModule;
-	const CUdpSocket m_Sock;
-	const bool       m_ListenOnly;
+	const CCallsign   m_Callsign;
+	const CIp         m_Ip;
+	const char        m_ReflectorModule;
+	const CUdpSocket &m_Sock;
+	const bool        m_ListenOnly;
 
 	// status
 	bool        m_isTXing;
