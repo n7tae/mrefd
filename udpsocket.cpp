@@ -145,26 +145,7 @@ ssize_t CUdpSocket::ReceiveFrom(uint8_t *Buffer, CIp &ip)
 ////////////////////////////////////////////////////////////////////////////////////////
 // write
 
-void CUdpSocket::Send(const char *Buffer, const CIp &Ip) const
-{
-	sendto(m_fd, Buffer, ::strlen(Buffer), 0, Ip.GetCPointer(), Ip.GetSize());
-}
-
 void CUdpSocket::Send(const uint8_t *Buffer, size_t size, const CIp &Ip) const
 {
 	sendto(m_fd, Buffer, size, 0, Ip.GetCPointer(), Ip.GetSize());
-}
-
-void CUdpSocket::Send(const char *Buffer, const CIp &Ip, uint16_t destport) const
-{
-	CIp temp(Ip);
-	temp.SetPort(destport);
-	sendto(m_fd, Buffer, ::strlen(Buffer), 0, temp.GetCPointer(), temp.GetSize());
-}
-
-void CUdpSocket::Send(const uint8_t *Buffer, size_t size, const CIp &Ip, uint16_t destport) const
-{
-	CIp temp(Ip);
-	temp.SetPort(destport);
-	sendto(m_fd, Buffer, size, 0, temp.GetCPointer(), temp.GetSize());
 }

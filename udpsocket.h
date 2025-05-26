@@ -63,10 +63,7 @@ public:
 	ssize_t ReceiveFrom(uint8_t *, CIp &);
 
 	// write
-	void Send(const char    *,         const CIp &) const;
 	void Send(const uint8_t *, size_t, const CIp &) const;
-	void Send(const char    *,         const CIp &, uint16_t) const;
-	void Send(const uint8_t *, size_t, const CIp &, uint16_t) const;
 
 protected:
 	// data

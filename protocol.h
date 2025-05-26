@@ -109,10 +109,7 @@ protected:
 	ssize_t ReceiveDS(uint8_t *buf, CIp &Ip, int time_ms);
 	ssize_t (CProtocol::*Receive)(uint8_t *buf, CIp &Ip, int time_ms);
 
-	void Send(const char    *buf, const CIp &Ip) const;
 	void Send(const uint8_t *buf, size_t size, const CIp &Ip) const;
-	void Send(const char    *buf, const CIp &Ip, uint16_t port) const;
-	void Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t port) const;
 
 	// socket
 	CUdpSocket m_Socket4;

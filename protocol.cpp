@@ -542,23 +542,7 @@ ssize_t CProtocol::ReceiveDS(uint8_t *buf, CIp &ip, int time_ms)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// dual stack senders
-
-void CProtocol::Send(const char *buf, const CIp &Ip) const
-{
-	switch (Ip.GetFamily())
-	{
-	case AF_INET:
-		m_Socket4.Send(buf, Ip);
-		break;
-	case AF_INET6:
-		m_Socket6.Send(buf, Ip);
-		break;
-	default:
-		std::cerr << "ERROR: wrong family: " << Ip.GetFamily() << std::endl;
-		break;
-	}
-}
+// dual stack sender
 
 void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 {
@@ -572,38 +556,6 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 		break;
 	default:
 		std::cerr << "ERROR: wrong family: " << Ip.GetFamily() << std::endl;
-		break;
-	}
-}
-
-void CProtocol::Send(const char *buf, const CIp &Ip, uint16_t port) const
-{
-	switch (Ip.GetFamily())
-	{
-	case AF_INET:
-		m_Socket4.Send(buf, Ip, port);
-		break;
-	case AF_INET6:
-		m_Socket6.Send(buf, Ip, port);
-		break;
-	default:
-		std::cerr << "ERROR: wrong family: " << Ip.GetFamily() << " on port " << port << std::endl;
-		break;
-	}
-}
-
-void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip, uint16_t port) const
-{
-	switch (Ip.GetFamily())
-	{
-	case AF_INET:
-		m_Socket4.Send(buf, size, Ip, port);
-		break;
-	case AF_INET6:
-		m_Socket6.Send(buf, size, Ip, port);
-		break;
-	default:
-		std::cerr << "ERROR: wrong family: " << Ip.GetFamily() << " on port " << port << std::endl;
 		break;
 	}
 }
