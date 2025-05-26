@@ -240,11 +240,11 @@ void CProtocol::Task(void)
 				{
 					// create the new peer
 					// this also create one client per module
-					std::shared_ptr<CPeer> peer = std::make_shared<CPeer>(cs, ip, mods);
+					if (AF_INET6 == ip.GetFamily())
+						peers->AddPeer(std::make_shared<CPeer>(cs, ip, mods, m_Socket6));
+					else
+						peers->AddPeer(std::make_shared<CPeer>(cs, ip, mods, m_Socket4));
 
-					// append the peer to reflector peer list
-					// this also add all new clients to reflector client list
-					peers->AddPeer(peer);
 					publish = true;
 				}
 				g_Reflector.ReleasePeers();
@@ -277,10 +277,16 @@ void CProtocol::Task(void)
 							EncodeConnectNackPacket(pack.GetData());
 							Send(pack.GetCData(), 4, ip);
 						} else {
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, true));
+							if(AF_INET6 == ip.GetFamily())
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket6, true));
+							else
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket4, true));
 						}
 					} else {
-						g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod));
+						if (AF_INET6 == ip.GetFamily())
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket6));
+						else
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket4));
 					}
 					g_Reflector.ReleaseClients();
 				}
@@ -589,13 +595,13 @@ void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient>
 			{
 				// this client is not a reflector
 				packet.ClearRelay();
-				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+				client->SendPacket(packet);
 			}
 			else if (not relayIsSet)
 			{
 				// this client is a reflector and the packet hasn't yet been relayed
 				packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
-				Send(packet.GetCData(), packet.GetSize(), client->GetIp());
+				client->SendPacket(packet);
 			}
 		}
 	}
@@ -813,7 +819,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 				{
 					// it is not the last packet and it is a stream packet and it is not enrypted
 					std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
-					parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client->GetIp(), (ft & 0x2u) ? false : true);
+					parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client, (ft & 0x2u) ? false : true);
 					parrotMap[client]->Add(packet.GetCVoice());
 				}
 				else

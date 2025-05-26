@@ -33,6 +33,7 @@
 #include "ip.h"
 #include "callsign.h"
 #include "client.h"
+#include "udpsocket.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -44,8 +45,8 @@ class CPeer
 {
 public:
 	// constructors
-	CPeer();
-	CPeer(const CCallsign &, const CIp &, const char *);
+	CPeer() = delete;
+	CPeer(const CCallsign cs, const CIp ip, const char *mods, CUdpSocket sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor

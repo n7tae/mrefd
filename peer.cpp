@@ -33,28 +33,21 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-
-CPeer::CPeer()
+CPeer::CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket sock) : m_Callsign(cs), m_Ip(ip)
 {
-	m_ConnectTime = std::time(nullptr);
-}
-
-CPeer::CPeer(const CCallsign &callsign, const CIp &ip, const char *modules) : CPeer()
-{
-	m_Callsign = callsign;
-	m_Ip = ip;
-	m_ReflectorModules.assign(modules);
+	m_ReflectorModules.assign(mods);
 	m_LastKeepaliveTime.Start();
+	m_ConnectTime = std::time(nullptr);
 
-	std::cout << "Adding M17 peer " << callsign << " module(s) " << modules << std::endl;
+	std::cout << "Adding M17 peer " << cs << " module(s) " << mods << std::endl;
 
 	// and construct the M17 clients
+	CCallsign clientcs(m_Callsign);
 	for (const auto mod : m_ReflectorModules)
 	{
-		CCallsign clientcs(callsign);
 		clientcs.SetModule(mod);
 		// create and append to list
-		m_Clients.push_back(std::make_shared<CClient>(clientcs, ip, mod));
+		m_Clients.push_back(std::make_shared<CClient>(clientcs, ip, mod, sock));
 	}
 }
 

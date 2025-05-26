@@ -61,7 +61,7 @@ void CParrot::playThread()
 		pack.CalcCRC();
 		clock = clock + std::chrono::milliseconds(40);
 		std::this_thread::sleep_until(clock);
-		sock.Send(pack.GetCData(), pack.GetSize(), ip);
+		client->SendPacket(pack);
 		data[n].clear();
 	}
 	data.clear();

@@ -65,7 +65,7 @@ public:
 	// write
 	void Send(const uint8_t *, size_t, const CIp &) const;
 
-protected:
+private:
 	// data
 	int m_fd;
 	CIp m_addr;

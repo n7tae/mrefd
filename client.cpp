@@ -37,26 +37,12 @@ extern CConfigure g_CFG;
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructors
 
-CClient::CClient()
+CClient::CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket sock, bool lo) : m_Callsign(cs), m_Ip(ip), m_ReflectorModule(mod), m_Sock(sock), m_ListenOnly(lo)
 {
-	m_ReflectorModule = ' ';
 	m_isTXing = false;
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 	m_LastHeardTime = std::time(nullptr);
-	m_ListenOnly = false;
-}
-
-CClient::CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly)
-{
-	m_ReflectorModule = reflectorModule;
-	m_Callsign = callsign;
-	m_Ip = ip;
-	m_isTXing = false;
-	m_LastKeepaliveTime.Start();
-	m_ConnectTime = std::time(nullptr);
-	m_LastHeardTime = std::time(nullptr);
-	m_ListenOnly = listenOnly;
 }
 
 
@@ -78,6 +64,14 @@ bool CClient::operator ==(const CClient &client) const
 	       (client.m_Ip == m_Ip) and
 	       (client.m_ReflectorModule == m_ReflectorModule) and
 		   (client.m_Ip.GetPort() == m_Ip.GetPort());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// function
+
+void CClient::SendPacket(const CPacket &pack) const
+{
+	m_Sock.Send(pack.GetCData(), pack.GetSize(), m_Ip);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

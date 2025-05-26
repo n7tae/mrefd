@@ -22,9 +22,11 @@
 
 #pragma once
 
+#include "udpsocket.h"
+#include "callsign.h"
+#include "packet.h"
 #include "timer.h"
 #include "ip.h"
-#include "callsign.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -36,9 +38,9 @@ class CClient
 {
 public:
 	// constructors
-	CClient();
+	CClient() = delete;
 	CClient(const CClient &) = delete;
-	CClient(const CCallsign &callsign, const CIp &ip, char reflectorModule, bool listenOnly = false);
+	CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket sock, bool listenOnly = false);
 
 	// destructor
 	virtual ~CClient() {};
@@ -54,9 +56,6 @@ public:
 	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
 	char GetReflectorModule(void) const      { return m_ReflectorModule; }
 
-	// set
-	void SetReflectorModule(char c)          { m_ReflectorModule = c; }
-
 	// identity
 	const char *GetProtocolName(void) const  { return "M17"; }
 	bool IsNode(void) const                  { return true; }
@@ -70,23 +69,21 @@ public:
 	void ClearTX(void)                       { m_isTXing = false; }
 	void Heard(void)                         { m_LastHeardTime = std::time(nullptr); }
 
+	// function
+	void SendPacket(const CPacket &pack) const;
 	// reporting
 	void WriteXml(std::ofstream &);
 
 protected:
-	// data
-	CCallsign   m_Callsign;
-	CIp         m_Ip;
-
-	// linked to
-	char        m_ReflectorModule;
+	const CCallsign  m_Callsign;
+	const CIp        m_Ip;
+	const char       m_ReflectorModule;
+	const CUdpSocket m_Sock;
+	const bool       m_ListenOnly;
 
 	// status
 	bool        m_isTXing;
 	CTimer		m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;
-
-	// identity
-	bool         m_ListenOnly;
 };

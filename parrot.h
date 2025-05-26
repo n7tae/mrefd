@@ -25,6 +25,7 @@
 #include <future>
 
 #include "callsign.h"
+#include "client.h"
 #include "ip.h"
 #include "timer.h"
 
@@ -33,7 +34,7 @@ enum class EParrotState { record, play, done };
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, const CIp &rip, bool isvoiceonly) : src(src_addr), ip(rip), is3200(isvoiceonly), state(EParrotState::record) {}
+	CParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, bool isvoiceonly) : src(src_addr), client(spc), is3200(isvoiceonly), state(EParrotState::record) {}
 	void Add(const uint8_t *v);
 	void Play();
 	EParrotState GetState() const { return state; }
@@ -44,7 +45,7 @@ public:
 
 private:
 	const CCallsign src;
-	const CIp &ip;
+	std::shared_ptr<CClient> client;
 	std::vector<std::vector<uint8_t>> data;
 	const bool is3200;
 	std::atomic<EParrotState> state;
