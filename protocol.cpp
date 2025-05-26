@@ -953,8 +953,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	auto buf = packet.GetCData();
 	if (memcmp(buf, "M17", 3))
 		return false;
-	auto uc = buf[3];
-	if (((' ' == char(uc)) or ('!' == char(uc))) and (54u == size) and (0x1u == (0x1u & buf[19])))
+	if (((' ' == char(buf[3])) or ('!' == char(buf[3]))) and (54u == size) and (0x1u == (0x1u & buf[19])))
 	{
 		packet.Initialize(size, true);
 	}
@@ -966,7 +965,6 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	{
 		return false;
 	}
-	*(packet.GetData()+3) = uc;
 	// check validity of packet
 	const CCallsign src(packet.GetCSrcAddress());
 	if (std::regex_match(src.GetCS(), clientRegEx))

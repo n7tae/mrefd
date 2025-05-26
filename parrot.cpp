@@ -46,6 +46,7 @@ void CParrot::playThread()
 {
 	state = EParrotState::play;
 	CPacket pack;
+	memcpy(pack.GetData(), "M17 ", 4);
 	pack.Initialize(54u, true);
 	pack.SetStreamId(NewSID.Make());
 	memset(pack.GetDstAddress(), 0xffu, 6);
