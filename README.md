@@ -19,9 +19,13 @@ Only systemd-based operating systems are supported. Debian or Ubuntu is recommen
 
 ## Parroting
 
-Once a client connects to a module, that client can send a parrot voice stream to reflector that will be echoed back to that client. To perform a parrot make sure your client is connected to any module, set the DST callsign to `PARROT`, then key up and send an up to 10 second voice stream to the reflector. Anything past 10 seconds (250 M17 Stream Mode packets) will be ignored. Try something like "This is (your-callsign) testing parrot."
+Once a client connects to a module, that client can send a parrot voice stream to reflector that will be echoed back to that client. To perform a parrot make sure your client is connected to any module, set the DST callsign to `PARROT`, then key up and send an up to 10 second voice stream to the reflector. Anything past 20 seconds (500 M17 Stream Mode packets) will be ignored. Try something like "This is (your-callsign) testing parrot."
 
 When you stop transmitting, the voice data will be returned to your client. This returned Stream Mode packets will have a BROADCAST destination address but will only be sent to your client. And the source callsign will not be changed for the returned stream. While you are transmitting and receiving your PARROT stream, you won't hear regular traffic on the module that might be taking place at the same time. The reflector will begin sending the received stream back to your client about 40 milliseconds after it received your last packet. Your transmission will timeout if a Stream Mode packet has not been received for 1.6 seconds since the last packet was received. Whatever has been received up to that point will be sent back to your client after the timeout has occurred.
+
+Parroting does not work for encrypted streams. If you are digitally signing your stream, the returned stream will not be signed.
+
+Parroting does work in Packet Mode as well, but if your incoming packet doesn't have correctly calculated checksums, or there are inappropriate bits set in the FrameType field, the return packet will be an SMS packet outlining the problems, otherwise it will be identical except that the DST will be set to the BROADCAST address and the LSF checksum will be recalculated.
 
 ## A few words about valid client callsigns
 

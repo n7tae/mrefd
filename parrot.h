@@ -34,24 +34,53 @@ enum class EParrotState { record, play, done };
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, bool isvoiceonly) : src(src_addr), client(spc), is3200(isvoiceonly), state(EParrotState::record) {}
-	void Add(const uint8_t *v);
-	void Play();
+	CParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, uint16_t ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record) {}
+	virtual void Add(const CPacket &pack) = 0;
+	virtual bool IsExpired() const = 0;
+	virtual void Play() = 0;
+	virtual bool IsStream() const = 0;
 	EParrotState GetState() const { return state; }
-	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
-	size_t GetSize() const { return size; }
 	const CCallsign &GetSRC() const { return src; }
 	void Quit() { if (fut.valid()) fut.get(); }
 
-private:
+protected:
 	const CCallsign src;
 	std::shared_ptr<CClient> client;
-	std::vector<std::vector<uint8_t>> data;
-	const bool is3200;
+	const uint16_t frameType;
 	std::atomic<EParrotState> state;
 	std::future<void> fut;
+};
+
+class CStreamParrot : public CParrot
+{
+public:
+	CStreamParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, uint16_t ft) : CParrot(src_addr, spc, ft), is3200(0u == (0x2u & ft)) {}
+	void Add(const CPacket &pack);
+	void Play();
+	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
+	size_t GetSize() const { return size; }
+	bool IsStream() const { return true; }
+
+private:
+	std::vector<std::vector<uint8_t>> data;
+	const bool is3200;
 	CTimer lastHeard;
 	size_t size;
 
 	void playThread();
+};
+
+class CPacketParrot : public CParrot
+{
+public:
+	CPacketParrot(const uint8_t *src_addr, std::shared_ptr<CClient>spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
+	void Add(const CPacket &pack);
+	bool IsExpired() const { return false; }
+	void Play();
+	bool IsStream() const { return false; }
+
+private:
+	CPacket packet;
+
+	void returnPacket();
 };

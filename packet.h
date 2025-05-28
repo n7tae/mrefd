@@ -53,8 +53,11 @@ public:
 	size_t GetSize() const { return size; }
 	uint8_t *GetVoice();
 	const uint8_t *GetCVoice() const;
+	uint16_t GetCRC(bool first = true) const;
 
 private:
+	uint16_t Get16At(size_t pos) const;
+	
 	bool isstream;
 	size_t size;
 	uint8_t data[MAX_PACKET_SIZE+1];

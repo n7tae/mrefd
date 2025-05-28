@@ -182,7 +182,7 @@ void CProtocol::Task(void)
 						if (OnPacketIn(pack, client))
 						{
 							SendToAllClients(pack, client, mod);
-							if (pack.IsLastPacket()) // always returns false for PM packet
+							if (pack.IsStreamPacket() and pack.IsLastPacket())
 							{
 								CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
 							}
@@ -468,7 +468,15 @@ void CProtocol::CheckStreamsTimeout(void)
 			pit++;
 			break;
 		case EParrotState::done:
-			std::cout << pit->second->GetSize() << " packet parrot stream from " << pit->second->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
+			if (pit->second->IsStream())
+			{
+				auto psp = static_cast<CStreamParrot *>(pit->second.get());
+				std::cout << psp->GetSize() << " packet parrot stream from " << psp->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
+			}
+			else
+			{
+				std::cout << "Parrot packet from " << pit->second->GetSRC() << " played back to " << pit->first->GetCallsign() << " at " << pit->first->GetIp() << std::endl;
+			}
 			pit->second->Quit();        // get() the future
 			pit->second.reset();        // destroy the parrot object
 			pit = parrotMap.erase(pit); // remove the map std::pair, incrementing the pointer
@@ -812,27 +820,36 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		if (parrotMap.end() == item)
 		{
 			const auto ft = packet.GetFrameType();
-			if (not packet.IsLastPacket())
+			if (packet.IsStreamPacket())
+			{
+				if (not packet.IsLastPacket())
+				{
+					const CCallsign src(packet.GetCSrcAddress());
+					if ((ft & 0x1du) == 0x5u)
+					{
+						// it is not the last packet and it is a stream packet and it is not enrypted
+						std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
+						parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, ft);
+						parrotMap[client]->Add(packet);
+					}
+					else
+					{
+						std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " was rejected because it was entrypted" << std::endl;
+					}
+				}
+			}
+			else
 			{
 				const CCallsign src(packet.GetCSrcAddress());
-				if ((ft & 0x1du) == 0x5u)
-				{
-					// it is not the last packet and it is a stream packet and it is not enrypted
-					std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
-					parrotMap[client] = std::make_unique<CParrot>(packet.GetCSrcAddress(), client, (ft & 0x2u) ? false : true);
-					parrotMap[client]->Add(packet.GetCVoice());
-				}
-				else
-				{
-					std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " was rejected because it was entrypted" << std::endl;
-				}
+				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
+				parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, ft);
 			}
 		}
 		else
 		{
 			if (EParrotState::record == item->second->GetState())
 			{
-				item->second->Add(packet.GetCVoice());
+				item->second->Add(packet);
 				if (packet.IsLastPacket())
 				{
 					std::cout << "Parrot stream 0x" << std::hex << packet.GetStreamId() << std::dec << " closed, playing..." << std::endl;
@@ -957,7 +974,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	{
 		packet.Initialize(size, true);
 	}
-	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size < 840u)) and (0x0u == (0x01u & buf[17])))
+	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size < 840u)) and (0x0u == (0x1u & buf[17])))
 	{
 		packet.Initialize(size, false);
 	}

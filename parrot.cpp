@@ -19,30 +19,33 @@
 
 #include <string.h>
 #include <thread>
+#include <sstream>
 
 #include "packet.h"
 #include "newsid.h"
 #include "parrot.h"
 #include "udpsocket.h"
+#include "crc.h"
 
 static CNewStreamID NewSID;
 
-void CParrot::Add(const uint8_t *voice)
+void CStreamParrot::Add(const CPacket &pack)
 {
-	if (data.size() < 250u)
+	if (data.size() < 500u)
 	{
 		size_t length = is3200 ? 16 : 8;
+		auto voice = pack.GetCVoice();
 		data.emplace_back(voice, voice+length);
 	}
 	lastHeard.Start();
 }
 
-void CParrot::Play()
+void CStreamParrot::Play()
 {
-	fut = std::async(std::launch::async, &CParrot::playThread, this);
+	fut = std::async(std::launch::async, &CStreamParrot::playThread, this);
 }
 
-void CParrot::playThread()
+void CStreamParrot::playThread()
 {
 	state = EParrotState::play;
 	CPacket pack;
@@ -51,7 +54,7 @@ void CParrot::playThread()
 	pack.SetStreamId(NewSID.Make());
 	memset(pack.GetDstAddress(), 0xffu, 6);
 	src.CodeOut(pack.GetSrcAddress());
-	pack.SetFrameType(is3200 ? 0x5u : 0x7u);
+	pack.SetFrameType(frameType);
 	auto clock = std::chrono::steady_clock::now();
 	CUdpSocket sock;
 	size = data.size();
@@ -66,5 +69,57 @@ void CParrot::playThread()
 		data[n].clear();
 	}
 	data.clear();
+	state = EParrotState::done;
+}
+
+void CPacketParrot::Add(const CPacket &pack)
+{
+	packet.Initialize(pack.GetSize(), false);
+	memcpy(packet.GetData(), pack.GetCData(), pack.GetSize());
+}
+
+void CPacketParrot::Play()
+{
+	fut = std::async(std::launch::async, &CPacketParrot::returnPacket, this);
+}
+
+void CPacketParrot::returnPacket()
+{
+	CCRC crc;
+	state = EParrotState::play;
+	const auto crc1 = packet.GetCRC(true);
+	const auto cal1 = crc.CalcCRC(packet.GetCData()+4, 28);
+	const auto crc2 = packet.GetCRC(false);
+	const auto cal2 = crc.CalcCRC(packet.GetCData()+34, packet.GetSize()-36);
+
+	const bool firstcrc = crc1 == cal1;
+	const bool secondcrc = crc2 == cal2;
+
+	memset(packet.GetDstAddress(), 0xffu, 6);
+	if (firstcrc and secondcrc)
+	{
+		packet.CalcCRC();
+		client->SendPacket(packet);
+	}
+	else
+	{
+		std::stringstream ss;
+		ss << std::hex << std::showbase << "There were problems with your packet:" << std::endl;
+		if (not firstcrc)
+			ss << "  The LSF CRC was wrong." << std::endl <<"    You had " << crc1 << " but it should have been " << cal1 << std::endl;
+		if (not secondcrc)
+			ss << "  The Payload CRC was wrong." << std::endl << "    You had " << crc2 << " but it should have been " << cal2 << std::endl;
+		
+		const std::string str = ss.str();
+		const auto l = str.length();
+		packet.SetFrameType(frameType);
+		packet.GetData()[34] = 0x5u; // SMS type
+		memcpy(packet.GetData()+35, str.c_str(), l);
+		size_t tps = 4 + 30 + 3 + l;
+		packet.Initialize(tps, false);
+		packet.CalcCRC();
+		for (; tps < MAX_PACKET_SIZE; tps++) packet.GetData()[tps] = 0u;
+		client->SendPacket(packet);
+	}
 	state = EParrotState::done;
 }

@@ -59,7 +59,7 @@ uint8_t *CPacket::GetSrcAddress()
 // returns the StreamID in host byte order
 uint16_t CPacket::GetStreamId() const
 {
-	return isstream ? 0x100u * data[4] + data[5] : 0u;
+	return isstream ? Get16At(4) : 0u;
 }
 
 void CPacket::SetStreamId(uint16_t sid)
@@ -74,10 +74,8 @@ void CPacket::SetStreamId(uint16_t sid)
 // returns LSD:TYPE in host byte order
 uint16_t CPacket::GetFrameType() const
 {
-	if (isstream)
-		return 0x100u * data[18] + data[19];
+	return Get16At(isstream ? 18 : 16);
 
-	return 0x100u * data[16] + data[17];
 }
 
 void CPacket::SetFrameType(uint16_t ft)
@@ -107,10 +105,7 @@ bool CPacket::IsRelaySet() const
 
 uint16_t CPacket::GetFrameNumber() const
 {
-	if (isstream)
-		return 0x100u * data[34] + data[35];
-	else
-		return 0u;
+	return isstream ? Get16At(34) : 0;
 }
 
 void CPacket::SetFrameNumber(uint16_t fn)
@@ -126,7 +121,7 @@ bool CPacket::IsLastPacket() const
 {
 	if (isstream and size)
 		return 0x8000u == (0x8000u & GetFrameNumber());
-	return false;
+	return true;
 }
 
 void CPacket::CalcCRC()
@@ -159,4 +154,24 @@ uint8_t *CPacket::GetVoice()
 {
 	static uint8_t fake[16];
 	return isstream ? data+36 : fake;
+}
+
+uint16_t CPacket::GetCRC(bool first) const
+{
+	uint16_t rv = 0u;
+	if (isstream)
+		rv = Get16At(52);
+	else
+	{
+		if (first)
+			rv = Get16At(32);
+		else
+			rv = Get16At(size-2);
+	}
+	return rv;
+}
+
+uint16_t CPacket::Get16At(size_t pos) const
+{
+	return 0x100u * data[pos] + data[pos+1];
 }
