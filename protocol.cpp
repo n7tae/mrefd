@@ -842,7 +842,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			{
 				const CCallsign src(packet.GetCSrcAddress());
 				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
-				parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, ft);
+				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, ft);
 			}
 		}
 		else
@@ -974,7 +974,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	{
 		packet.Initialize(size, true);
 	}
-	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size < 840u)) and (0x0u == (0x1u & buf[17])))
+	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
 	{
 		packet.Initialize(size, false);
 	}
