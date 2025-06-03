@@ -95,6 +95,8 @@ void CPacketParrot::returnPacket()
 	const bool firstcrc = crc1 == cal1;
 	const bool secondcrc = crc2 == cal2;
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 	memset(packet.GetDstAddress(), 0xffu, 6);
 	if (firstcrc and secondcrc)
 	{

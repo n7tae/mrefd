@@ -843,6 +843,8 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 				const CCallsign src(packet.GetCSrcAddress());
 				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
 				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, ft);
+				parrotMap[client]->Add(packet);
+				parrotMap[client]->Play();
 			}
 		}
 		else
