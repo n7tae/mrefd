@@ -804,7 +804,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 	// if the packet dst looks like an M17 reflector, change the dst to @ALL
 	const auto relayIsSet = packet.IsRelaySet();
 	CCallsign dst(packet.GetCDstAddress());
-	auto cs = dst.GetCS();
+	const auto cs = dst.GetCS();
 	if (0 == cs.compare(0, 4, "M17-"))
 	{
 		packet.ClearRelay();
@@ -814,7 +814,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		if (relayIsSet)
 			packet.SetRelay();
 	}
-	else if (0 == cs.compare("PARROT"))
+	else if (std::string::npos != cs.find("PARROT"))
 	{
 		auto item = parrotMap.find(client);
 		if (parrotMap.end() == item)
