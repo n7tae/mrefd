@@ -27,63 +27,30 @@
 
 CVersion g_Version(1, 1, 0);	// the global object
 
-CVersion::CVersion(uint32_t v) : version(v) {}
-
-CVersion::CVersion(uint8_t maj, uint8_t min, uint8_t rev) : version(0x10000*maj + 0x100*min + rev) {}
-
-uint32_t CVersion::GetMajor(void) const
+uint8_t CVersion::GetMajor(void) const
 {
-	return version / 0x10000;
+	return maj;
 }
 
-uint32_t CVersion::GetMinor(void) const
+uint8_t CVersion::GetMinor(void) const
 {
-	return version / 0x100 % 0x100;
+	return min;
 }
 
-uint32_t CVersion::GetRevision(void) const
+uint16_t CVersion::GetRevision(void) const
 {
-	return version % 0x100;
+	return rev;
 }
 
-uint32_t CVersion::GetVersion(void)  const
+uint32_t CVersion::GetVersion() const
 {
-	return version;
-}
-
-bool CVersion::operator ==(const CVersion &v) const
-{
-	return v.version == version;
-};
-
-bool CVersion::operator !=(const CVersion &v) const
-{
-	return v.version != version;
-};
-
-bool CVersion::operator >=(const CVersion &v) const
-{
-	return v.version >= version;
-}
-
-bool CVersion::operator <=(const CVersion &v) const
-{
-	return v.version <= version;
-}
-bool CVersion::operator >(const CVersion &v) const
-{
-	return v.version  > version;
-}
-
-bool CVersion::operator <(const CVersion &v) const
-{
-	return v.version  < version;
+	return (maj<<24) | (min<<16) | rev;
 }
 
 // output
 std::ostream &operator <<(std::ostream &os, const CVersion &v)
 {
-	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetRevision();
+	os << v.maj << '.' << v.min << '.' << v.rev;
 #ifndef NO_DHT
 	os << "-dht";
 #endif

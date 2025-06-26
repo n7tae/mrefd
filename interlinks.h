@@ -1,7 +1,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 30/12/2015.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early, N7TAE
+//  Copyright © 2025 Thomas A. Early, N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -23,21 +23,24 @@
 #pragma once
 
 #include <mutex>
+#include <memory>
 #include <unordered_map>
 
-#include "ifileitem.h"
+#include "interlink.h"
+
+using InterlinkMap = std::unordered_map<std::string, std::unique_ptr<CInterlink>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
 
-class CIFileMap
+class CInterlinks
 {
 public:
 	// constructor
-	CIFileMap();
+	CInterlinks();
 
 	// destructor
-	virtual ~CIFileMap() {}
+	~CInterlinks();
 
 	// locks
 	void Lock(void)   const { m_Mutex.lock(); }
@@ -48,32 +51,31 @@ public:
 	bool ReloadFromFile(void);
 	bool NeedReload(void);
 
-#ifndef NO_DHT
-	void Update(const std::string &cs, const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &encryptedmods);
-#endif
+	#ifndef NO_DHT
+	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy);
+	#endif
 
 	// compare
-	bool IsCallsignListed(const CCallsign &, const char) const;
-	bool IsCallsignListed(const CCallsign &, const CIp &ip, const char*) const;
+	bool IsCallsignListed(const std::string &, const std::string &) const;
 
 	// pass-through
-	bool empty() const { return m_InterlinkMap.empty(); }
-	std::unordered_map<std::string, CIFileItem>::iterator begin() { return m_InterlinkMap.begin(); }
-	std::unordered_map<std::string, CIFileItem>::iterator end()   { return m_InterlinkMap.end(); }
-	std::unordered_map<std::string, CIFileItem>::const_iterator cbegin() { return m_InterlinkMap.cbegin(); }
-	std::unordered_map<std::string, CIFileItem>::const_iterator cend()   { return m_InterlinkMap.cend(); }
+	bool empty() const { return m_Imap.empty(); }
+	auto begin() { return m_Imap.begin(); }
+	auto end()   { return m_Imap.end(); }
+	auto cbegin() { return m_Imap.cbegin(); }
+	auto cend()   { return m_Imap.cend(); }
 
-	// find
-	CIFileItem *FindMapItem(const std::string &);
+	const CInterlink *Find(const std::string &) const;
+	void Emplace(const std::string &cs, const std::string &mods);
+	void Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 
 protected:
 	bool GetLastModTime(time_t *);
-	char *TrimWhiteSpaces(char *);
-	char *ToUpper(char *str);
+	void ToUpper(std::string &s);
 
 	// data
 	mutable std::mutex m_Mutex;
 	const char *m_Filename;
 	time_t m_LastModTime;
-	std::unordered_map<std::string, CIFileItem> m_InterlinkMap;
+	InterlinkMap m_Imap;
 };

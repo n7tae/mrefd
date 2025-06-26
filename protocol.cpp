@@ -28,12 +28,12 @@
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
-#include "ifile.h"
+#include "interlinks.h"
 
 extern CConfigure g_CFG;
 extern CGateKeeper g_GateKeeper;
 extern CReflector g_Reflector;
-extern CIFileMap g_IFile;
+extern CInterlinks g_Interlinks;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -107,7 +107,7 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		}
 	}
 
-	for (const auto &mod : g_CFG.GetModules())
+	for (const auto &mod : g_CFG.GetRefMods().GetModules())
 	{
 		m_streamMap[mod] = std::make_unique<CPacketStream>();
 	}
@@ -212,7 +212,7 @@ void CProtocol::Task(void)
 			//std::cout << "INTR packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip, mods) )
+			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				SInterConnect ackn;
 				// acknowledge the request
@@ -232,20 +232,28 @@ void CProtocol::Task(void)
 			//std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip, mods) )
+			if ( g_GateKeeper.MayLink(cs, ip) )
 			{
 				// already connected ?
 				auto peers = g_Reflector.GetPeers();
 				if ( nullptr == peers->FindPeer(cs, ip) )
 				{
-					// create the new peer
-					// this also create one client per module
-					if (AF_INET6 == ip.GetFamily())
-						peers->AddPeer(std::make_shared<CPeer>(cs, ip, mods, m_Socket6));
+					auto item = g_Interlinks.Find(cs.GetCS());
+					if (item)
+					{
+						auto type = item->IsNotLegacy() ? EClientType::newref : EClientType::oldref;
+						// create the new peer
+						// this also create one client per module
+						if (AF_INET6 == ip.GetFamily())
+							peers->AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+						else
+							peers->AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+						publish = true;
+					}
 					else
-						peers->AddPeer(std::make_shared<CPeer>(cs, ip, mods, m_Socket4));
-
-					publish = true;
+					{
+						std::cerr << "ERROR: gotn ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
+					}
 				}
 				g_Reflector.ReleasePeers();
 			}
@@ -270,7 +278,8 @@ void CProtocol::Task(void)
 
 					// create the client and append
 					if (isLstn) {
-						if (g_CFG.GetEncryptedMods().find(mod) != std::string::npos && !g_CFG.GetSWLEncryptedMods()) {
+						if (g_CFG.GetRefMods().GetEModules().find(mod) != std::string::npos && not g_CFG.GetSWLEncryptedMods()) 
+						{
 							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
 
 							// deny the request
@@ -278,15 +287,15 @@ void CProtocol::Task(void)
 							Send(pack.GetCData(), 4, ip);
 						} else {
 							if(AF_INET6 == ip.GetFamily())
-								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket6, true));
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket6));
 							else
-								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket4, true));
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket4));
 						}
 					} else {
 						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket6));
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket6));
 						else
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, mod, m_Socket4));
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket4));
 					}
 					g_Reflector.ReleaseClients();
 				}
@@ -644,15 +653,10 @@ void CProtocol::HandleKeepalives(void)
 			client->Alive();
 		}
 		// otherwise check if still with us
-		else if ( !client->IsAlive() )
+		else if ( not client->IsAlive() )
 		{
-			auto peers = g_Reflector.GetPeers();
-			auto peer = peers->FindPeer(client->GetCallsign(), client->GetIp());
-			if ( peer && (peer->GetReflectorModules()[0] == client->GetReflectorModule()) )
-			{
-				// no, but this is a peer client, so it will be handled below
-			}
-			else
+			const auto type = client->GetClientType();
+			if (EClientType::simple == type or EClientType::listenonly == type)
 			{
 				// no, disconnect
 				uint8_t disconnect[10];
@@ -706,7 +710,7 @@ void CProtocol::HandleKeepalives(void)
 void CProtocol::HandlePeerLinks(void)
 {
 	// get the list of peers
-	g_IFile.Lock();
+	g_Interlinks.Lock();
 	auto peers = g_Reflector.GetPeers();
 
 	// check if all our connected peers are still listed in mrefd.interlink
@@ -716,7 +720,7 @@ void CProtocol::HandlePeerLinks(void)
 	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
 		const auto cs = peer->GetCallsign().GetCS();
-		if ( nullptr == g_IFile.FindMapItem(cs) )
+		if ( nullptr == g_Interlinks.Find(cs) )
 		{
 			uint8_t buf[10];
 			// send disconnect packet
@@ -731,60 +735,31 @@ void CProtocol::HandlePeerLinks(void)
 
 	// check if all ours peers listed in mrefd.interlink are connected
 	// if not, connect or reconnect
-	for ( auto it=g_IFile.begin(); it!=g_IFile.end(); it++ )
+	for ( auto it=g_Interlinks.begin(); it!=g_Interlinks.end(); it++ )
 	{
 		auto &item = it->second;
-		if ( nullptr == peers->FindPeer(item.GetCallsign()) )
+		if ( nullptr == peers->FindPeer(item->GetCallsign()) )
 		{
-#ifndef NO_DHT
-			item.UpdateIP(g_CFG.GetIPv6ExtAddr().empty());
-			if (item.GetIp().IsSet())
+			if (item->IsUpdated())
 			{
-				bool ok = true;
-				// does everything match up?
-				for (auto &c : item.GetModules())
-				{
-					if (std::string::npos == g_CFG.GetModules().find(c))
-					{	// is the local module not config'ed?
-						ok = false;
-						std::cerr << "This reflector has no module '" << c << "', so it can't interlink with " << item.GetCallsign() << std::endl;
-					}
-					else if (item.UsesDHT())
-					{
-						if (std::string::npos == item.GetCMods().find(c))
-						{	// is the remote module not config'ed?
-							ok = false;
-							std::cerr << item.GetCallsign() << " has no module '" << c << "'" << std::endl;
-						}
-						else if ((std::string::npos == item.GetEMods().find(c)) != (std::string::npos == g_CFG.GetEncryptedMods().find(c)))
-						{	// are the encryption states on both sides mismatched?
-							ok = false;
-							std::cerr << "The encryption states for module '" << c << "' don't match for this reflector and " << item.GetCallsign() << std::endl;
-						}
-					}
-				}
-				if (ok)
-				{
-
-#endif
-					// send connect packet to re-initiate peer link
-					SInterConnect connect;
-					EncodeInterlinkConnectPacket(connect, item.GetModules());
-					Send(connect.magic, sizeof(SInterConnect), item.GetIp());
-					std::cout << "Sent connect packet to M17 peer " << item.GetCallsign() << " @ " << item.GetIp() << " for module(s) " << item.GetModules() << std::endl;
-#ifndef NO_DHT
-				}
+				// send connect packet to re-initiate peer link
+				SInterConnect connect;
+				const auto mods = item->GetReqMods();
+				EncodeInterlinkConnectPacket(connect, mods);
+				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
+				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 			}
-			else // m_Ip is not set!
+#ifndef NO_DHT
+			else
 			{
-				g_Reflector.GetDHTConfig(item.GetCallsign().GetCS());
+				g_Reflector.GetDHTConfig(item->GetCallsign().GetCS());
 			}
 #endif
 		}
 	}
 
 	g_Reflector.ReleasePeers();
-	g_IFile.Unlock();
+	g_Interlinks.Unlock();
 
 #ifndef NO_DHT
 	if (publish)
@@ -972,8 +947,20 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	auto buf = packet.GetCData();
 	if (memcmp(buf, "M17", 3))
 		return false;
-	if (((' ' == char(buf[3])) or ('!' == char(buf[3]))) and (54u == size) and (0x1u == (0x1u & buf[19])))
+	if (((' ' == char(buf[3])) or ('!' == char(buf[3]))) and (0x1u == (0x1u & buf[19])))
 	{
+		switch (size)
+		{
+		case 54u:
+			packet.Initialize(size, true);
+			break;
+		case 55u:
+			packet.Initialize(54u, true);
+			packet.SetRelay();
+			break;
+		default:
+			return false;
+		}
 		packet.Initialize(size, true);
 	}
 	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))

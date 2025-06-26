@@ -22,6 +22,8 @@
 
 #pragma once
 
+enum class EModuleMode { normal, encrypted };
+
 // defines
 #define M17_KEEPALIVE_PERIOD			3
 #define M17_KEEPALIVE_TIMEOUT           (M17_KEEPALIVE_PERIOD*10)

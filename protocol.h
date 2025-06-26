@@ -71,7 +71,6 @@ protected:
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
-	void CheckParrots(void);
 
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);

@@ -19,11 +19,12 @@
 #pragma once
 
 #include <string>
+#include "refmods.h"
 
 #define IS_TRUE(a) ((a)=='t' || (a)=='T' || (a)=='1')
 
 using CFGDATA = struct CFGData_struct {
-	std::string callsign, mods, encryptedmods;
+	std::string callsign;
 	std::string ipv4bindaddr, ipv6bindaddr;
 #ifndef NO_DHT
 	std::string ipv4extaddr, ipv6extaddr;
@@ -34,6 +35,7 @@ using CFGDATA = struct CFGData_struct {
 	std::string pidpath, xmlpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
 	bool swlencryptedmods;
+	CReflMods refmods;
 };
 
 class CConfigure
@@ -41,12 +43,11 @@ class CConfigure
 public:
 	CConfigure() {}
 	bool ReadData(const std::string &path);
-	bool IsValidModule(char c) const { return std::string::npos != data.mods.find(c); }
-	bool IsEncyrptionAllowed(const char mod);
+	bool IsValidModule(char c) const { return std::string::npos != data.refmods.GetModules().find(c); }
+	bool IsEncyrptionAllowed(const char mod) const;
 
 	const std::string &GetCallsign()         const { return data.callsign;         }
-	const std::string &GetModules()          const { return data.mods;             }
-	const std::string &GetEncryptedMods()    const { return data.encryptedmods;    }
+	const CReflMods   &GetRefMods()          const { return data.refmods;          }
 	const std::string &GetIPv4BindAddr()     const { return data.ipv4bindaddr;     }
 	const std::string &GetIPv6BindAddr()     const { return data.ipv6bindaddr;     }
 #ifndef NO_DHT

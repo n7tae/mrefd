@@ -137,7 +137,7 @@ bool CConfigure::ReadData(const std::string &path)
 	CurlAddresses(ipv4, ipv6);
 #endif
 
-	std::string line;
+	std::string line, mods, emods;
 	while (std::getline(cfg, line)) {
 		trim(line);
 
@@ -178,25 +178,11 @@ bool CConfigure::ReadData(const std::string &path)
 		}
 		else if (0 == key.compare("Modules"))
 		{
-			for (auto cit=value.begin(); cit!=value.end(); cit++)
-			{
-				auto c = *cit;
-				if (std::islower(c))
-					c = std::toupper(c);
-				if (std::string::npos == data.mods.find(c))
-					data.mods.append(1, c);
-			}
+			mods.assign(value);
 		}
 		else if (0 == key.compare("EncryptionAllowed"))
 		{
-			for (auto cit=value.begin(); cit!=value.end(); cit++)
-			{
-				auto c = *cit;
-				if (std::islower(c))
-					c = std::toupper(c);
-				if (std::string::npos == data.encryptedmods.find(c))
-					data.encryptedmods.append(1, c);
-			}
+			emods.assign(value);
 		}
 		else if (0 == key.compare("ListenOnlyAllowEncrypt"))
 		{
@@ -308,17 +294,18 @@ bool CConfigure::ReadData(const std::string &path)
 		}
 	}
 
-	if (data.mods.empty())
+	data.refmods.Parse(mods, emods);
+	if (0 == data.refmods.GetSize())
 	{
 		std::cout << "ERROR - no modules defined" << std::endl;
 		rval = true;
 	}
 	else
 	{
-		std::cout << "Modules='" << data.mods << "'" << std::endl;
+		std::cout << "Modules='" << data.refmods.GetModules() << "'" << std::endl;
 	}
 
-	std::cout << "EncryptionAllowed='" << data.encryptedmods << "'" << std::endl;
+	std::cout << "EncryptionAllowed='" << data.refmods.GetEModules() << "'" << std::endl;
 
 	std::cout << "ListenOnlyAllowEncrypt=" << (data.swlencryptedmods ? "true" : "false") << std::endl;
 
@@ -580,10 +567,10 @@ bool CConfigure::ReadData(const std::string &path)
 	return rval;
 }
 
-bool CConfigure::IsEncyrptionAllowed(const char mod)
+bool CConfigure::IsEncyrptionAllowed(const char mod) const
 {
-	 if (std::string::npos != data.encryptedmods.find(mod))
-	 	return true;
-	else
+	EModuleMode mm;
+	if (data.refmods.GetMode(mod, mm))
 		return false;
+	return EModuleMode::encrypted == mm;
 }

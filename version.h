@@ -32,23 +32,17 @@ class CVersion
 {
 public:
 	// constructor
-	CVersion(uint32_t v);
-	CVersion(uint8_t maj, uint8_t min, uint8_t rev);
-
+	CVersion() = delete;
+	CVersion(const CVersion &v) : maj(v.GetMajor()), min(v.GetMinor()), rev(v.GetRevision()) {}
+	CVersion(uint8_t a, uint8_t b, uint16_t c) : maj(a), min(b), rev(c) {}
+	CVersion &operator=(const CVersion &v) { maj=v.maj; min=v.min; rev=v.rev; return *this; }
+	~CVersion() {}
 
 	// get
-	uint32_t GetMajor(void) const;
-	uint32_t GetMinor(void) const;
-	uint32_t GetRevision(void) const;
+	uint8_t GetMajor(void) const;
+	uint8_t GetMinor(void) const;
+	uint16_t GetRevision(void) const;
 	uint32_t GetVersion(void) const;
-
-	// comparison operators
-	bool operator ==(const CVersion &v) const;
-	bool operator !=(const CVersion &v) const;
-	bool operator >=(const CVersion &v) const;
-	bool operator <=(const CVersion &v) const;
-	bool operator  >(const CVersion &v) const;
-	bool operator  <(const CVersion &v) const;
 
 	// output
 	friend std::ostream &operator <<(std::ostream &os, const CVersion &v);
@@ -56,5 +50,6 @@ public:
 
 protected:
 	// data
-	uint32_t version;
+	uint8_t maj, min;
+	uint16_t rev;
 };

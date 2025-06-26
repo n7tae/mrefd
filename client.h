@@ -29,7 +29,10 @@
 #include "ip.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//
+// client type
+
+enum class EClientType { simple, listenonly, newref, oldref };
+// oldref means version 0.X.Y newref means version 1.0.0 or newer
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -40,7 +43,7 @@ public:
 	// constructors
 	CClient() = delete;
 	CClient(const CClient &) = delete;
-	CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket &sock, bool listenOnly = false);
+	CClient(const CCallsign cs, const CIp ip, EClientType type, char mod, const CUdpSocket &sock);
 
 	// destructor
 	virtual ~CClient() {};
@@ -59,7 +62,8 @@ public:
 	// identity
 	const char *GetProtocolName(void) const  { return "M17"; }
 	bool IsNode(void) const                  { return true; }
-	bool IsListenOnly(void) const            { return m_ListenOnly; }
+	EClientType GetClientType(void) const    { return m_Type; }
+	bool IsListenOnly(void) const            { return m_Type == EClientType::listenonly; }
 
 	// status
 	void Alive(void);
@@ -72,14 +76,14 @@ public:
 	// function
 	void SendPacket(const CPacket &pack) const;
 	// reporting
-	void WriteXml(std::ofstream &);
+	void WriteXml(std::ofstream &) const;
 
 protected:
 	const CCallsign   m_Callsign;
 	const CIp         m_Ip;
+	const EClientType m_Type;
 	const char        m_ReflectorModule;
 	const CUdpSocket &m_Sock;
-	const bool        m_ListenOnly;
 
 	// status
 	bool        m_isTXing;

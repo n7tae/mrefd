@@ -33,13 +33,13 @@
 #include "gatekeeper.h"
 #include "configure.h"
 #include "version.h"
-#include "ifile.h"
+#include "interlinks.h"
 
 CReflector g_Reflector;
 extern CGateKeeper g_GateKeeper;
 extern CConfigure g_CFG;
 extern CVersion g_Version;
-extern CIFileMap g_IFile;
+extern CInterlinks g_Interlinks;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -286,7 +286,7 @@ void CReflector::PutDHTPeers()
 	auto peers = GetPeers();
 	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
 	{
-		p.list.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetReflectorModules(), (*pit)->GetConnectTime());
+		p.list.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetSharedModules(), (*pit)->GetConnectTime());
 	}
 	ReleasePeers();
 
@@ -310,8 +310,8 @@ void CReflector::PutDHTConfig()
 	cfg.callsign.assign(cs);
 	cfg.ipv4addr.assign(g_CFG.GetIPv4ExtAddr());
 	cfg.ipv6addr.assign(g_CFG.GetIPv6ExtAddr());
-	cfg.modules.assign(g_CFG.GetModules());
-	cfg.encryptedmods.assign(g_CFG.GetEncryptedMods());
+	cfg.modules.assign(g_CFG.GetRefMods().GetModules());
+	cfg.encryptedmods.assign(g_CFG.GetRefMods().GetEModules());
 	cfg.url.assign(g_CFG.GetURL());
 	cfg.email.assign(g_CFG.GetEmailAddr());
 	cfg.country.assign(g_CFG.GetCountry());
@@ -337,7 +337,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 {
 	static SMrefdConfig1 cfg;
 	cfg.timestamp = 0;	// every time this is called, zero the timestamp
-	auto item = g_IFile.FindMapItem(cs);
+	auto item = g_Interlinks.Find(cs);
 	if (nullptr == item)
 	{
 		std::cerr << "Can't Listen() for " << cs << " because it doesn't exist" << std::endl;
@@ -373,7 +373,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 				if (cfg.timestamp)
 				{
 					// if the get() call was successful and there is a nonzero timestamp, then do the update
-					g_IFile.Update(cfg.callsign, cfg.modules, cfg.ipv4addr, cfg.ipv6addr, cfg.port, cfg.encryptedmods);
+					g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.ipv4addr, cfg.ipv6addr, cfg.port, (cfg.version[0] == '0'));
 				}
 			}
 			else

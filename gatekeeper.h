@@ -43,7 +43,7 @@ public:
 	void Close(void);
 
 	// authorizations
-	bool MayLink(const CCallsign &, const CIp &, char * = nullptr) const;
+	bool MayLink(const CCallsign &, const CIp &) const;
 	bool MayTransmit(const CCallsign &, const CIp &) const;
 
 protected:
@@ -52,7 +52,7 @@ protected:
 
 	// operation helpers
 	bool IsNodeListedOk(const CCallsign &) const;
-	bool IsPeerListedOk(const CCallsign &, const CIp &, const char *) const;
+	bool IsPeerListedOk(const std::string &, const CIp &) const;
 
 	// data
 	CBWSet   m_NodeWhiteSet;

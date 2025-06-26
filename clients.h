@@ -65,8 +65,11 @@ public:
 	std::shared_ptr<CClient> FindClient(const CIp &);
 
 	// iterate on clients
+	// all the cleints
 	std::shared_ptr<CClient> FindNextClient(std::list<std::shared_ptr<CClient>>::iterator &);
+	// all the clients on a module
 	std::shared_ptr<CClient> FindNextClient(const char, std::list<std::shared_ptr<CClient>>::iterator &);
+	// all the clients with a 8-char callsign and an ip address
 	std::shared_ptr<CClient> FindNextClient(const CCallsign &, const CIp &, std::list<std::shared_ptr<CClient>>::iterator &);
 
 protected:

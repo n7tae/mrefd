@@ -29,11 +29,11 @@
 #include "reflector.h"
 #include "gatekeeper.h"
 #include "configure.h"
-#include "ifile.h"
+#include "interlinks.h"
 
 extern CReflector g_Reflector;
 extern CConfigure g_CFG;
-extern CIFileMap g_IFile;
+extern CInterlinks g_Interlinks;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +65,7 @@ bool CGateKeeper::Init(void)
 	// load lists from files
 	m_NodeWhiteSet.LoadFromFile(g_CFG.GetWhitePath().c_str());
 	m_NodeBlackSet.LoadFromFile(g_CFG.GetBlackPath().c_str());
-	g_IFile.LoadFromFile(g_CFG.GetInterlinkPath().c_str());
+	g_Interlinks.LoadFromFile(g_CFG.GetInterlinkPath().c_str());
 
 	// reset run flag
 	keep_running = true;
@@ -92,26 +92,26 @@ void CGateKeeper::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // authorizations
 
-bool CGateKeeper::MayLink(const CCallsign &callsign, const CIp &ip, char *modules) const
+bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 {
 	bool ok = false;
-	if (callsign.GetCS(4).compare("M17-"))
+	if (cs.GetCS(4).compare("M17-"))
 	{
 		auto clients = g_Reflector.GetClients();
 		if (clients->FindClient(ip))
-			ok = false;
+			ok = false;	// already linked!
 		else
-			ok = IsNodeListedOk(callsign);
+			ok = IsNodeListedOk(cs);
 		g_Reflector.ReleaseClients();
 	}
 	else
 	{
-		ok = IsPeerListedOk(callsign, ip, modules);
+		ok = IsPeerListedOk(cs.GetCS(), ip);
 	}
 
 	if ( !ok )
 	{
-		std::cout << "Gatekeeper blocking linking of " << callsign << " @ " << ip << std::endl;
+		std::cout << "Gatekeeper blocking linking of " << cs << " @ " << ip << std::endl;
 	}
 
 	// done
@@ -143,10 +143,12 @@ void CGateKeeper::Thread()
 		{
 			m_NodeBlackSet.ReloadFromFile();
 		}
-		if ( g_IFile.NeedReload() )
+		g_Interlinks.Lock();
+		if ( g_Interlinks.NeedReload() )
 		{
-			g_IFile.ReloadFromFile();
+			g_Interlinks.ReloadFromFile();
 		}
+		g_Interlinks.Unlock();
 	}
 }
 
@@ -160,35 +162,28 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign) const
 	// next, check callsign
 	// first check if callsign is in white list
 	// note if white list is empty, everybody is authorized
-	m_NodeWhiteSet.Lock();
-	if ( ! m_NodeWhiteSet.empty() )
-	{
-		ok = m_NodeWhiteSet.IsMatched(callsign.GetCS());
-	}
-	m_NodeWhiteSet.Unlock();
+	ok = m_NodeWhiteSet.IsMatched(callsign.GetCS());
 
 	// then check if not blacklisted
-	m_NodeBlackSet.Lock();
 	ok = ok && !m_NodeBlackSet.IsMatched(callsign.GetCS());
-	m_NodeBlackSet.Unlock();
 
 	// done
 	return ok;
 
 }
 
-bool CGateKeeper::IsPeerListedOk(const CCallsign &callsign, const CIp &ip, const char *modules) const
+bool CGateKeeper::IsPeerListedOk(const std::string &cs, const CIp &ip) const
 {
 	bool ok = false;
 
 	// look for an exact match in the list
-	g_IFile.Lock();
-	if ( ! g_IFile.empty() )
+	g_Interlinks.Lock();
+	if ( ! g_Interlinks.empty() )
 	{
 		// find an exact match
-		ok = g_IFile.IsCallsignListed(callsign, ip, modules);
+		ok = g_Interlinks.IsCallsignListed(cs, ip.GetAddress());
 	}
-	g_IFile.Unlock();
+	g_Interlinks.Unlock();
 
 	// done
 	return ok;

@@ -37,7 +37,7 @@ extern CConfigure g_CFG;
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructors
 
-CClient::CClient(const CCallsign cs, const CIp ip, char mod, const CUdpSocket &sock, bool lo) : m_Callsign(cs), m_Ip(ip), m_ReflectorModule(mod), m_Sock(sock), m_ListenOnly(lo)
+CClient::CClient(const CCallsign cs, const CIp ip, EClientType type, char mod, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_Type(type), m_ReflectorModule(mod), m_Sock(sock)
 {
 	m_isTXing = false;
 	m_LastKeepaliveTime.Start();
@@ -77,7 +77,7 @@ void CClient::SendPacket(const CPacket &pack) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CClient::WriteXml(std::ofstream &xmlFile)
+void CClient::WriteXml(std::ofstream &xmlFile) const
 {
 	xmlFile << "<NODE>" << std::endl;
 	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;

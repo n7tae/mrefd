@@ -33,9 +33,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
 
-CPeer::CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip)
+CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_refType(type), m_sharedModules(mods)
 {
-	m_ReflectorModules.assign(mods);
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 
@@ -43,11 +42,11 @@ CPeer::CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocke
 
 	// and construct the M17 clients
 	CCallsign clientcs(m_Callsign);
-	for (const auto mod : m_ReflectorModules)
+	for (auto m : m_sharedModules)
 	{
-		clientcs.SetModule(mod);
+		clientcs.SetModule(m);
 		// create and append to list
-		m_Clients.push_back(std::make_shared<CClient>(clientcs, ip, mod, sock));
+		m_Clients.push_back(std::make_shared<CClient>(clientcs, ip, type, m, sock));
 	}
 }
 
@@ -110,7 +109,7 @@ void CPeer::Alive(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CPeer::WriteXml(std::ofstream &xmlFile)
+void CPeer::WriteXml(std::ofstream &xmlFile) const
 {
 	time_t lht = 0;
 	for (auto &client : m_Clients)
@@ -122,7 +121,7 @@ void CPeer::WriteXml(std::ofstream &xmlFile)
 	xmlFile << "<PEER>" << std::endl;
 	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;
 	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
-	xmlFile << "\t<LINKEDMODULE>" << m_ReflectorModules << "</LINKEDMODULE>" << std::endl;
+	xmlFile << "\t<LINKEDMODULE>" << m_sharedModules << "</LINKEDMODULE>" << std::endl;
 	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))

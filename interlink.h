@@ -1,7 +1,7 @@
 //
 //  Created by Jean-Luc Deltombe (LX3JL) on 31/01/2016.
 //  Copyright © 2015 Jean-Luc Deltombe (LX3JL). All rights reserved.
-//  Copyright © 2020 Thomas A. Early N7TAE
+//  Copyright © 2025 Thomas A. Early N7TAE
 //
 // ----------------------------------------------------------------------------
 //    This file is part of mrefd.
@@ -25,53 +25,43 @@
 #include <string>
 
 #include "callsign.h"
+#include "refmods.h"
 #include "ip.h"
 
-class CIFileItem
+class CInterlink
 {
 public:
 	// constructor
-	CIFileItem();
+	CInterlink() = delete;
 #ifndef NO_DHT
-	CIFileItem(const CCallsign &cs, const char *mods);
+	CInterlink(const std::string &cs, const std::string &mods);
 #endif
-	CIFileItem(const CCallsign &cs, const char *addr, const char *mods, uint16_t port);
+	CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 
-	// Update things
-	void UpdateIP(bool IPv6NotConfigured);
-#ifndef NO_DHT
-	void UpdateItem(const std::string &cmods, const std::string &ipv4, const std::string &ipv6, uint16_t port, const std::string &emods);
-#endif
-
-	// compare
-	bool HasSameCallsign(const CCallsign &) const;
-	bool HasSameIp(const CIp &ip);
-	bool HasModuleListed(char) const;
-	bool CheckListedModules(const char*) const;
+	void UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy);
 
 	// get
 	const CIp &GetIp(void) const              { return m_Ip; }
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
-	const std::string &GetModules(void) const { return m_Mods; }
-	bool UsesDHT(void) const                  { return m_UsesDHT; }
-#ifndef NO_DHT
+	bool IsNotLegacy(void) const              { return m_IsNotLegacy; }
+	bool IsUpdated(void) const                { return m_Updated; }
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
-	const std::string &GetEMods(void) const   { return m_EMods; }
-	const std::string &GetCMods(void) const   { return m_CMods; }
-	uint16_t GetPort(void) const              { return m_Port; }
-#endif
+	const std::string &GetReqMods(void) const { return m_reqMods; }
+	//uint16_t GetPort(void) const              { return m_Port; }
 
 private:
 	// data
+	const bool  m_UsingDHT;
+	const std::string m_reqMods;
 	CCallsign   m_Callsign;
 	CIp         m_Ip;
-	std::string m_Mods;
 	uint16_t    m_Port;
-	bool        m_UsesDHT;
+	CReflMods   m_refmods;
+	bool        m_Updated;
+	bool        m_IsNotLegacy;
 
 #ifndef NO_DHT
-	bool m_Updated;
-	std::string m_CMods, m_IPv4, m_IPv6, m_EMods;
+	std::string m_IPv4, m_IPv6;
 #endif
 };

@@ -46,7 +46,7 @@ class CPeer
 public:
 	// constructors
 	CPeer() = delete;
-	CPeer(const CCallsign cs, const CIp ip, const char *mods, const CUdpSocket &sock);
+	CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor
@@ -56,16 +56,16 @@ public:
 	bool operator ==(const CPeer &) const;
 
 	// get
-	const CCallsign &GetCallsign(void) const     { return m_Callsign; }
-	const CIp &GetIp(void) const                 { return m_Ip; }
-	const std::string &GetReflectorModules(void) { return m_ReflectorModules; }
-	std::time_t GetConnectTime(void)             { return m_ConnectTime; }
+	const CCallsign &GetCallsign(void) const        { return m_Callsign; }
+	const CIp &GetIp(void) const                    { return m_Ip; }
+	const std::string &GetSharedModules(void) const { return m_sharedModules; }
+	std::time_t GetConnectTime(void) const          { return m_ConnectTime; }
 
 	// set
 
 	// identity
 	uint8_t GetProtocolRevision(const CVersion &ver) const;
-	const char *GetProtocolName(void) const     { return "M17"; }
+	const char *GetProtocolName(void) const { return "M17"; }
 
 	// status
 	bool IsTransmitting(void) const;
@@ -73,8 +73,8 @@ public:
 	bool IsAlive(void) const;
 
 	// clients access
-	int     GetNbClients(void) const                    { return (int)m_Clients.size(); }
-	void    ClearClients(void)                          { m_Clients.clear(); }
+	int     GetNbClients(void) const { return (int)m_Clients.size(); }
+	void    ClearClients(void)       { m_Clients.clear(); }
 
 	// pass-through
 	std::list<std::shared_ptr<CClient>>::iterator begin()              { return m_Clients.begin(); }
@@ -83,13 +83,14 @@ public:
 	std::list<std::shared_ptr<CClient>>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
-	virtual void WriteXml(std::ofstream &);
+	virtual void WriteXml(std::ofstream &) const;
 
 protected:
 	// data
-	CCallsign m_Callsign;
-	CIp       m_Ip;
-	std::string m_ReflectorModules;
+	const CCallsign   m_Callsign;
+	const CIp         m_Ip;
+	const EClientType m_refType;
+	const std::string m_sharedModules;
 	std::list<std::shared_ptr<CClient>> m_Clients;
 
 	// status
