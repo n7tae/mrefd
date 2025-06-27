@@ -27,7 +27,7 @@ CPacketStream::CPacketStream()
 	m_OwnerClient = nullptr;
 }
 
-bool CPacketStream::OpenPacketStream(const CPacket &packet, std::shared_ptr<CClient>client)
+bool CPacketStream::OpenPacketStream(const CPacket &packet, SPClient client)
 {
 	bool ok = false;
 

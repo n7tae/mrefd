@@ -85,24 +85,6 @@ void CPacket::SetFrameType(uint16_t ft)
 	data[offset+1] = 0xffu & ft;
 }
 
-void CPacket::SetRelay()
-{
-	data[3] = uint8_t(isstream ? '!' : 'Q');
-}
-
-void CPacket::ClearRelay()
-{
-	data[3] = uint8_t(isstream ? ' ' : 'P');
-}
-
-bool CPacket::IsRelaySet() const
-{
-	if (isstream)
-		return '!' == char(data[3]);
-
-	return 'Q' == char(data[3]);
-}
-
 uint16_t CPacket::GetFrameNumber() const
 {
 	return isstream ? Get16At(34) : 0;

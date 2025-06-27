@@ -22,7 +22,12 @@
 
 #pragma once
 
-enum class EModuleMode { normal, encrypted };
+#include <cstdint>
+
+enum class EModuleMode : uint8_t { normal, encrypted };
+
+enum class EClientType : uint8_t { listenonly, simple, reflector, legacy };
+
 
 // defines
 #define M17_KEEPALIVE_PERIOD			3

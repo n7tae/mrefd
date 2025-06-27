@@ -33,13 +33,13 @@ public:
 	CPacketStream();
 
 	// open / close
-	bool OpenPacketStream(const CPacket &, std::shared_ptr<CClient>);
+	bool OpenPacketStream(const CPacket &, SPClient);
 	void ClosePacketStream(void);
 
 	void Tickle(void)                               { m_LastPacketTime.Start(); }
 
 	// get
-	std::shared_ptr<CClient> GetOwnerClient(void)   { return m_OwnerClient; }
+	SPClient GetOwnerClient(void)   { return m_OwnerClient; }
 	const CIp       &GetOwnerIp(void);
 	bool             IsExpired(void) const          { return (m_LastPacketTime.Time() > STREAM_TIMEOUT); }
 	bool             IsOpen(void) const             { return m_bOpen; }
@@ -50,5 +50,5 @@ protected:
 	bool                     m_bOpen;
 	uint16_t                 m_uiStreamId;
 	CTimer                   m_LastPacketTime;
-	std::shared_ptr<CClient> m_OwnerClient;
+	SPClient m_OwnerClient;
 };

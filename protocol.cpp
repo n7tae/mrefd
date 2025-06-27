@@ -166,6 +166,7 @@ void CProtocol::Task(void)
 			if (client)
 			{
 				mod = client->GetReflectorModule();
+				pack.SetFromType(client->GetClientType());
 				// sets the packet type and size based on the magic value and the `len` value
 				// NOTE: this could be a packet from a simple client or another reflector
 				// check that the source callsign matches a licensed ham callsign,
@@ -241,7 +242,7 @@ void CProtocol::Task(void)
 					auto item = g_Interlinks.Find(cs.GetCS());
 					if (item)
 					{
-						auto type = item->IsNotLegacy() ? EClientType::newref : EClientType::oldref;
+						auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
 						// create the new peer
 						// this also create one client per module
 						if (AF_INET6 == ip.GetFamily())
@@ -323,7 +324,7 @@ void CProtocol::Task(void)
 				// find all clients with that callsign & ip and keep them alive
 				auto clients = g_Reflector.GetClients();
 				auto it = clients->begin();
-				std::shared_ptr<CClient>client = nullptr;
+				SPClient client = nullptr;
 				while (nullptr != (client = clients->FindNextClient(cs, ip, it)))
 				{
 					client->Alive();
@@ -423,7 +424,7 @@ void CProtocol::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // stream handle helpers
 
-CPacketStream *CProtocol::GetStream(CPacket &packet, const std::shared_ptr<CClient> client)
+CPacketStream *CProtocol::GetStream(CPacket &packet, const SPClient client)
 {
 	// this is only for stream mode packet
 	if (not packet.IsStreamPacket())
@@ -586,7 +587,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient> &txclient, const char mod)
+void CProtocol::SendToAllClients(CPacket &packet, const SPClient &txclient, const char mod)
 {
 	#ifdef DEBUG
 	if (not packet.IsStreamPacket())
@@ -595,10 +596,14 @@ void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient>
 		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
 	}
 	#endif
-	// save the orginal relay value
-	const auto relayIsSet = packet.IsRelaySet();
+	// this might be going to a legacy reflector
+	if (packet.IsStreamPacket())
+	{
+		const bool b = true;
+		packet.GetData()[54] = uint8_t(b);
+	}
 	// push it to all our clients linked to the module and who is not streaming in
-	std::shared_ptr<CClient>client = nullptr;
+	SPClient client = nullptr;
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
@@ -606,18 +611,20 @@ void CProtocol::SendToAllClients(CPacket &packet, const std::shared_ptr<CClient>
 		// he not TXing and he is not doing a parrot
 		if ((client != txclient) and (parrotMap.end() == parrotMap.find(client)))
 		{
-			const auto cs = client->GetCallsign();
+			const auto ct = client->GetClientType();
 
-			if (cs.GetCS(4).compare("M17-"))
+			if (EClientType::reflector == ct or EClientType::legacy == ct)
+			{
+				// the client is a reflector
+				if (EClientType::simple == packet.GetFromType())
+				{
+					// only send it if from a client
+					client->SendPacket(packet);
+				}
+			}
+			else 
 			{
 				// this client is not a reflector
-				packet.ClearRelay();
-				client->SendPacket(packet);
-			}
-			else if (not relayIsSet)
-			{
-				// this client is a reflector and the packet hasn't yet been relayed
-				packet.SetRelay(); // make sure the destination reflector doesn't send it to other reflectors
 				client->SendPacket(packet);
 			}
 		}
@@ -636,7 +643,7 @@ void CProtocol::HandleKeepalives(void)
 	// iterate on clients
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
-	std::shared_ptr<CClient> client;
+	SPClient client;
 	while ( nullptr != (client = clients->FindNextClient(it)) )
 	{
 		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
@@ -774,20 +781,16 @@ void CProtocol::HandlePeerLinks(void)
 // streams helpers
 
 // returns true if the packet is ready for distribution
-bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> client)
+bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 {
 	// if the packet dst looks like an M17 reflector, change the dst to @ALL
-	const auto relayIsSet = packet.IsRelaySet();
 	CCallsign dst(packet.GetCDstAddress());
 	const auto cs = dst.GetCS();
 	if (0 == cs.compare(0, 4, "M17-"))
 	{
-		packet.ClearRelay();
 		dst.CSIn("@ALL");
 		dst.CodeOut(packet.GetDstAddress());
 		packet.CalcCRC();
-		if (relayIsSet)
-			packet.SetRelay();
 	}
 	else if (std::string::npos != cs.find("PARROT"))
 	{
@@ -837,19 +840,21 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 		return false;
 	}
 
-	auto stream = GetStream(packet, client);
-	if (stream)
+	if ( client->IsListenOnly())
 	{
-		// stream already open
-		// skip packet, but tickle the stream
-		stream->Tickle();
+		// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+		return false;
 	}
-	else
+
+	if (packet.IsStreamPacket())
 	{
-		if ( client->IsListenOnly())
+		auto stream = GetStream(packet, client);
+		if (stream)
 		{
-			// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
-			return false;
+			// stream already open
+			// skip packet, but tickle the stream
+			stream->Tickle();
+			return true;
 		}
 		else
 		{
@@ -859,16 +864,13 @@ bool CProtocol::OnPacketIn(CPacket &packet, const std::shared_ptr<CClient> clien
 			{
 				return false;
 			}
-			else
-			{
-				// update last heard
-				CCallsign src(packet.GetCSrcAddress());
-				auto cli = client->GetCallsign();
-				g_Reflector.GetUsers()->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
-				g_Reflector.ReleaseUsers();
-			}
 		}
 	}
+	// update last heard
+	CCallsign src(packet.GetCSrcAddress());
+	auto cli = client->GetCallsign();
+	g_Reflector.GetUsers()->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamPacket() ? EMode::sm : EMode::pm));
+	g_Reflector.ReleaseUsers();
 	return true;
 }
 
@@ -947,23 +949,11 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 	auto buf = packet.GetCData();
 	if (memcmp(buf, "M17", 3))
 		return false;
-	if (((' ' == char(buf[3])) or ('!' == char(buf[3]))) and (0x1u == (0x1u & buf[19])))
+	if ((' ' == char(buf[3])) and (0x1u == (0x1u & buf[19])) and ((54u == size) or (55u == size)))
 	{
-		switch (size)
-		{
-		case 54u:
-			packet.Initialize(size, true);
-			break;
-		case 55u:
-			packet.Initialize(54u, true);
-			packet.SetRelay();
-			break;
-		default:
-			return false;
-		}
-		packet.Initialize(size, true);
+		packet.Initialize(54u, true);
 	}
-	else if ((('P' == char(buf[3])) or ('Q' == char(buf[3]))) and ((37u < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
+	else if (('P' == char(buf[3])) and ((37u < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
 	{
 		packet.Initialize(size, false);
 	}
@@ -1099,7 +1089,7 @@ void CProtocol::EncodeDisconnectedPacket(uint8_t *buf)
 	memcpy(buf, "DISC", 4);
 }
 
-CPacketStream *CProtocol::OpenStream(CPacket &packet, std::shared_ptr<CClient>client)
+CPacketStream *CProtocol::OpenStream(CPacket &packet, SPClient client)
 {
 	// if it is a stream packet, check sid is not zero
 	if ( packet.IsStreamPacket() and 0U == packet.GetStreamId() )
@@ -1176,7 +1166,7 @@ void CProtocol::CloseStream(char module)
 		g_Reflector.GetClients();	// lock clients
 
 		// get and check the master
-		std::shared_ptr<CClient>client = stream->GetOwnerClient();
+		SPClient client = stream->GetOwnerClient();
 		if ( client != nullptr )
 		{
 			// client no longer a master

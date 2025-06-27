@@ -66,24 +66,24 @@ public:
 
 protected:
 	// queue helper
-	void SendToAllClients(CPacket &, const std::shared_ptr<CClient> &, const char);
+	void SendToAllClients(CPacket &, const SPClient &, const char);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
 	void HandleKeepalives(void);
 
 	// stream helpers
-	CPacketStream *OpenStream(CPacket &, std::shared_ptr<CClient>);
+	CPacketStream *OpenStream(CPacket &, SPClient);
 	void CloseStream(char module);
-	bool OnPacketIn(CPacket &, const std::shared_ptr<CClient>);
-	CPacketStream *GetStream(CPacket &, const std::shared_ptr<CClient>);
+	bool OnPacketIn(CPacket &, const SPClient);
+	CPacketStream *GetStream(CPacket &, const SPClient);
 	void CheckStreamsTimeout(void);
 
 	// packet decoding helpers
 	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(CPacket &packet, size_t size, const char mod);
+	bool IsValidPacket(CPacket &packet, size_t size, const char m);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
@@ -136,5 +136,5 @@ protected:
 
 private:
 	std::regex clientRegEx, peerRegEx, lstnRegEx;
-	std::unordered_map<std::shared_ptr<CClient>, std::unique_ptr<CParrot>> parrotMap;
+	std::unordered_map<SPClient, std::unique_ptr<CParrot>> parrotMap;
 };

@@ -22,17 +22,15 @@
 
 #pragma once
 
+#include <cstdint>
+#include <memory>
+
 #include "udpsocket.h"
 #include "callsign.h"
+#include "defines.h"
 #include "packet.h"
 #include "timer.h"
 #include "ip.h"
-
-////////////////////////////////////////////////////////////////////////////////////////
-// client type
-
-enum class EClientType { simple, listenonly, newref, oldref };
-// oldref means version 0.X.Y newref means version 1.0.0 or newer
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // class
@@ -91,3 +89,5 @@ protected:
 	std::time_t m_ConnectTime;
 	std::time_t m_LastHeardTime;
 };
+
+using SPClient = std::shared_ptr<CClient>;

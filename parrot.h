@@ -34,7 +34,7 @@ enum class EParrotState { record, play, done };
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, uint16_t ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record) {}
+	CParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record) {}
 	virtual void Add(const CPacket &pack) = 0;
 	virtual bool IsExpired() const = 0;
 	virtual void Play() = 0;
@@ -45,7 +45,7 @@ public:
 
 protected:
 	const CCallsign src;
-	std::shared_ptr<CClient> client;
+	SPClient client;
 	const uint16_t frameType;
 	std::atomic<EParrotState> state;
 	std::future<void> fut;
@@ -54,7 +54,7 @@ protected:
 class CStreamParrot : public CParrot
 {
 public:
-	CStreamParrot(const uint8_t *src_addr, std::shared_ptr<CClient> spc, uint16_t ft) : CParrot(src_addr, spc, ft), is3200(0u == (0x2u & ft)) {}
+	CStreamParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft), is3200(0u == (0x2u & ft)) {}
 	void Add(const CPacket &pack);
 	void Play();
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
@@ -73,7 +73,7 @@ private:
 class CPacketParrot : public CParrot
 {
 public:
-	CPacketParrot(const uint8_t *src_addr, std::shared_ptr<CClient>spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
+	CPacketParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
 	void Add(const CPacket &pack);
 	bool IsExpired() const { return false; }
 	void Play();

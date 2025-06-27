@@ -51,29 +51,29 @@ public:
 
 	// manage Clients
 	int     GetSize(void) const         { return (int)m_Clients.size(); }
-	void    AddClient(std::shared_ptr<CClient>);
-	void    RemoveClient(std::shared_ptr<CClient>);
-	bool    IsClient(std::shared_ptr<CClient>) const;
+	void    AddClient(SPClient);
+	void    RemoveClient(SPClient);
+	bool    IsClient(SPClient) const;
 
 	// pass-through
-	std::list<std::shared_ptr<CClient>>::iterator begin()              { return m_Clients.begin(); }
-	std::list<std::shared_ptr<CClient>>::iterator end()                { return m_Clients.end(); }
-	std::list<std::shared_ptr<CClient>>::const_iterator cbegin() const { return m_Clients.cbegin(); }
-	std::list<std::shared_ptr<CClient>>::const_iterator cend()   const { return m_Clients.cend(); }
+	std::list<SPClient>::iterator begin()              { return m_Clients.begin(); }
+	std::list<SPClient>::iterator end()                { return m_Clients.end(); }
+	std::list<SPClient>::const_iterator cbegin() const { return m_Clients.cbegin(); }
+	std::list<SPClient>::const_iterator cend()   const { return m_Clients.cend(); }
 
 	// find clients
-	std::shared_ptr<CClient> FindClient(const CIp &);
+	SPClient FindClient(const CIp &);
 
 	// iterate on clients
 	// all the cleints
-	std::shared_ptr<CClient> FindNextClient(std::list<std::shared_ptr<CClient>>::iterator &);
+	SPClient FindNextClient(std::list<SPClient>::iterator &);
 	// all the clients on a module
-	std::shared_ptr<CClient> FindNextClient(const char, std::list<std::shared_ptr<CClient>>::iterator &);
+	SPClient FindNextClient(const char, std::list<SPClient>::iterator &);
 	// all the clients with a 8-char callsign and an ip address
-	std::shared_ptr<CClient> FindNextClient(const CCallsign &, const CIp &, std::list<std::shared_ptr<CClient>>::iterator &);
+	SPClient FindNextClient(const CCallsign &, const CIp &, std::list<SPClient>::iterator &);
 
 protected:
 	// data
 	std::mutex           m_Mutex;
-	std::list<std::shared_ptr<CClient>> m_Clients;
+	std::list<SPClient> m_Clients;
 };

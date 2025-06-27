@@ -24,6 +24,7 @@
 #include <memory>
 
 #include "callsign.h"
+#include "defines.h"
 
 #define MAX_PACKET_SIZE 859
 
@@ -37,28 +38,28 @@ public:
 	uint8_t *GetDstAddress();
 	uint8_t *GetSrcAddress();
 	uint16_t GetStreamId() const;
-	void SetStreamId(uint16_t sid);
 	uint16_t GetFrameType() const;
-	void SetFrameType(uint16_t ft);
-	void SetRelay();
-	void ClearRelay();
-	bool IsRelaySet() const;
 	uint16_t GetFrameNumber() const;
-	void SetFrameNumber(uint16_t fn);
-	bool IsStreamPacket() const { return isstream; }
-	bool IsLastPacket() const;
-	void CalcCRC();
+	size_t GetSize() const { return size; }
+	EClientType GetFromType() const { return type; }
 	uint8_t *GetData() { return data; }
 	const uint8_t *GetCData() const { return data; }
-	size_t GetSize() const { return size; }
 	uint8_t *GetVoice();
 	const uint8_t *GetCVoice() const;
 	uint16_t GetCRC(bool first = true) const;
+	void SetFrameNumber(uint16_t fn);
+	void SetFromType(EClientType f) { type = f; }
+	void SetStreamId(uint16_t sid);
+	void SetFrameType(uint16_t ft);
+	bool IsStreamPacket() const { return isstream; }
+	bool IsLastPacket() const;
+	void CalcCRC();
 
 private:
 	uint16_t Get16At(size_t pos) const;
 	
 	bool isstream;
+	EClientType type;
 	size_t size;
 	uint8_t data[MAX_PACKET_SIZE+1];
 };

@@ -77,10 +77,10 @@ public:
 	void    ClearClients(void)       { m_Clients.clear(); }
 
 	// pass-through
-	std::list<std::shared_ptr<CClient>>::iterator begin()              { return m_Clients.begin(); }
-	std::list<std::shared_ptr<CClient>>::iterator end()                { return m_Clients.end(); }
-	std::list<std::shared_ptr<CClient>>::const_iterator cbegin() const { return m_Clients.cbegin(); }
-	std::list<std::shared_ptr<CClient>>::const_iterator cend() const   { return m_Clients.cend(); }
+	std::list<SPClient>::iterator begin()              { return m_Clients.begin(); }
+	std::list<SPClient>::iterator end()                { return m_Clients.end(); }
+	std::list<SPClient>::const_iterator cbegin() const { return m_Clients.cbegin(); }
+	std::list<SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
 	virtual void WriteXml(std::ofstream &) const;
@@ -91,7 +91,7 @@ protected:
 	const CIp         m_Ip;
 	const EClientType m_refType;
 	const std::string m_sharedModules;
-	std::list<std::shared_ptr<CClient>> m_Clients;
+	std::list<SPClient> m_Clients;
 
 	// status
 	CTimer      m_LastKeepaliveTime;
