@@ -112,7 +112,7 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 		ok = IsPeerListedOk(cs.GetCS(), ip);
 	}
 
-	if ( !ok )
+	if ( not ok )
 	{
 		std::cout << "Gatekeeper blocking linking of " << cs << " at " << ip << std::endl;
 	}
@@ -165,14 +165,13 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign) const
 	// next, check callsign
 	// first check if callsign is in white list
 	// note if white list is empty, everybody is authorized
-	ok = m_NodeWhiteSet.IsMatched(callsign.GetCS());
+	ok = m_NodeWhiteSet.IsEmptyOrMatched(callsign.GetCS());
 
 	// then check if not blacklisted
 	ok = ok && (not m_NodeBlackSet.IsMatched(callsign.GetCS()));
 
 	// done
 	return ok;
-
 }
 
 bool CGateKeeper::IsPeerListedOk(const std::string &cs, const CIp &ip) const

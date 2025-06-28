@@ -33,22 +33,17 @@ public:
 	// constructor
 	CBWSet();
 
-	// locks
-	void Lock(void)   const { m_Mutex.lock(); }
-	void Unlock(void) const { m_Mutex.unlock(); }
-
 	// file io
 	bool LoadFromFile(const char *);
 	bool ReloadFromFile(void);
 	bool NeedReload(void);
 
-	// pass-through
-	bool empty() const { return m_Callsigns.empty(); }
-
 	// compare
+	bool IsEmptyOrMatched(const std::string &) const;
 	bool IsMatched(const std::string &) const;
 
 protected:
+	bool matched(const std::string &) const;
 	bool GetLastModTime(time_t *);
 	char *TrimWhiteSpaces(char *);
 	char *ToUpper(char *str);

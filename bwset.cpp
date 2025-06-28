@@ -52,8 +52,6 @@ bool CBWSet::LoadFromFile(const char *filename)
 	std::ifstream file (filename);
 	if ( file.is_open() )
 	{
-		Lock();
-
 		// empty list
 		m_Callsigns.clear();
 		// fill with file content
@@ -90,7 +88,6 @@ bool CBWSet::LoadFromFile(const char *filename)
 		GetLastModTime(&m_LastModTime);
 
 		// and done
-		Unlock();
 		ok = true;
 		std::cout << "Gatekeeper loaded " << m_Callsigns.size() << " lines from " << filename <<  std::endl;
 	}
@@ -104,6 +101,7 @@ bool CBWSet::LoadFromFile(const char *filename)
 
 bool CBWSet::ReloadFromFile(void)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	bool ok = false;
 
 	if ( m_Filename !=  nullptr )
@@ -128,7 +126,21 @@ bool CBWSet::NeedReload(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
+bool CBWSet::IsEmptyOrMatched(const std::string &cs) const
+{
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	if (m_Callsigns.empty())
+		return true;
+	return matched(cs);
+}
+
 bool CBWSet::IsMatched(const std::string &cs) const
+{
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	return matched(cs);
+}
+
+bool CBWSet::matched(const std::string &cs) const
 {
 	for ( const auto &item : m_Callsigns )
 	{
