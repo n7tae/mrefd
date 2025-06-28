@@ -99,7 +99,10 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 	{
 		auto clients = g_Reflector.GetClients();
 		if (clients->FindClient(ip))
+		{
+			std::cout << "GateKeeper: " << cs << " is trying to link again" << std::endl;
 			ok = false;	// already linked!
+		}
 		else
 			ok = IsNodeListedOk(cs);
 		g_Reflector.ReleaseClients();
@@ -111,7 +114,7 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 
 	if ( !ok )
 	{
-		std::cout << "Gatekeeper blocking linking of " << cs << " @ " << ip << std::endl;
+		std::cout << "Gatekeeper blocking linking of " << cs << " at " << ip << std::endl;
 	}
 
 	// done
@@ -165,7 +168,7 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign) const
 	ok = m_NodeWhiteSet.IsMatched(callsign.GetCS());
 
 	// then check if not blacklisted
-	ok = ok && !m_NodeBlackSet.IsMatched(callsign.GetCS());
+	ok = ok && (not m_NodeBlackSet.IsMatched(callsign.GetCS()));
 
 	// done
 	return ok;
