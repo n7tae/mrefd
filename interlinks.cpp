@@ -59,6 +59,8 @@ bool CInterlinks::LoadFromFile(const char *filename)
 	bool ok = false;
 	std::string line;
 
+	auto desregex = std::regex("^M17-([A-Z0-9]){3,3}[L]?$", std::regex::extended);
+
 	// and load
 	std::ifstream file(filename);
 	if ( file.is_open() )
@@ -86,7 +88,7 @@ bool CInterlinks::LoadFromFile(const char *filename)
 				std::cerr << m_Filename << " line #" << count << ": Self linking is not allowed! You cannot use " << v[0] << std::endl;
 				continue;
 			}
-			if (not std::regex_match(v[0], std::regex("^[L]?M17-([A-Z0-9]){3,3}$", std::regex::extended)))
+			if (not std::regex_match(v[0], desregex))
 			{
 				std::cerr << m_Filename << " line #" << count << ": malformed reflect :" << v[0] << std::endl;
 				continue;
@@ -97,7 +99,7 @@ bool CInterlinks::LoadFromFile(const char *filename)
 			if (v[0].size() > 7)
 			{
 				islegacy = true;
-				v[0].assign(v[0].substr(1));
+				v[0].resize(7);
 			}
 
 			switch(v.size())
