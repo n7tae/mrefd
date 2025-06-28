@@ -41,7 +41,7 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_Using
 }
 #endif
 
-CInterlink::CInterlink(const std::string &cs, const std::string &addr, const std::string &mods, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods)
+CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods)
 {
 	m_Callsign.CSIn(cs);
 	if (addr.npos == addr.find(':'))
