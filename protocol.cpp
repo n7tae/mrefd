@@ -210,7 +210,7 @@ void CProtocol::Task(void)
 	case sizeof(SInterConnect):
 		if (IsValidInterlinkConnect(pack.GetCData(), cs, mods))
 		{
-			//std::cout << "INTR packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
+			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip) )
@@ -230,7 +230,7 @@ void CProtocol::Task(void)
 		}
 		else if (IsValidInterlinkAcknowledge(pack.GetCData(), cs, mods))
 		{
-			//std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
+			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if ( g_GateKeeper.MayLink(cs, ip) )
@@ -991,7 +991,7 @@ bool CProtocol::IsValidPacket(CPacket &packet, size_t size, const char mod)
 
 bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char *mods)
 {
-	if (memcmp(buf, "INTR", 4))
+	if (memcmp(buf, "CONN", 4))
 		return false;
 
 	cs.CodeIn(buf + 4);
@@ -1046,7 +1046,7 @@ void CProtocol::EncodeKeepAlivePacket(uint8_t *buf)
 void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
 {
 	memset(conn.magic, 0, sizeof(SInterConnect));
-	memcpy(conn.magic, "INTR", 4);
+	memcpy(conn.magic, "CONN", 4);
 	GetReflectorCallsign().CodeOut(conn.fromcs);
 	memcpy(conn.mods, mods.c_str(), mods.size());
 }
