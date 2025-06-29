@@ -25,7 +25,7 @@
 
 #include "version.h"
 
-CVersion g_Version(1, 0, 5);	// the global object
+CVersion g_Version(1, 0, 6);	// the global object
 
 unsigned CVersion::GetMajor(void) const
 {
@@ -50,7 +50,7 @@ unsigned CVersion::GetVersion() const
 // output
 std::ostream &operator <<(std::ostream &os, const CVersion &v)
 {
-	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetVersion();
+	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetRevision();
 #ifndef NO_DHT
 	os << "-dht";
 #endif

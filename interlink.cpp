@@ -37,6 +37,7 @@ extern CConfigure g_CFG;
 #ifndef NO_DHT
 CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_UsingDHT(true), m_reqMods(mods)
 {
+	m_Updated = false;
 	m_Callsign.CSIn(cs);
 }
 #endif
