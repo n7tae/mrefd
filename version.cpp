@@ -25,24 +25,24 @@
 
 #include "version.h"
 
-CVersion g_Version(1, 0, 0);	// the global object
+CVersion g_Version(1, 0, 5);	// the global object
 
-uint8_t CVersion::GetMajor(void) const
+unsigned CVersion::GetMajor(void) const
 {
 	return maj;
 }
 
-uint8_t CVersion::GetMinor(void) const
+unsigned CVersion::GetMinor(void) const
 {
 	return min;
 }
 
-uint16_t CVersion::GetRevision(void) const
+unsigned CVersion::GetRevision(void) const
 {
 	return rev;
 }
 
-uint32_t CVersion::GetVersion() const
+unsigned CVersion::GetVersion() const
 {
 	return (maj<<24) | (min<<16) | rev;
 }
@@ -50,7 +50,7 @@ uint32_t CVersion::GetVersion() const
 // output
 std::ostream &operator <<(std::ostream &os, const CVersion &v)
 {
-	os << v.maj << '.' << v.min << '.' << v.rev;
+	os << v.GetMajor() << '.' << v.GetMinor() << '.' << v.GetVersion();
 #ifndef NO_DHT
 	os << "-dht";
 #endif

@@ -39,10 +39,10 @@ public:
 	~CVersion() {}
 
 	// get
-	uint8_t GetMajor(void) const;
-	uint8_t GetMinor(void) const;
-	uint16_t GetRevision(void) const;
-	uint32_t GetVersion(void) const;
+	unsigned GetMajor(void) const;
+	unsigned GetMinor(void) const;
+	unsigned GetRevision(void) const;
+	unsigned GetVersion(void) const;
 
 	// output
 	friend std::ostream &operator <<(std::ostream &os, const CVersion &v);

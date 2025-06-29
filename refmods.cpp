@@ -72,7 +72,7 @@ void CReflMods::Parse(const std::string &s, const std::string &e)
 				}
 				else
 				{
-					mods.append(1, m);
+					emods.append(1, m);
 					mmMap[m] = EModuleMode::encrypted;
 				}
 			}
