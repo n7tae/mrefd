@@ -112,11 +112,6 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 		ok = IsPeerListedOk(cs.GetCS(), ip);
 	}
 
-	if ( not ok )
-	{
-		std::cout << "Gatekeeper blocking linking of " << cs << " at " << ip << std::endl;
-	}
-
 	// done
 	return ok;
 }
@@ -158,35 +153,42 @@ void CGateKeeper::Thread()
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation helpers
 
-bool CGateKeeper::IsNodeListedOk(const CCallsign &callsign) const
+bool CGateKeeper::IsNodeListedOk(const CCallsign &cs) const
 {
-	bool ok = true;
-
 	// next, check callsign
 	// first check if callsign is in white list
 	// note if white list is empty, everybody is authorized
-	ok = m_NodeWhiteSet.IsEmptyOrMatched(callsign.GetCS());
+	if (not m_NodeWhiteSet.IsEmptyOrMatched(cs.GetCS()))
+	{
+		std::cout << cs.GetCS() << " has been blocked by the whitelist" << std::endl;
+		return false;
+	}
+
 
 	// then check if not blacklisted
-	ok = ok && (not m_NodeBlackSet.IsMatched(callsign.GetCS()));
+	if (not m_NodeBlackSet.IsMatched(cs.GetCS()))
+	{
+		std::cout << cs.GetCS() << " has been blocked by the blacklist" << std::endl;
+		return false;
+	}
 
 	// done
-	return ok;
+	return true;
 }
 
 bool CGateKeeper::IsPeerListedOk(const std::string &cs, const CIp &ip) const
 {
-	bool ok = false;
-
 	// look for an exact match in the list
 	g_Interlinks.Lock();
 	if ( ! g_Interlinks.empty() )
 	{
 		// find an exact match
-		ok = g_Interlinks.IsCallsignListed(cs, ip.GetAddress());
+		if (g_Interlinks.IsCallsignListed(cs, ip.GetAddress()))
+			return true;
 	}
 	g_Interlinks.Unlock();
 
+	std::cout << cs << " at " << ip << " was not found in the interlink file" << std::endl;
 	// done
-	return ok;
+	return false;
 }
