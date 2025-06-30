@@ -716,6 +716,9 @@ void CProtocol::HandleKeepalives(void)
 
 void CProtocol::HandlePeerLinks(void)
 {
+#ifdef DEBUG
+	std::cout << "Entering HandlePeerLinks" << std::endl;
+#endif;
 	// get the list of peers
 	g_Interlinks.Lock();
 	auto peers = g_Reflector.GetPeers();
@@ -784,6 +787,9 @@ void CProtocol::HandlePeerLinks(void)
 		publish = false;
 	}
 #endif
+#ifdef DEBUG
+	std::cout << "Leaving HandlePeerLinks" << std::endl;
+#endif;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
