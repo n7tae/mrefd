@@ -52,17 +52,17 @@ public:
 	#endif
 
 	// pass-through
-	bool empty() const { std::lock_guard<std::mutex> l(m_Mutex); return m_Imap.empty(); }
+	bool empty() const { return m_Imap.empty(); }
 	auto begin() { return m_Imap.begin(); }
 	auto end()   { return m_Imap.end(); }
 	auto cbegin() { return m_Imap.cbegin(); }
 	auto cend()   { return m_Imap.cend(); }
 
 	const CInterlink *Find(const std::string &) const;
-	void Emplace(const std::string &cs, const std::string &mods);
-	void Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 
 protected:
+	void Emplace(const std::string &cs, const std::string &mods);
+	void Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 	bool GetLastModTime(time_t *);
 	void ToUpper(std::string &s);
 

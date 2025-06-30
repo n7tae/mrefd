@@ -225,7 +225,6 @@ void CInterlinks::Update(const std::string &cs, const std::string &cmods, const 
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 {
-	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods));
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;
@@ -233,7 +232,6 @@ void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy)
 {
-	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods, addr, port, islegacy));
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;
