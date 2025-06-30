@@ -147,11 +147,3 @@ bool CPeer::IsAlive(void) const
 	}
 	return true;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// revision helper
-
-uint8_t CPeer::GetProtocolRevision(const CVersion &version) const
-{
-	return version.GetMajor();
-}

@@ -35,12 +35,6 @@
 #include "client.h"
 #include "udpsocket.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-//
-
-////////////////////////////////////////////////////////////////////////////////////////
-// class
-
 class CPeer
 {
 public:
@@ -64,7 +58,6 @@ public:
 	// set
 
 	// identity
-	uint8_t GetProtocolRevision(const CVersion &ver) const;
 	const char *GetProtocolName(void) const { return "M17"; }
 
 	// status

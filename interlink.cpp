@@ -46,57 +46,49 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std
 {
 	m_Callsign.CSIn(cs);
 	if (addr.npos == addr.find(':'))
-		UpdateItem("", "", addr, "", port, islegacy);
+		UpdateItem(mods, "", addr, "", port, islegacy);
 	else
-		UpdateItem("", "", "", addr, port, islegacy);
+		UpdateItem(mods, "", "", addr, port, islegacy);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
-void CInterlink::UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
+void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
 {
-	m_Updated = false;
-	// if we know what the target's modules are, then we can make sure the requested modules are suppored
-	if (targetmods.size() > 0)
-	{
-		bool quit = false;
-		for (const auto m : m_reqMods)
-		{
-			if (std::string::npos == targetmods.find(m))
-			{
-				std::cerr << "ERROR: " << m_Callsign.GetCS() << " doesn't have a module '" << m << "'" << std::endl;
-				quit = true;
-			}
-		}
-		if (quit) return;
-	}
 	m_IsNotLegacy = not islegacy;	// this is the gatekeeper for sending packets to a reflector
 
-	// checkout the modules first
-	CReflMods tmprm(m_reqMods, emods);
-	if (tmprm.GetSize())
+	m_Updated = false;
+	bool isbad = false;
+	for (const auto m : m_reqMods)
 	{
-		if (tmprm.IsIn(g_CFG.GetRefMods(), m_UsingDHT))
+		if (std::string::npos == mods.find(m))
 		{
-			if (not (tmprm == m_refmods))
-			{
-				m_refmods = tmprm;
-				m_Updated = true;
-			}
+			std::cerr << "ERROR: Requested module '" << m << " is not in " << m_Callsign.GetCS() << std::endl;
+			isbad = true;
+		}
+	}
+	if (isbad)
+		return;
+
+	CReflMods tmprm(m_reqMods, emods);   // make the request
+
+	// checkout the modules first
+	if (tmprm.IsIn(g_CFG.GetRefMods(), m_UsingDHT))
+	{
+		if (not (tmprm == m_refmods))
+		{
+			m_refmods = tmprm;
+			m_Updated = true;
 		}
 		else
 		{
-			std::cout << "ERROR: There is a mismatched module specifed for " << m_Callsign.GetCS() << std::endl;
+			std::cerr << "ERROR: There is an encrypted mismatched module specifed for " << m_Callsign.GetCS() << std::endl;
 			return;
 		}
 	}
-	else
-	{
-		std::cout << "ERROR: Can't find any modules for " << m_Callsign.GetCS() << std::endl;
-		return;
-	}
-	// now the other stuff
+		
+			// now the other stuff
 	if (m_IPv4.compare(ipv4))
 	{
 		m_IPv4.assign(ipv4);

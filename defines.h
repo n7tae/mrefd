@@ -32,6 +32,6 @@ enum class EClientType : uint8_t { listenonly, simple, reflector, legacy };
 // defines
 #define M17_KEEPALIVE_PERIOD			3
 #define M17_KEEPALIVE_TIMEOUT           (M17_KEEPALIVE_PERIOD*10)
-#define M17_RECONNECT_PERIOD            5
+#define M17_RECONNECT_PERIOD            10
 #define LASTHEARD_USERS_MAX_SIZE        40
 #define XML_UPDATE_PERIOD               10

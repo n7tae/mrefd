@@ -696,7 +696,7 @@ void CProtocol::HandleKeepalives(void)
 			peer->Alive();
 		}
 		// otherwise check if still with us
-		else if ( !peer->IsAlive() )
+		else if ( not peer->IsAlive() )
 		{
 			// no, disconnect
 			uint8_t disconnect[10];
@@ -745,23 +745,24 @@ void CProtocol::HandlePeerLinks(void)
 	for ( auto it=g_Interlinks.begin(); it!=g_Interlinks.end(); it++ )
 	{
 		auto &item = it->second;
-		if ( nullptr == peers->FindPeer(item->GetCallsign()) )
+		const auto cs = item->GetCallsign().GetCS();
+		if (not item->IsUpdated())
 		{
-			if (item->IsUpdated())
-			{
-				// send connect packet to re-initiate peer link
-				SInterConnect connect;
-				const auto mods = item->GetReqMods();
-				EncodeInterlinkConnectPacket(connect, mods);
-				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
-				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
-			}
-#ifndef NO_DHT
-			else
-			{
-				g_Reflector.GetDHTConfig(item->GetCallsign().GetCS());
-			}
-#endif
+		#ifdef NO_DHT
+			std::cerr << "ERROR: can't call CReflector::GetDHTConfig(" << cs <<") without DHT support!" << std::endl;
+		#else
+			g_Reflector.GetDHTConfig(cs);
+		#endif
+			continue;
+		}
+		if (nullptr == peers->FindPeer(item->GetCallsign()))
+		{
+			// send connect packet to re-initiate peer link
+			SInterConnect connect;
+			const auto mods = item->GetReqMods();
+			EncodeInterlinkConnectPacket(connect, mods);
+			Send(connect.magic, sizeof(SInterConnect), item->GetIp());
+			std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 		}
 	}
 

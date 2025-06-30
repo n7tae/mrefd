@@ -45,10 +45,10 @@ public:
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	bool IsNotLegacy(void) const              { return m_IsNotLegacy; }
 	bool IsUpdated(void) const                { return m_Updated; }
+	bool IsUsingDHT(void) const               { return m_UsingDHT; }
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
 	const std::string &GetReqMods(void) const { return m_reqMods; }
-	//uint16_t GetPort(void) const              { return m_Port; }
 
 private:
 	// data
