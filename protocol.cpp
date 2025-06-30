@@ -748,7 +748,7 @@ void CProtocol::HandlePeerLinks(void)
 		const auto cs = item->GetCallsign().GetCS();
 		if (item->GetIp().IsSet())
 		{
-			if (nullptr == peers->FindPeer(item->GetCallsign()) and item->GetIp().IsSet())
+			if (nullptr == peers->FindPeer(item->GetCallsign()))
 			{
 				// send connect packet to re-initiate peer link
 				SInterConnect connect;
@@ -757,6 +757,12 @@ void CProtocol::HandlePeerLinks(void)
 				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
 				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 			}
+		#ifdef DEBUG
+			else
+			{
+				std::cout << cs << " is already a peer" << std::endl;
+			}
+		#endif
 		}
 		else
 		{
