@@ -142,7 +142,7 @@ bool CPeer::IsAlive(void) const
 {
 	for ( auto it=cbegin(); it!=cend(); it++ )
 	{
-		if (! (*it)->IsAlive())
+		if (not (*it)->IsAlive())
 			return false;
 	}
 	return true;

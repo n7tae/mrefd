@@ -750,10 +750,10 @@ void CProtocol::HandlePeerLinks(void)
 		{
 		#ifdef NO_DHT
 			std::cerr << "ERROR: can't call CReflector::GetDHTConfig(" << cs <<") without DHT support!" << std::endl;
+			continue;
 		#else
 			g_Reflector.GetDHTConfig(cs);
 		#endif
-			continue;
 		}
 		if (nullptr == peers->FindPeer(item->GetCallsign()))
 		{
