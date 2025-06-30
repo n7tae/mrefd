@@ -213,7 +213,7 @@ void CProtocol::Task(void)
 			std::cout << "CONN packet from " << cs <<  " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip) )
+			if ( g_GateKeeper.PeerMayLink(cs) )
 			{
 				SInterConnect ackn;
 				// acknowledge the request
@@ -233,7 +233,7 @@ void CProtocol::Task(void)
 			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip) )
+			if ( g_GateKeeper.PeerMayLink(cs) )
 			{
 				// already connected ?
 				auto peers = g_Reflector.GetPeers();
@@ -268,7 +268,7 @@ void CProtocol::Task(void)
 			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
 
 			// callsign authorized?
-			if ( g_GateKeeper.MayLink(cs, ip) )
+			if ( g_GateKeeper.ClientMayLink(cs, ip) )
 			{
 				// valid module ?
 				if ( g_CFG.IsValidModule(mod) )

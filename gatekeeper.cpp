@@ -92,27 +92,20 @@ void CGateKeeper::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // authorizations
 
-bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
+bool CGateKeeper::ClientMayLink(const CCallsign &cs, const CIp &ip) const
 {
 	bool ok = false;
-	if (cs.GetCS(4).compare("M17-"))
+
+	auto clients = g_Reflector.GetClients();
+	if (clients->FindClient(ip))
 	{
-		auto clients = g_Reflector.GetClients();
-		if (clients->FindClient(ip))
-		{
-			std::cout << "GateKeeper: " << cs << " is trying to link again" << std::endl;
-			ok = false;	// already linked!
-		}
-		else
-			ok = IsNodeListed(cs);
-		g_Reflector.ReleaseClients();
+		std::cout << "GateKeeper: " << cs << " is trying to link again" << std::endl;
+		ok = false;	// already linked!
 	}
 	else
-	{
-		ok = IsPeerListed(cs.GetCS());
-	}
+		ok = IsNodeListed(cs);
+	g_Reflector.ReleaseClients();
 
-	// done
 	return ok;
 }
 
@@ -176,14 +169,14 @@ bool CGateKeeper::IsNodeListed(const CCallsign &cs) const
 	return true;
 }
 
-bool CGateKeeper::IsPeerListed(const std::string &cs) const
+bool CGateKeeper::PeerMayLink(const CCallsign &cs) const
 {
 	// look for an exact match in the list
 	g_Interlinks.Lock();
 	if ( ! g_Interlinks.empty() )
 	{
 		// find an exact match
-		if (g_Interlinks.Find(cs))
+		if (g_Interlinks.Find(cs.GetCS()))
 			return true;
 	}
 	g_Interlinks.Unlock();
