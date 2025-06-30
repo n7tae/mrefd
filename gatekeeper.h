@@ -51,8 +51,8 @@ protected:
 	void Thread();
 
 	// operation helpers
-	bool IsNodeListedOk(const CCallsign &) const;
-	bool IsPeerListedOk(const std::string &, const CIp &) const;
+	bool IsNodeListed(const CCallsign &) const;
+	bool IsPeerListed(const std::string &) const;
 
 	// data
 	CBWSet   m_NodeWhiteSet;

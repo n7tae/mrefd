@@ -44,7 +44,6 @@ public:
 	const CIp &GetIp(void) const              { return m_Ip; }
 	const CCallsign &GetCallsign(void) const  { return m_Callsign; }
 	bool IsNotLegacy(void) const              { return m_IsNotLegacy; }
-	bool IsUpdated(void) const                { return m_Updated; }
 	bool IsUsingDHT(void) const               { return m_UsingDHT; }
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
@@ -58,7 +57,6 @@ private:
 	CIp         m_Ip;
 	uint16_t    m_Port;
 	CReflMods   m_refmods;
-	bool        m_Updated;
 	bool        m_IsNotLegacy;
 
 #ifndef NO_DHT

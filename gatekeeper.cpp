@@ -104,12 +104,12 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 			ok = false;	// already linked!
 		}
 		else
-			ok = IsNodeListedOk(cs);
+			ok = IsNodeListed(cs);
 		g_Reflector.ReleaseClients();
 	}
 	else
 	{
-		ok = IsPeerListedOk(cs.GetCS(), ip);
+		ok = IsPeerListed(cs.GetCS());
 	}
 
 	// done
@@ -118,7 +118,7 @@ bool CGateKeeper::MayLink(const CCallsign &cs, const CIp &ip) const
 
 bool CGateKeeper::MayTransmit(const CCallsign &callsign, const CIp &/*ip*/) const
 {
-	return IsNodeListedOk(callsign);
+	return IsNodeListed(callsign);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ void CGateKeeper::Thread()
 ////////////////////////////////////////////////////////////////////////////////////////
 // operation helpers
 
-bool CGateKeeper::IsNodeListedOk(const CCallsign &cs) const
+bool CGateKeeper::IsNodeListed(const CCallsign &cs) const
 {
 	// next, check callsign
 	// first check if callsign is in white list
@@ -176,19 +176,19 @@ bool CGateKeeper::IsNodeListedOk(const CCallsign &cs) const
 	return true;
 }
 
-bool CGateKeeper::IsPeerListedOk(const std::string &cs, const CIp &ip) const
+bool CGateKeeper::IsPeerListed(const std::string &cs) const
 {
 	// look for an exact match in the list
 	g_Interlinks.Lock();
 	if ( ! g_Interlinks.empty() )
 	{
 		// find an exact match
-		if (g_Interlinks.IsCallsignListed(cs, ip.GetAddress()))
+		if (g_Interlinks.Find(cs))
 			return true;
 	}
 	g_Interlinks.Unlock();
 
-	std::cout << cs << " at " << ip << " was not found in the interlink file" << std::endl;
+	std::cout << cs << " was not found in the interlink file" << std::endl;
 	// done
 	return false;
 }

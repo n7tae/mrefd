@@ -746,23 +746,25 @@ void CProtocol::HandlePeerLinks(void)
 	{
 		auto &item = it->second;
 		const auto cs = item->GetCallsign().GetCS();
-		if (not item->IsUpdated())
+		if (item->GetIp().IsSet())
+		{
+			if (nullptr == peers->FindPeer(item->GetCallsign()) and item->GetIp().IsSet())
+			{
+				// send connect packet to re-initiate peer link
+				SInterConnect connect;
+				const auto mods = item->GetReqMods();
+				EncodeInterlinkConnectPacket(connect, mods);
+				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
+				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
+			}
+		}
+		else
 		{
 		#ifdef NO_DHT
-			std::cerr << "ERROR: can't call CReflector::GetDHTConfig(" << cs <<") without DHT support!" << std::endl;
-			continue;
+			std::cerr << "ERROR: " << cs << " doesn't have a vaild IP address!" << std::endl;
 		#else
 			g_Reflector.GetDHTConfig(cs);
 		#endif
-		}
-		if (nullptr == peers->FindPeer(item->GetCallsign()))
-		{
-			// send connect packet to re-initiate peer link
-			SInterConnect connect;
-			const auto mods = item->GetReqMods();
-			EncodeInterlinkConnectPacket(connect, mods);
-			Send(connect.magic, sizeof(SInterConnect), item->GetIp());
-			std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 		}
 	}
 

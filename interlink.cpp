@@ -37,7 +37,6 @@ extern CConfigure g_CFG;
 #ifndef NO_DHT
 CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_UsingDHT(true), m_reqMods(mods)
 {
-	m_Updated = false;
 	m_Callsign.CSIn(cs);
 }
 #endif
@@ -58,7 +57,6 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 {
 	m_IsNotLegacy = not islegacy;	// this is the gatekeeper for sending packets to a reflector
 
-	m_Updated = false;
 	bool isbad = false;
 	for (const auto m : m_reqMods)
 	{
@@ -79,7 +77,6 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 		if (not (tmprm == m_refmods))
 		{
 			m_refmods = tmprm;
-			m_Updated = true;
 		}
 		else
 		{
@@ -92,24 +89,20 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	if (m_IPv4.compare(ipv4))
 	{
 		m_IPv4.assign(ipv4);
-		m_Updated = true;
 	}
 	if (m_IPv6.compare(ipv6))
 	{
 		m_IPv6.assign(ipv6);
-		m_Updated = true;
 	}
 	if (m_Port != port)
 	{
 		m_Port = port;
-		m_Updated = true;
 	}
 	if (g_CFG.GetIPv6BindAddr().empty())
 	{
 		if (m_IPv4.empty())
 		{
 			std::cout << "ERROR: " << m_Callsign.GetCS() << " doesn't have an IPv4 address" << std::endl;
-			m_Updated = false;
 			return;
 		}
 		else
@@ -120,7 +113,6 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 		if (m_IPv6.empty())
 		{
 			std::cout << "ERROR: " << m_Callsign.GetCS() << " doesn't have an IPv6 address" << std::endl;
-			m_Updated = false;
 			return;
 		}
 		else
