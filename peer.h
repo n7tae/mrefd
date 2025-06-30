@@ -87,3 +87,5 @@ protected:
 	CTimer      m_LastKeepaliveTime;
 	std::time_t m_ConnectTime;
 };
+
+using SPPeer = std::shared_ptr<CPeer>;

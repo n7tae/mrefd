@@ -683,7 +683,7 @@ void CProtocol::HandleKeepalives(void)
 	// iterate on peers
 	auto peers = g_Reflector.GetPeers();
 	auto pit = peers->begin();
-	std::shared_ptr<CPeer> peer;
+	SPPeer peer;
 	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
 	{
 		// send keepalive
@@ -723,7 +723,7 @@ void CProtocol::HandlePeerLinks(void)
 	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
 	auto pit = peers->begin();
-	std::shared_ptr<CPeer>peer = nullptr;
+	SPPeer peer = nullptr;
 	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
 	{
 		const auto cs = peer->GetCallsign().GetCS();

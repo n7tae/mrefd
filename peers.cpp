@@ -46,7 +46,7 @@ CPeers::~CPeers()
 ////////////////////////////////////////////////////////////////////////////////////////
 // manage peers
 
-void CPeers::AddPeer(std::shared_ptr<CPeer> peer)
+void CPeers::AddPeer(SPPeer peer)
 {
 	// first check if peer already exists
 	for ( auto it=begin(); it!=end(); it++ )
@@ -81,7 +81,7 @@ void CPeers::AddPeer(std::shared_ptr<CPeer> peer)
 	g_Reflector.ReleaseClients();
 }
 
-void CPeers::RemovePeer(std::shared_ptr<CPeer> peer)
+void CPeers::RemovePeer(SPPeer peer)
 {
 	// look for the client
 	for ( auto pit=begin(); pit!=end(); /*increment done in body */ )
@@ -115,7 +115,7 @@ void CPeers::RemovePeer(std::shared_ptr<CPeer> peer)
 ////////////////////////////////////////////////////////////////////////////////////////
 // find peers
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CIp &Ip)
+SPPeer CPeers::FindPeer(const CIp &Ip)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
@@ -128,7 +128,7 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CIp &Ip)
 	return nullptr;
 }
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip)
+SPPeer CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
@@ -141,7 +141,7 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip
 	return nullptr;
 }
 
-std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign)
+SPPeer CPeers::FindPeer(const CCallsign &Callsign)
 {
 	for ( auto it=begin(); it!=end(); it++ )
 	{
@@ -158,7 +158,7 @@ std::shared_ptr<CPeer> CPeers::FindPeer(const CCallsign &Callsign)
 ////////////////////////////////////////////////////////////////////////////////////////
 // iterate on peers
 
-std::shared_ptr<CPeer> CPeers::FindNextPeer(std::list<std::shared_ptr<CPeer>>::iterator &it)
+SPPeer CPeers::FindNextPeer(std::list<SPPeer>::iterator &it)
 {
 	if ( it!=end() )
 		return *it++;
