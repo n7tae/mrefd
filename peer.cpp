@@ -59,32 +59,6 @@ CPeer::~CPeer()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// operators
-
-bool CPeer::operator ==(const CPeer &peer) const
-{
-	if (peer.m_Callsign != m_Callsign)
-		return false;
-	if (peer.m_Ip != m_Ip)
-		return false;
-	auto it1 = cbegin();
-	auto it2 = peer.cbegin();
-	while (true)
-	{
-		if (it1==cend() && it2==peer.cend())
-			break;
-		if (it1==cend() || it2==peer.cend())
-			return false;
-		if (*it1 != *it2)
-			return false;
-		it1++;
-		it2++;
-	}
-	return true;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////
 // status
 
 bool CPeer::IsTransmitting(void) const

@@ -172,17 +172,6 @@ bool CInterlinks::NeedReload(void)
 	return needReload;
 }
 
-bool CInterlinks::IsCallsignListed(const std::string &cs, const std::string &addr) const
-{
-	const auto &item = m_Imap.find(cs);
-	if (m_Imap.end() != item)
-	{
-		return (addr == item->second->GetIPv4() or addr == item->second->GetIPv6());
-	}
-
-	return false;
-}
-
 const CInterlink *CInterlinks::Find(const std::string &cs) const
 {
 	auto item = m_Imap.find(cs);

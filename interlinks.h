@@ -55,9 +55,6 @@ public:
 	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy);
 	#endif
 
-	// compare
-	bool IsCallsignListed(const std::string &, const std::string &) const;
-
 	// pass-through
 	bool empty() const { return m_Imap.empty(); }
 	auto begin() { return m_Imap.begin(); }

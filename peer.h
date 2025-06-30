@@ -46,9 +46,6 @@ public:
 	// destructor
 	virtual ~CPeer();
 
-	// operators
-	bool operator ==(const CPeer &) const;
-
 	// get
 	const CCallsign &GetCallsign(void) const        { return m_Callsign; }
 	const CIp &GetIp(void) const                    { return m_Ip; }

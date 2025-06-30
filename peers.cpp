@@ -51,13 +51,11 @@ void CPeers::AddPeer(std::shared_ptr<CPeer> peer)
 	// first check if peer already exists
 	for ( auto it=begin(); it!=end(); it++ )
 	{
-		if (*peer == *(*it))
-			// if found, just do nothing
-			// so *peer keep pointing on a valid object
-			// on function return
+		if (FindPeer((*it)->GetCallsign()))
+			// if found, just do nothing so *peer keep pointing on a valid object on function return
 		{
-			// delete new one
-			return;
+			std::cerr << "ERROR: trying to make a new " << peer->GetCallsign() << " but it already exists!" << std::endl;
+			return; // this shared ptr dies here
 		}
 	}
 
