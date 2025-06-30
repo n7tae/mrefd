@@ -47,6 +47,7 @@ CInterlinks::CInterlinks()
 
 CInterlinks::~CInterlinks()
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	for (auto &item : m_Imap)
 	{
 		item.second.reset();
@@ -56,6 +57,7 @@ CInterlinks::~CInterlinks()
 
 bool CInterlinks::LoadFromFile(const char *filename)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	bool ok = false;
 	std::string line;
 
@@ -174,6 +176,7 @@ bool CInterlinks::NeedReload(void)
 
 const CInterlink *CInterlinks::Find(const std::string &cs) const
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.find(cs);
 	if (m_Imap.end() == item)
 		return nullptr;
@@ -209,6 +212,7 @@ void CInterlinks::ToUpper(std::string &str)
 #ifndef NO_DHT
 void CInterlinks::Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.find(cs);
 	if (m_Imap.end() != item)
 	{
@@ -221,6 +225,7 @@ void CInterlinks::Update(const std::string &cs, const std::string &cmods, const 
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods));
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;
@@ -228,6 +233,7 @@ void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods, addr, port, islegacy));
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;

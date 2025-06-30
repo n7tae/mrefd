@@ -134,12 +134,10 @@ void CGateKeeper::Thread()
 		{
 			m_NodeBlackSet.ReloadFromFile();
 		}
-		g_Interlinks.Lock();
 		if ( g_Interlinks.NeedReload() )
 		{
 			g_Interlinks.ReloadFromFile();
 		}
-		g_Interlinks.Unlock();
 	}
 }
 
@@ -172,14 +170,12 @@ bool CGateKeeper::IsNodeListed(const CCallsign &cs) const
 bool CGateKeeper::PeerMayLink(const CCallsign &cs) const
 {
 	// look for an exact match in the list
-	g_Interlinks.Lock();
-	if ( ! g_Interlinks.empty() )
+	if ( not g_Interlinks.empty() )
 	{
 		// find an exact match
 		if (g_Interlinks.Find(cs.GetCS()))
 			return true;
 	}
-	g_Interlinks.Unlock();
 
 	std::cout << cs << " was not found in the interlink file" << std::endl;
 	// done

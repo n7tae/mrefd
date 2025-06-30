@@ -711,7 +711,6 @@ void CProtocol::HandlePeerLinks(void)
 	std::cout << "Entering HandlePeerLinks" << std::endl;
 #endif
 	// get the list of peers
-	g_Interlinks.Lock();
 
 	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
@@ -766,8 +765,6 @@ void CProtocol::HandlePeerLinks(void)
 		#endif
 		}
 	}
-
-	g_Interlinks.Unlock();
 
 #ifndef NO_DHT
 	if (publish)

@@ -42,10 +42,6 @@ public:
 	// destructor
 	~CInterlinks();
 
-	// locks
-	void Lock(void)   const { m_Mutex.lock(); }
-	void Unlock(void) const { m_Mutex.unlock(); }
-
 	// file io
 	virtual bool LoadFromFile(const char *);
 	bool ReloadFromFile(void);
@@ -56,7 +52,7 @@ public:
 	#endif
 
 	// pass-through
-	bool empty() const { return m_Imap.empty(); }
+	bool empty() const { std::lock_guard<std::mutex> l(m_Mutex); return m_Imap.empty(); }
 	auto begin() { return m_Imap.begin(); }
 	auto end()   { return m_Imap.end(); }
 	auto cbegin() { return m_Imap.cbegin(); }
