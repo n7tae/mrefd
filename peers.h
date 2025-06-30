@@ -45,8 +45,6 @@ public:
 	virtual ~CPeers();
 
 	// locks
-	void Lock(void)   { m_Mutex.lock(); }
-	void Unlock(void) { m_Mutex.unlock(); }
 
 	// manage peers
 	int  GetSize(void) const { return (int)m_Peers.size(); }
@@ -54,20 +52,17 @@ public:
 	void RemovePeer(SPPeer);
 
 	// pass-through
-	std::list<SPPeer>::iterator begin()              { return m_Peers.begin(); }
-	std::list<SPPeer>::iterator end()                { return m_Peers.end(); }
-	std::list<SPPeer>::const_iterator cbegin() const { return m_Peers.cbegin(); }
-	std::list<SPPeer>::const_iterator cend() const   { return m_Peers.cend(); }
+	std::list<SPPeer>::iterator Begin() { return m_Peers.begin(); }
 
 	// find peers
 	SPPeer FindPeer(const CIp &);
-	SPPeer FindPeer(const CCallsign &, const CIp &);
 	SPPeer FindPeer(const CCallsign &);
 
 	// iterate on peers
 	SPPeer FindNextPeer(std::list<SPPeer>::iterator &);
 
 protected:
+	void Insert(SPPeer peer);
 	// data
 	std::mutex         m_Mutex;
 	std::list<SPPeer> m_Peers;

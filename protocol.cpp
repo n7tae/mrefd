@@ -236,8 +236,7 @@ void CProtocol::Task(void)
 			if ( g_GateKeeper.PeerMayLink(cs) )
 			{
 				// already connected ?
-				auto peers = g_Reflector.GetPeers();
-				if ( nullptr == peers->FindPeer(cs, ip) )
+				if ( nullptr == g_Reflector.GetPeers().FindPeer(cs) )
 				{
 					auto item = g_Interlinks.Find(cs.GetCS());
 					if (item)
@@ -246,9 +245,9 @@ void CProtocol::Task(void)
 						// create the new peer
 						// this also create one client per module
 						if (AF_INET6 == ip.GetFamily())
-							peers->AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
 						else
-							peers->AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
 						publish = true;
 					}
 					else
@@ -256,7 +255,6 @@ void CProtocol::Task(void)
 						std::cerr << "ERROR: gotn ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
 					}
 				}
-				g_Reflector.ReleasePeers();
 			}
 		}
 		break;
@@ -334,14 +332,12 @@ void CProtocol::Task(void)
 			else
 			{
 				// find peer
-				auto peers = g_Reflector.GetPeers();
-				auto peer = peers->FindPeer(ip);
+				auto peer = g_Reflector.GetPeers().FindPeer(ip);
 				if ( peer )
 				{
 					// keep it alive
 					peer->Alive();
 				}
-				g_Reflector.ReleasePeers();
 			}
 		}
 		else if ( IsValidDisconnect(pack.GetCData(), cs) )
@@ -364,16 +360,14 @@ void CProtocol::Task(void)
 			else
 			{
 				// find the peer and remove it
-				auto peers = g_Reflector.GetPeers();
-				auto peer = peers->FindPeer(ip);
+				auto peer = g_Reflector.GetPeers().FindPeer(ip);
 				if ( peer )
 				{
 					// remove it from reflector peer list
 					// this also remove all peer's clients from reflector client list
 					// and delete them
-					peers->RemovePeer(peer);
+					g_Reflector.GetPeers().RemovePeer(peer);
 				}
-				g_Reflector.ReleasePeers();
 			}
 		}
 		else if ( IsValidNAcknowledge(pack.GetCData(), cs))
@@ -674,17 +668,15 @@ void CProtocol::HandleKeepalives(void)
 				std::cout << "Client " << client->GetCallsign() << " keepalive timeout" << std::endl;
 				clients->RemoveClient(client);
 			}
-			g_Reflector.ReleasePeers();
 		}
 
 	}
 	g_Reflector.ReleaseClients();
 
 	// iterate on peers
-	auto peers = g_Reflector.GetPeers();
-	auto pit = peers->begin();
+	auto pit = g_Reflector.GetPeers().Begin();
 	SPPeer peer;
-	while ( nullptr != (peer = peers->FindNextPeer(pit)) )
+	while ( (peer = g_Reflector.GetPeers().FindNextPeer(pit)) )
 	{
 		// send keepalive
 		Send(keepalive, 10, peer->GetIp());
@@ -705,10 +697,9 @@ void CProtocol::HandleKeepalives(void)
 
 			// remove it
 			std::cout << "Peer " << peer->GetCallsign() << " keepalive timeout" << std::endl;
-			peers->RemovePeer(peer);
+			g_Reflector.GetPeers().RemovePeer(peer);
 		}
 	}
-	g_Reflector.ReleasePeers();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -721,13 +712,12 @@ void CProtocol::HandlePeerLinks(void)
 #endif
 	// get the list of peers
 	g_Interlinks.Lock();
-	auto peers = g_Reflector.GetPeers();
 
 	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
-	auto pit = peers->begin();
+	auto pit = g_Reflector.GetPeers().Begin();
 	SPPeer peer = nullptr;
-	while ( (peer = peers->FindNextPeer(pit)) != nullptr )
+	while ( (peer = g_Reflector.GetPeers().FindNextPeer(pit)) )
 	{
 		const auto cs = peer->GetCallsign().GetCS();
 		if ( nullptr == g_Interlinks.Find(cs) )
@@ -738,7 +728,7 @@ void CProtocol::HandlePeerLinks(void)
 			Send(buf, 10, peer->GetIp());
 			std::cout << "Sent disconnect packet to M17 peer " << cs << " at " << peer->GetIp() << std::endl;
 			// remove client
-			peers->RemovePeer(peer);
+			g_Reflector.GetPeers().RemovePeer(peer);
 			publish = true;
 		}
 	}
@@ -751,7 +741,7 @@ void CProtocol::HandlePeerLinks(void)
 		const auto cs = item->GetCallsign().GetCS();
 		if (item->GetIp().IsSet())
 		{
-			if (nullptr == peers->FindPeer(item->GetCallsign()))
+			if (nullptr == g_Reflector.GetPeers().FindPeer(item->GetCallsign()))
 			{
 				// send connect packet to re-initiate peer link
 				SInterConnect connect;
@@ -777,7 +767,6 @@ void CProtocol::HandlePeerLinks(void)
 		}
 	}
 
-	g_Reflector.ReleasePeers();
 	g_Interlinks.Unlock();
 
 #ifndef NO_DHT

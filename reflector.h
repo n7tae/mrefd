@@ -52,8 +52,7 @@ public:
 	void      ReleaseClients(void)                  { m_Clients.Unlock(); }
 
 	// peers
-	CPeers   *GetPeers(void)                        { m_Peers.Lock(); return &m_Peers; }
-	void      ReleasePeers(void)                    { m_Peers.Unlock(); }
+	CPeers   &GetPeers(void)                        { return m_Peers; }
 
 	// users
 	CUsers  *GetUsers(void)                         { m_Users.Lock(); return &m_Users; }

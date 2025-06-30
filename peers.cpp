@@ -38,9 +38,8 @@ CPeers::CPeers() {}
 
 CPeers::~CPeers()
 {
-	m_Mutex.lock();
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	m_Peers.clear();
-	m_Mutex.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -48,29 +47,18 @@ CPeers::~CPeers()
 
 void CPeers::AddPeer(SPPeer peer)
 {
-	// first check if peer already exists
-	for ( auto it=begin(); it!=end(); it++ )
+	if (FindPeer(peer->GetCallsign()))
+		// if found, just do nothing so *peer keep pointing on a valid object on function return
 	{
-		if (FindPeer((*it)->GetCallsign()))
-			// if found, just do nothing so *peer keep pointing on a valid object on function return
-		{
-			std::cerr << "ERROR: trying to make a new " << peer->GetCallsign() << " but it already exists!" << std::endl;
-			return; // this shared ptr dies here
-		}
+		std::cerr << "ERROR: trying to make a new " << peer->GetCallsign() << ". It already exists!" << std::endl;
+		return; // this shared ptr dies here
 	}
 
 	// if not, append to the list (put in alphabetical order)
-	auto pit = m_Peers.begin();
-	for ( ; pit!=m_Peers.end(); pit++)
-	{
-		if (peer->GetCallsign().GetCS().compare((*pit)->GetCallsign().GetCS()) < 0) {
-			m_Peers.insert(pit, peer);
-			break;
-		}
-	}
-	if (pit == m_Peers.end())
-		m_Peers.push_back(peer);
+	Insert(peer);
+
 	std::cout << "New peer " << peer->GetCallsign() << " at " << peer->GetIp() << " added with protocol " << peer->GetProtocolName()  << std::endl;
+
 	// and append all peer's client to reflector client list
 	// it is double lock safe to lock Clients list after Peers list
 	auto clients = g_Reflector.GetClients();
@@ -81,13 +69,29 @@ void CPeers::AddPeer(SPPeer peer)
 	g_Reflector.ReleaseClients();
 }
 
+void CPeers::Insert(SPPeer peer)
+{
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	auto pit = m_Peers.begin();
+	for ( ; pit!=m_Peers.end(); pit++)
+	{
+		if (peer->GetCallsign().GetCS().compare((*pit)->GetCallsign().GetCS()) < 0) {
+			m_Peers.insert(pit, peer);
+			break;
+		}
+	}
+	if (pit == m_Peers.end())
+		m_Peers.push_back(peer);
+}
+
 void CPeers::RemovePeer(SPPeer peer)
 {
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	// look for the client
-	for ( auto pit=begin(); pit!=end(); /*increment done in body */ )
+	for ( auto pit=m_Peers.begin(); pit!=m_Peers.end(); /*increment done in body */ )
 	{
 		// compare object pointers
-		if (( *pit == peer ) && ( !(*pit)->IsTransmitting() ))
+		if (( (*pit)->GetCallsign() == peer->GetCallsign() ) && ( !(*pit)->IsTransmitting() ))
 		{
 			// remove all clients from reflector client list
 			// it is double lock safe to lock Clients list after Peers list
@@ -117,38 +121,26 @@ void CPeers::RemovePeer(SPPeer peer)
 
 SPPeer CPeers::FindPeer(const CIp &Ip)
 {
-	for ( auto it=begin(); it!=end(); it++ )
+	std::lock_guard<std::mutex> lock(m_Mutex);
+
+	for (auto &item : m_Peers)
 	{
-		if ( ((*it)->GetIp() == Ip) )
+		if ( (item->GetIp() == Ip) )
 		{
-			return *it;
+			return item;
 		}
 	}
 
 	return nullptr;
 }
 
-SPPeer CPeers::FindPeer(const CCallsign &Callsign, const CIp &Ip)
+SPPeer CPeers::FindPeer(const CCallsign &cs)
 {
-	for ( auto it=begin(); it!=end(); it++ )
+	std::lock_guard<std::mutex> lock(m_Mutex);
+	for (auto &item : m_Peers)
 	{
-		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) && ((*it)->GetIp() == Ip) )
-		{
-			return *it;
-		}
-	}
-
-	return nullptr;
-}
-
-SPPeer CPeers::FindPeer(const CCallsign &Callsign)
-{
-	for ( auto it=begin(); it!=end(); it++ )
-	{
-		if ( (*it)->GetCallsign().HasSameCallsign(Callsign) )
-		{
-			return *it;
-		}
+		if (cs == item->GetCallsign())
+			return item;
 	}
 
 	return nullptr;
@@ -160,7 +152,7 @@ SPPeer CPeers::FindPeer(const CCallsign &Callsign)
 
 SPPeer CPeers::FindNextPeer(std::list<SPPeer>::iterator &it)
 {
-	if ( it!=end() )
+	if ( it!=m_Peers.end() )
 		return *it++;
 
 	return nullptr;

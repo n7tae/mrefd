@@ -230,14 +230,14 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// linked peers
 	xmlFile << "<PEERS>" << std::endl;
 	// lock
-	auto peers = GetPeers();
 	// iterate on peers
-	for ( auto pit=peers->cbegin(); pit!=peers->cend(); pit++ )
+	auto item = m_Peers.Begin();
+	SPPeer p;
+	while ( (p = m_Peers.FindNextPeer(item)) )
 	{
-		(*pit)->WriteXml(xmlFile);
+		p->WriteXml(xmlFile);
 	}
 	// unlock
-	ReleasePeers();
 	xmlFile << "</PEERS>" << std::endl;
 
 	// linked nodes
@@ -283,12 +283,13 @@ void CReflector::PutDHTPeers()
 	SMrefdPeers1 p;
 	time(&p.timestamp);
 	p.sequence = peers_put_count++;
-	auto peers = GetPeers();
-	for (auto pit=peers->cbegin(); pit!=peers->cend(); pit++)
+
+	auto item = m_Peers.Begin();
+	SPPeer peer;
+	while ( (peer = m_Peers.FindNextPeer(item)) )
 	{
-		p.list.emplace_back((*pit)->GetCallsign().GetCS(), (*pit)->GetSharedModules(), (*pit)->GetConnectTime());
+		p.list.emplace_back(peer->GetCallsign().GetCS(), peer->GetSharedModules(), peer->GetConnectTime());
 	}
-	ReleasePeers();
 
 	auto nv = std::make_shared<dht::Value>(p);
 	nv->user_type.assign("mrefd-peers-1");
