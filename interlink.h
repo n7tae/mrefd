@@ -56,7 +56,6 @@ private:
 	CCallsign   m_Callsign;
 	CIp         m_Ip;
 	uint16_t    m_Port;
-	CReflMods   m_refmods;
 	bool        m_IsNotLegacy;
 
 #ifndef NO_DHT

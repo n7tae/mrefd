@@ -69,23 +69,16 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	if (isbad)
 		return;
 
-	CReflMods tmprm(m_reqMods, emods);   // make the request
+	CReflMods reqrm(m_reqMods, emods);   // make the request
 
 	// checkout the modules first
-	if (tmprm.IsIn(g_CFG.GetRefMods(), m_UsingDHT))
+	if (reqrm.IsIn(g_CFG.GetRefMods(), m_UsingDHT))
 	{
-		if (not (tmprm == m_refmods))
-		{
-			m_refmods = tmprm;
-		}
-		else
-		{
-			std::cerr << "ERROR: There is an encrypted mismatched module specifed for " << m_Callsign.GetCS() << std::endl;
-			return;
-		}
+		std::cerr << "ERROR: There is a module mismatch for " << m_Callsign.GetCS() << std::endl;
+		return;
 	}
-		
-			// now the other stuff
+
+	// now the other stuff
 	if (m_IPv4.compare(ipv4))
 	{
 		m_IPv4.assign(ipv4);
