@@ -53,7 +53,7 @@ private:
 	// data
 	const bool  m_UsingDHT;
 	const std::string m_reqMods;
-	CCallsign   m_Callsign;
+	const CCallsign   m_Callsign;
 	CIp         m_Ip;
 	uint16_t    m_Port;
 	bool        m_IsNotLegacy;

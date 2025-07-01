@@ -35,15 +35,13 @@ extern CConfigure g_CFG;
 // constructor
 
 #ifndef NO_DHT
-CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_UsingDHT(true), m_reqMods(mods)
+CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_UsingDHT(true), m_reqMods(mods), m_Callsign(cs)
 {
-	m_Callsign.CSIn(cs);
 }
 #endif
 
-CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods)
+CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
 {
-	m_Callsign.CSIn(cs);
 	if (addr.npos == addr.find(':'))
 		UpdateItem(mods, "", addr, "", port, islegacy);
 	else

@@ -85,11 +85,11 @@ void CReflMods::Parse(const std::string &s, const std::string &e)
 bool CReflMods::IsIn(const CReflMods &rm, bool checkmodes, const std::string &cs) const
 {
 	bool rv = true;
-	// check each one of the modules
+	// check each one of the modules of the interlink request
 	for (const auto item : mmMap)
 	{
 		EModuleMode mm;
-		if (rm.GetMode(item.first, mm))
+		if (rm.GetMode(item.first, mm)) // get the module of this refector
 		{
 			std::cerr << "ERROR: for enterlink item " << cs << ", module '" << item.first << "' is not configured on this reflector!" << std::endl;
 			rv = false;
@@ -98,7 +98,7 @@ bool CReflMods::IsIn(const CReflMods &rm, bool checkmodes, const std::string &cs
 		{
 			if (item.second != mm)
 			{
-				std::cerr << "ERROR: for interlink item " << cs << ", module '" << item.first << "' is " << GetModeName(mm) << " and is incompatible with this reflector" << std::endl;
+				std::cerr << "ERROR: for interlink item " << cs << ", module '" << item.first << "' it's mode is " << GetModeName(item.second) << " and is incompatible with this reflector, which is " << GetModeName(mm) << std::endl;
 				rv = false;
 			}
 		}
