@@ -707,11 +707,6 @@ void CProtocol::HandleKeepalives(void)
 
 void CProtocol::HandlePeerLinks(void)
 {
-#ifdef DEBUG
-	std::cout << "Entering HandlePeerLinks" << std::endl;
-#endif
-	// get the list of peers
-
 	// check if all our connected peers are still listed in mrefd.interlink
 	// if not, disconnect
 	auto pit = g_Reflector.GetPeers().Begin();
@@ -749,12 +744,6 @@ void CProtocol::HandlePeerLinks(void)
 				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
 				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 			}
-		#ifdef DEBUG
-			else
-			{
-				std::cout << cs << " is already a peer" << std::endl;
-			}
-		#endif
 		}
 		else
 		{
@@ -772,9 +761,6 @@ void CProtocol::HandlePeerLinks(void)
 		g_Reflector.PutDHTPeers();
 		publish = false;
 	}
-#endif
-#ifdef DEBUG
-	std::cout << "Leaving HandlePeerLinks" << std::endl;
 #endif
 }
 
