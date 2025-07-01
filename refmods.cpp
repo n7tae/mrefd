@@ -40,7 +40,7 @@ CReflMods &CReflMods::operator=(const CReflMods &item)
 
 const char *CReflMods::GetModeName(EModuleMode mm) const
 {
-	return (EModuleMode::normal == mm) ? "non-encrypted" : "encrypted";
+	return (EModuleMode::normal == mm) ? "not encrypted" : "encrypted";
 }
 
 void CReflMods::Parse(const std::string &s, const std::string &e)
@@ -80,25 +80,25 @@ void CReflMods::Parse(const std::string &s, const std::string &e)
 	}
 }
 
-// returns true if everthing in this map is defined identically in rm
-// if islegacy is true, then module modes won't be compaired
-// and then it's up to the admin to get this right
-bool CReflMods::IsIn(const CReflMods &rm, bool checkmodes) const
+// this is only used in the Cinterlink::UpdateItem routine to make sure requested modules
+// match rm, which is the configurtion of this reflector
+bool CReflMods::IsIn(const CReflMods &rm, bool checkmodes, const std::string &cs) const
 {
 	bool rv = true;
+	// check each one of the modules
 	for (const auto item : mmMap)
 	{
 		EModuleMode mm;
 		if (rm.GetMode(item.first, mm))
 		{
-			std::cerr << "ERROR: Module '" << item.first << "' is not configured on this reflector!" << std::endl;
+			std::cerr << "ERROR: for enterlink item " << cs << ", module '" << item.first << "' is not configured on this reflector!" << std::endl;
 			rv = false;
 		}
 		if (checkmodes)
 		{
 			if (item.second != mm)
 			{
-				std::cerr << "ERROR: Module '" << item.first << "' is " << GetModeName(mm) << " and is incompatible with this reflector" << std::endl;
+				std::cerr << "ERROR: for interlink item " << cs << ", module '" << item.first << "' is " << GetModeName(mm) << " and is incompatible with this reflector" << std::endl;
 				rv = false;
 			}
 		}

@@ -38,7 +38,7 @@ public:
 	void Parse(const std::string &s, const std::string &e);
 	// utilities
 	size_t GetSize() const { return mmMap.size(); }
-	bool IsIn(const CReflMods &rm, bool checkmodes) const;
+	bool IsIn(const CReflMods &rm, bool checkmodes, const std::string &cs) const;
 	void Clear() { mmMap.clear(); mods.erase(); emods.erase(); }
 	// get data from the map
 	const std::string &GetModules() const { return mods; };

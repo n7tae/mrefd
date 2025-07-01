@@ -72,9 +72,8 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	CReflMods reqrm(m_reqMods, emods);   // make the request
 
 	// checkout the modules first
-	if (not reqrm.IsIn(g_CFG.GetRefMods(), m_UsingDHT))
+	if (not reqrm.IsIn(g_CFG.GetRefMods(), m_UsingDHT, m_Callsign.GetCS()))
 	{
-		std::cerr << "ERROR: There is a module mismatch for " << m_Callsign.GetCS() << std::endl;
 		return;
 	}
 
