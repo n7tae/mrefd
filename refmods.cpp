@@ -98,7 +98,7 @@ bool CReflMods::IsIn(const CReflMods &rm, bool checkmodes) const
 		{
 			if (item.second != mm)
 			{
-				std::cerr << "ERROR: Module '" << item.first << "' is " << GetModeName(mm) << " and this reflector is not" << std::endl;
+				std::cerr << "ERROR: Module '" << item.first << "' is " << GetModeName(mm) << " and is incompatible with this reflector" << std::endl;
 				rv = false;
 			}
 		}
