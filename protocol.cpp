@@ -984,18 +984,35 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	cs.CodeIn(buf + 4);
 	if (cs.GetCS(4).compare("M17-"))
 	{
-		std::cout << "Link request from '" << cs << "' denied" << std::endl;
+		std::cout << "Interlink request from '" << cs << "' denied" << std::endl;
 		return false;
 	}
-	memcpy(mods, buf+10, 27);
-	for (unsigned i=0; i<strlen(mods); i++)
+
+	auto pmods = (const char *)buf+10;
+	if (strnlen(pmods, 27) > 26)
 	{
-		if (! IsLetter(mods[i]))
-		{
-			std::cout << "Illegal module specified in '" << mods << "'" << std::endl;
-			return false;
-		}
+		std::cout << "Could not fine a null in the mods field of a CONN packet from " << cs << std::endl;
+		return false;
 	}
+
+	// we have to check if our interlink entry has the same module
+	auto pInterlinkItem = g_Interlinks.Find(cs.GetCS());
+	if (nullptr == pInterlinkItem)
+	{
+		std::cout << "Interlink request from " << cs.GetCS() << " is not defined in mrefd.interlink" << std::endl;
+		return false;
+	}
+	
+	const std::string rmods(CReflMods(pmods, "").GetModules());
+	const std::string imods(pInterlinkItem->GetReqMods());
+	if (imods.compare(rmods))
+	{
+		std::cout << cs.GetCS() << " CONN packet is for '" << rmods << "' but mrefd.interlink specifies '" << imods << "'" << std::endl;
+		return false;
+	}
+	
+	strcpy(mods, imods.c_str());
+
 	return true;
 }
 
