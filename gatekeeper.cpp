@@ -157,7 +157,7 @@ bool CGateKeeper::IsNodeListed(const CCallsign &cs) const
 
 
 	// then check if not blacklisted
-	if (not m_NodeBlackSet.IsMatched(cs.GetCS()))
+	if (m_NodeBlackSet.IsMatched(cs.GetCS()))
 	{
 		std::cout << cs.GetCS() << " has been blocked by the blacklist" << std::endl;
 		return false;
