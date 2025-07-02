@@ -182,7 +182,7 @@ void CProtocol::Task(void)
 						// if there is a problem, return false
 						if (OnPacketIn(pack, client))
 						{
-							SendToAllClients(pack, client, mod);
+							SendToClients(pack, client, mod);
 							if (pack.IsStreamPacket() and pack.IsLastPacket())
 							{
 								CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
@@ -581,7 +581,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendToAllClients(CPacket &packet, const SPClient &txclient, const char mod)
+void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod)
 {
 	#ifdef DEBUG
 	if (not packet.IsStreamPacket())
@@ -593,8 +593,6 @@ void CProtocol::SendToAllClients(CPacket &packet, const SPClient &txclient, cons
 	// this might be going to a legacy reflector
 	if (packet.IsStreamPacket())
 	{
-		const bool b = true;
-		packet.GetData()[54] = uint8_t(b);
 	}
 	// push it to all our clients linked to the module and who is not streaming in
 	SPClient client = nullptr;
@@ -605,21 +603,43 @@ void CProtocol::SendToAllClients(CPacket &packet, const SPClient &txclient, cons
 		// he not TXing and he is not doing a parrot
 		if ((client != txclient) and (parrotMap.end() == parrotMap.find(client)))
 		{
-			const auto ct = client->GetClientType();
+			const auto fromtype = packet.GetFromType();
+			switch (client->GetClientType())
+			{
+				case EClientType::legacy:
+					// legacy reflectors have to be properly addressed
+					// and will only get streaming data from simple clients
+					if ((EClientType::simple == fromtype) and packet.IsStreamPacket())
+					{
+						// save the DST address and the CRC
+						uint8_t dsta[6];
+						memcpy(dsta, packet.GetCDstAddress(), 6);
+						const auto crc = packet.GetCRC();
 
-			if (EClientType::reflector == ct or EClientType::legacy == ct)
-			{
-				// the client is a reflector
-				if (EClientType::simple == packet.GetFromType())
-				{
-					// only send it if from a client
+						// set the address and calculate the CRC
+						client->GetCallsign().CodeOut(packet.GetDstAddress());
+						packet.CalcCRC();
+
+						// one last thing, set the 55th bit to true
+						const bool b = true;
+						packet.GetData()[54] = uint8_t(b);
+
+						// send this data
+						client->SendPacket(packet);
+
+						// restore the DST address and CRC
+						memcpy(packet.GetDstAddress(), dsta, 6);
+						packet.SetCRC(crc);
+					}
+					break;
+				case EClientType::reflector:
+					if (EClientType::simple == fromtype)
+						client->SendPacket(packet);
+					break;
+				default:
+					// all local clients, simple and listen-only, get the data
 					client->SendPacket(packet);
-				}
-			}
-			else 
-			{
-				// this client is not a reflector
-				client->SendPacket(packet);
+					break;
 			}
 		}
 	}

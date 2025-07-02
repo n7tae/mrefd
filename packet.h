@@ -54,6 +54,7 @@ public:
 	bool IsStreamPacket() const { return isstream; }
 	bool IsLastPacket() const;
 	void CalcCRC();
+	void SetCRC(uint16_t crc);
 
 private:
 	uint16_t Get16At(size_t pos) const;

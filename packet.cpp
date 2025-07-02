@@ -126,6 +126,20 @@ void CPacket::CalcCRC()
 	}
 }
 
+void CPacket::SetCRC(uint16_t crc)
+{
+	if (isstream)
+	{
+		data[52] = 0xffu & (crc >> 8);
+		data[53] = 0xffu & crc;
+	}
+	else
+	{	// set the CRC for the LSF
+		data[32] = 0xffu & (crc >> 8);
+		data[33] = 0xffu & crc;
+	}
+}
+
 const uint8_t *CPacket::GetCVoice() const
 {
 	static uint8_t quiet[] { 0x01u, 0x00u, 0x09u, 0x43u, 0x9cu, 0xe4u, 0x21u, 0x08u, 0x01u, 0x00u, 0x09u, 0x43u, 0x9cu, 0xe4u, 0x21u, 0x08u };
