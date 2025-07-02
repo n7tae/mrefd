@@ -999,15 +999,15 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	auto pInterlinkItem = g_Interlinks.Find(cs.GetCS());
 	if (nullptr == pInterlinkItem)
 	{
-		std::cout << "Interlink request from " << cs.GetCS() << " is not defined in mrefd.interlink" << std::endl;
+		std::cout << "Interlink request from " << cs.GetCS() << " is not defined in the mrefd interlink file" << std::endl;
 		return false;
 	}
-	
+
 	const std::string rmods(CReflMods(pmods, "").GetModules());
 	const std::string imods(pInterlinkItem->GetReqMods());
 	if (imods.compare(rmods))
 	{
-		std::cout << cs.GetCS() << " CONN packet is for '" << rmods << "' but mrefd.interlink specifies '" << imods << "'" << std::endl;
+		std::cout << cs.GetCS() << " CONN packet is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
 		return false;
 	}
 	

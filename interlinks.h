@@ -55,8 +55,6 @@ public:
 	bool empty() const { return m_Imap.empty(); }
 	auto begin() { return m_Imap.begin(); }
 	auto end()   { return m_Imap.end(); }
-	auto cbegin() { return m_Imap.cbegin(); }
-	auto cend()   { return m_Imap.cend(); }
 
 	const CInterlink *Find(const std::string &) const;
 
