@@ -590,27 +590,26 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
 	}
 	#endif
-	// this might be going to a legacy reflector
-	if (packet.IsStreamPacket())
-	{
-	}
 	// push it to all our clients linked to the module and who is not streaming in
 	SPClient client = nullptr;
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
-		// he not TXing and he is not doing a parrot
-		if ((client != txclient) and (parrotMap.end() == parrotMap.find(client)))
+		if (packet.IsStreamPacket())
 		{
+		// he not TXing and he is not doing a parrot
+			if ((client == txclient) or (parrotMap.end() != parrotMap.find(client)))
+				return;
+
 			const auto fromtype = packet.GetFromType();
 			switch (client->GetClientType())
 			{
 				case EClientType::legacy:
-					// legacy reflectors have to be properly addressed
-					// and will only get streaming data from simple clients
-					if ((EClientType::simple == fromtype) and packet.IsStreamPacket())
+					// reflectors will only get streaming data from simple clients
+					if (EClientType::simple == fromtype)
 					{
+						// legacy reflectors have to be properly addressed
 						// save the DST address and the CRC
 						uint8_t dsta[6];
 						memcpy(dsta, packet.GetCDstAddress(), 6);
@@ -633,12 +632,34 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 					}
 					break;
 				case EClientType::reflector:
+					// reflectors will only get data from streaming client
 					if (EClientType::simple == fromtype)
 						client->SendPacket(packet);
 					break;
 				default:
-					// all local clients, simple and listen-only, get the data
+					// all local clients, simple and listen-only, get data from anywhere
+					// bogus listen-only input is blocked in OnPacketIn
 					client->SendPacket(packet);
+					break;
+			}
+		}
+		else // this is packet data
+		{
+			if (client == txclient)
+				continue; // don't send the packet data back to the client
+
+			const auto ct = client->GetClientType();
+			switch (packet.GetFromType())
+			{
+				case EClientType::reflector:
+					if (EClientType::simple==ct or EClientType::listenonly==ct)
+						client->SendPacket(packet);
+					break;
+				case EClientType::simple:
+					if (EClientType::legacy != ct)
+						client->SendPacket(packet);
+					break;
+				default:
 					break;
 			}
 		}
