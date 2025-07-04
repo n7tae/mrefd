@@ -289,14 +289,15 @@ void CProtocol::Task(void)
 								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket6));
 							else
 								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket4));
+							g_Reflector.ReleaseClients();
 						}
 					} else {
 						if (AF_INET6 == ip.GetFamily())
 							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket6));
 						else
 							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket4));
+						g_Reflector.ReleaseClients();
 					}
-					g_Reflector.ReleaseClients();
 				}
 				else
 				{
@@ -870,7 +871,8 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 
 	if ( client->IsListenOnly())
 	{
-		// std::cerr << "Client " << client->GetCallsign() << " is not allowed to stream! (ListenOnly)" << std::endl;
+		if (packet.IsLastPacket())
+			std::cerr << "Listen-only client " << client->GetCallsign() << " is sending data!" << std::endl;
 		return false;
 	}
 
