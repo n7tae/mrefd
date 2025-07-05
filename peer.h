@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <list>
+#include <map>
 #include <memory>
 
 #include "version.h"
@@ -51,6 +51,7 @@ public:
 	const CIp &GetIp(void) const                    { return m_Ip; }
 	const std::string &GetSharedModules(void) const { return m_sharedModules; }
 	std::time_t GetConnectTime(void) const          { return m_ConnectTime; }
+	EClientType GetType(void) const                 { return m_refType; }
 
 	// set
 
@@ -65,12 +66,13 @@ public:
 	// clients access
 	int     GetNbClients(void) const { return (int)m_Clients.size(); }
 	void    ClearClients(void)       { m_Clients.clear(); }
+	SPClient GetClient(char);
 
 	// pass-through
-	std::list<SPClient>::iterator begin()              { return m_Clients.begin(); }
-	std::list<SPClient>::iterator end()                { return m_Clients.end(); }
-	std::list<SPClient>::const_iterator cbegin() const { return m_Clients.cbegin(); }
-	std::list<SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
+	std::map<char, SPClient>::iterator begin()              { return m_Clients.begin(); }
+	std::map<char, SPClient>::iterator end()                { return m_Clients.end(); }
+	std::map<char, SPClient>::const_iterator cbegin() const { return m_Clients.cbegin(); }
+	std::map<char, SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
 	virtual void WriteXml(std::ofstream &) const;
@@ -81,7 +83,7 @@ protected:
 	const CIp         m_Ip;
 	const EClientType m_refType;
 	const std::string m_sharedModules;
-	std::list<SPClient> m_Clients;
+	std::map<char, SPClient> m_Clients;
 
 	// status
 	CTimer      m_LastKeepaliveTime;

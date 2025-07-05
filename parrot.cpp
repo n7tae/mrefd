@@ -50,7 +50,8 @@ void CStreamParrot::playThread()
 	state = EParrotState::play;
 	CPacket pack;
 	memcpy(pack.GetData(), "M17 ", 4);
-	pack.Initialize(54u, true);
+	pack.SetSize(54u);
+	pack.SetType(true);
 	pack.SetStreamId(NewSID.Make());
 	memset(pack.GetDstAddress(), 0xffu, 6);
 	src.CodeOut(pack.GetSrcAddress());
@@ -74,7 +75,8 @@ void CStreamParrot::playThread()
 
 void CPacketParrot::Add(const CPacket &pack)
 {
-	packet.Initialize(pack.GetSize(), false);
+	packet.SetSize(pack.GetSize());
+	packet.SetType(false);
 	memcpy(packet.GetData(), pack.GetCData(), pack.GetSize());
 }
 
@@ -118,7 +120,8 @@ void CPacketParrot::returnPacket()
 		packet.GetData()[34] = 0x5u; // SMS type
 		memcpy(packet.GetData()+35, str.c_str(), l);
 		size_t tps = 4 + 30 + 3 + l;
-		packet.Initialize(tps, false);
+		packet.SetSize(tps);
+		packet.SetType(false);
 		packet.CalcCRC();
 		for (; tps < MAX_PACKET_SIZE; tps++) packet.GetData()[tps] = 0u;
 		client->SendPacket(packet);

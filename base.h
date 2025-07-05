@@ -1,6 +1,6 @@
 #pragma once
 /*
- *   Copyright (C) 2020 by Thomas Early N7TAE
+ *   Copyright (C) 2020,2025 by Thomas Early N7TAE
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,5 +26,6 @@ public:
 	virtual ~CBase() {}
 
 protected:
+	void Dump(const void *pointer, int length);
 	void Dump(const std::string &title, const void *pointer, int length);
 };

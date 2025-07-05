@@ -30,9 +30,6 @@
 #include "reflector.h"
 #include "peer.h"
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructor
-
 CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_refType(type), m_sharedModules(mods)
 {
 	m_LastKeepaliveTime.Start();
@@ -46,26 +43,20 @@ CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::stri
 	{
 		//clientcs.SetModule(m);
 		// create and append to list
-		m_Clients.push_back(std::make_shared<CClient>(m_Callsign, ip, type, m, sock));
+		m_Clients[m] = std::make_shared<CClient>(m_Callsign, ip, type, m, sock);
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// destructors
 
 CPeer::~CPeer()
 {
 	m_Clients.clear();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// status
-
 bool CPeer::IsTransmitting(void) const
 {
-	for ( auto it=cbegin(); it!=cend(); it++ )
+	for (auto item : m_Clients)
 	{
-		if ((*it)->IsTransmitting())
+		if (item.second->IsTransmitting())
 			return true;
 	}
 	return false;
@@ -74,21 +65,18 @@ bool CPeer::IsTransmitting(void) const
 void CPeer::Alive(void)
 {
 	m_LastKeepaliveTime.Start();
-	for ( auto it=begin(); it!=end(); it++ )
+	for (auto item : m_Clients)
 	{
-		(*it)->Alive();
+		item.second->Alive();
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-// reporting
 
 void CPeer::WriteXml(std::ofstream &xmlFile) const
 {
 	time_t lht = 0;
-	for (auto &client : m_Clients)
+	for (auto &item : m_Clients)
 	{
-		auto t = client->GetLastHeardTime();
+		auto t = item.second->GetLastHeardTime();
 		if (t > lht)
 			lht = t;
 	}
@@ -109,15 +97,21 @@ void CPeer::WriteXml(std::ofstream &xmlFile) const
 	xmlFile << "</PEER>" << std::endl;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// status
-
 bool CPeer::IsAlive(void) const
 {
-	for ( auto it=cbegin(); it!=cend(); it++ )
+	for (auto item : m_Clients)
 	{
-		if (not (*it)->IsAlive())
+		if (item.second->IsAlive())
 			return false;
 	}
 	return true;
+}
+
+SPClient CPeer::GetClient(char m)
+{
+	auto item = m_Clients.find(m);
+	if (m_Clients.end() == item)
+		return nullptr;
+	else
+		return item->second;
 }

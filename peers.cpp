@@ -59,12 +59,10 @@ void CPeers::AddPeer(SPPeer peer)
 
 	std::cout << "New peer " << peer->GetCallsign() << " at " << peer->GetIp() << " added with protocol " << peer->GetProtocolName()  << std::endl;
 
-	// and append all peer's client to reflector client list
-	// it is double lock safe to lock Clients list after Peers list
 	auto clients = g_Reflector.GetClients();
 	for ( auto cit=peer->cbegin(); cit!=peer->cend(); cit++ )
 	{
-		clients->AddClient(*cit);
+		clients->AddClient(cit->second);
 	}
 	g_Reflector.ReleaseClients();
 }
@@ -98,8 +96,8 @@ void CPeers::RemovePeer(SPPeer peer)
 			CClients *clients = g_Reflector.GetClients();
 			for ( auto cit=peer->begin(); cit!=peer->end(); cit++ )
 			{
-				// this also delete the client object
-				clients->RemoveClient(*cit);
+				// this deletes the client object(s)
+				clients->RemoveClient(cit->second);
 			}
 			// so clear it then
 			(*pit)->ClearClients();

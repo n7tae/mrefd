@@ -72,14 +72,6 @@ bool CClient::operator ==(const CClient &client) const
 void CClient::SendPacket(const CPacket &pack) const
 {
 	auto size = pack.GetSize();
-	if (EClientType::legacy == m_Type)
-	{
-		if (pack.IsStreamPacket())
-			size++;
-		else
-			// don't send a pm packet to a legacy reflector
-			return;
-	}
 	m_Sock.Send(pack.GetCData(), size, m_Ip);
 }
 

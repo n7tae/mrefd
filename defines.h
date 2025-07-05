@@ -30,6 +30,7 @@ enum class EClientType : uint8_t { listenonly, simple, reflector, legacy };
 
 
 // defines
+#define MAX_PACKET_SIZE                 860
 #define M17_KEEPALIVE_PERIOD			3
 #define M17_KEEPALIVE_TIMEOUT           (M17_KEEPALIVE_PERIOD*10)
 #define M17_RECONNECT_PERIOD            10

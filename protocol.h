@@ -80,10 +80,10 @@ protected:
 	void CheckStreamsTimeout(void);
 
 	// packet decoding helpers
+	SPClient GetClient(const CIp &ip, const unsigned size, CPacket &p, char &m,  CCallsign &dst, CCallsign &src);
 	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
-	bool IsValidPacket(CPacket &packet, size_t size, const char m);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
 	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
@@ -103,10 +103,10 @@ protected:
 	bool IsLetter(char) const;
 	bool IsSpace(char) const;
 
-	ssize_t Receive6(uint8_t *buf, CIp &Ip, int time_ms);
-	ssize_t Receive4(uint8_t *buf, CIp &Ip, int time_ms);
-	ssize_t ReceiveDS(uint8_t *buf, CIp &Ip, int time_ms);
-	ssize_t (CProtocol::*Receive)(uint8_t *buf, CIp &Ip, int time_ms);
+	unsigned Receive6(uint8_t *buf, CIp &Ip, int time_ms);
+	unsigned Receive4(uint8_t *buf, CIp &Ip, int time_ms);
+	unsigned ReceiveDS(uint8_t *buf, CIp &Ip, int time_ms);
+	unsigned (CProtocol::*Receive)(uint8_t *buf, CIp &Ip, int time_ms);
 
 	void Send(const uint8_t *buf, size_t size, const CIp &Ip) const;
 

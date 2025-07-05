@@ -26,13 +26,10 @@
 #include "callsign.h"
 #include "defines.h"
 
-#define MAX_PACKET_SIZE 859
-
 class CPacket
 {
 public:
 	CPacket();
-	void Initialize(size_t s, bool iss);
 	const uint8_t *GetCDstAddress() const;
 	const uint8_t *GetCSrcAddress() const;
 	uint8_t *GetDstAddress();
@@ -51,7 +48,10 @@ public:
 	void SetFromType(EClientType f) { type = f; }
 	void SetStreamId(uint16_t sid);
 	void SetFrameType(uint16_t ft);
-	bool IsStreamPacket() const { return isstream; }
+	void SetSize(size_t n) { size = n; }
+	void SetType(bool iss) { isstream = iss; }
+	bool IsStreamData() const { return isstream; }
+	bool IsPacketData() const { return not isstream; }
 	bool IsLastPacket() const;
 	void CalcCRC();
 	void SetCRC(uint16_t crc);
@@ -62,5 +62,5 @@ private:
 	bool isstream;
 	EClientType type;
 	size_t size;
-	uint8_t data[MAX_PACKET_SIZE+1];
+	uint8_t data[MAX_PACKET_SIZE];
 };

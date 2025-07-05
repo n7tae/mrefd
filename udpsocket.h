@@ -59,11 +59,11 @@ public:
 	}
 
 	// read
-	ssize_t Receive    (uint8_t *, CIp &, int);
-	ssize_t ReceiveFrom(uint8_t *, CIp &);
+	unsigned Receive    (uint8_t *, CIp &, int);
+	unsigned ReceiveFrom(uint8_t *, CIp &);
 
 	// write
-	void Send(const uint8_t *, size_t, const CIp &) const;
+	unsigned Send(const uint8_t *, size_t, const CIp &) const;
 
 private:
 	// data

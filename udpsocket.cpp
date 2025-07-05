@@ -21,8 +21,10 @@
 // ----------------------------------------------------------------------------
 
 #include <string.h>
+#include <csignal>
 
 #include "udpsocket.h"
+#include "defines.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructor
@@ -52,7 +54,7 @@ bool CUdpSocket::Open(const CIp &Ip)
 	if ( m_fd < 0 )
 	{
 		std::cerr << "Unable to open socket on " << Ip << ", " << strerror(errno) << std::endl;
-		return false;
+		return true;
 	}
 	// initialize sockaddr struct
 	m_addr = Ip;
@@ -62,21 +64,21 @@ bool CUdpSocket::Open(const CIp &Ip)
 	{
 		std::cerr << "Cannot set the UDP socket option on " << m_addr << ", " << strerror(errno) << std::endl;
 		Close();
-		return false;
+		return true;
 	}
 
 	if (fcntl(m_fd, F_SETFL, O_NONBLOCK))
 	{
 		std::cerr << "fcntl set non-blocking failed on " << m_addr << ", " << strerror(errno) << std::endl;
 		Close();
-		return false;
+		return true;
 	}
 
 	if ( bind(m_fd, m_addr.GetCPointer(), m_addr.GetSize()) )
 	{
 		std::cerr << "bind failed on " << m_addr << ", " << strerror(errno) << std::endl;
 		Close();
-		return false;
+		return true;
 	}
 
 	if (0 == m_addr.GetPort())  	// get the assigned port for an ephemeral port request
@@ -87,7 +89,7 @@ bool CUdpSocket::Open(const CIp &Ip)
 		{
 			std::cerr << "getsockname error " << m_addr << ", " << strerror(errno) << std::endl;
 			Close();
-			return false;
+			return true;
 		}
 		if (a != m_addr)
 			std::cout << "getsockname didn't return the same address as set: returned " << a << ", should have been " << m_addr << std::endl;
@@ -96,7 +98,7 @@ bool CUdpSocket::Open(const CIp &Ip)
 	}
 
 	// done
-	return true;
+	return false;
 }
 
 void CUdpSocket::Close(void)
@@ -111,7 +113,7 @@ void CUdpSocket::Close(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // read
 
-ssize_t CUdpSocket::Receive(uint8_t *Buffer, CIp &Ip, int timeout)
+unsigned CUdpSocket::Receive(uint8_t *Buffer, CIp &Ip, int timeout)
 {
 	// socket valid ?
 	if ( 0 > m_fd )
@@ -130,22 +132,39 @@ ssize_t CUdpSocket::Receive(uint8_t *Buffer, CIp &Ip, int timeout)
 		return ReceiveFrom(Buffer, Ip);
 
 	if (rval < 0)
+	{
 		std::cerr << "select error on UPD port " << m_addr << ": " << strerror(errno) << std::endl;
+		raise(SIGINT);
+	}
 
-	return -1;
+	return 0u;
 }
 
-ssize_t CUdpSocket::ReceiveFrom(uint8_t *Buffer, CIp &ip)
+unsigned CUdpSocket::ReceiveFrom(uint8_t *Buffer, CIp &ip)
 {
 	// read
 	socklen_t fromsize = sizeof(struct sockaddr_storage);
-	return recvfrom(m_fd, Buffer, UDP_BUFFER_LENMAX, 0, ip.GetPointer(), &fromsize);
+	auto rv = recvfrom(m_fd, Buffer, MAX_PACKET_SIZE, 0, ip.GetPointer(), &fromsize);
+	if (rv < 0)
+	{
+		std::cerr << "ERROR ReceiveFrom():" << strerror(errno) << std::endl;
+		raise(SIGINT);
+		return 0u;
+	}
+	return unsigned(rv);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // write
 
-void CUdpSocket::Send(const uint8_t *Buffer, size_t size, const CIp &Ip) const
+unsigned CUdpSocket::Send(const uint8_t *Buffer, size_t size, const CIp &Ip) const
 {
-	sendto(m_fd, Buffer, size, 0, Ip.GetCPointer(), Ip.GetSize());
+	auto rv = sendto(m_fd, Buffer, size, 0, Ip.GetCPointer(), Ip.GetSize());
+	if (rv < 0)
+	{
+		std::cerr << "ERROR sending " << size << " byte packet to " << Ip << ": " << strerror(errno) << std::endl;
+		raise(SIGINT);
+		return 0u;
+	}
+	return unsigned(rv);
 }

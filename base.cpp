@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2020 by Thomas Early N7TAE
+ *   Copyright (C) 2020,2025 by Thomas Early N7TAE
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,10 +24,13 @@
 
 void CBase::Dump(const std::string &title, const void *pointer, int length)
 {
-	const unsigned char *data = (const unsigned char *)pointer;
-
 	std::cout << title << std::endl;
+	Dump(pointer, length);
+}
 
+void CBase::Dump(const void *pointer, int length)
+{
+	const unsigned char *data = (const unsigned char *)pointer;
 	unsigned int offset = 0U;
 
 	while (length > 0) {

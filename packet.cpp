@@ -30,12 +30,6 @@ CPacket::CPacket()
 	size = 0;
 }
 
-void CPacket::Initialize(size_t n, bool bis)
-{
-	size = n;
-	isstream = bis;
-}
-
 const uint8_t *CPacket::GetCDstAddress() const
 {
 	return data + (isstream ? 6u : 4u);
