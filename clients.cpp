@@ -80,7 +80,7 @@ void CClients::RemoveClient(SPClient client)
 {
 	if (not client)
 		return;
-	for (auto it=begin(); it!=end(); it++)
+	for (auto it=m_Clients.begin(); it!=m_Clients.end(); it++)
 	{
 		const auto c = *it;
 		if (c == client)

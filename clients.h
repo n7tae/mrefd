@@ -74,6 +74,6 @@ public:
 
 protected:
 	// data
-	std::mutex           m_Mutex;
+	std::mutex          m_Mutex;
 	std::list<SPClient> m_Clients;
 };
