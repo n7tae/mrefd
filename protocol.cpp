@@ -564,23 +564,22 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod, const CCallsign &dst)
 {
 	#ifdef DEBUG
-	if (packet.IsPacketData())
-	{
-		Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
-		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
-	}
+	std::cout << "SendToAll DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
+	Dump(packet.GetCData(), packet.GetSize());
 	#endif
-	// push it to all our clients linked to the module and who is not streaming in
+	// push it to all our clients linked to the module
 	SPClient client = nullptr;
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
+		if (txclient == client)
+			continue; // don't send data back to the originator
 		if (packet.IsStreamData())
 		{
-		// the client is not TXing and he is not doing a parrot
-			if ((client == txclient) or (parrotMap.end() != parrotMap.find(client)))
-				return;
+			// the client is not parroting
+			if (parrotMap.end() != parrotMap.find(client))
+				continue;
 
 			const auto fromtype = packet.GetFromType();
 			switch (client->GetClientType())
@@ -608,7 +607,6 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 						// restore the DST address and CRC
 						dst.CodeOut(packet.GetDstAddress());
 						packet.SetCRC(crc);
-						packet.SetSize(54u);
 					}
 					break;
 				case EClientType::reflector:
@@ -618,42 +616,42 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 						packet.SetSize(55u);
 						packet.GetData()[54] = uint8_t(mod);
 						client->SendPacket(packet);
-						packet.SetSize(54u);
 					}
 					break;
 				default:
 					// all local clients, simple and listen-only, get data from anywhere
 					// bogus listen-only input is blocked in OnPacketIn
+					packet.SetSize(54u);
 					client->SendPacket(packet);
 					break;
 			}
 		}
 		else // this is packet data
 		{
-			if (client == txclient)
-				continue; // don't send the packet data back to the client
-
 			const auto ct = client->GetClientType();
 			switch (packet.GetFromType())
 			{
 				case EClientType::reflector:
 					if (EClientType::simple==ct or EClientType::listenonly==ct)
+					{
+						const auto size = packet.GetSize();
+						packet.SetSize(size-1);
 						client->SendPacket(packet);
+						packet.SetSize(size);
+					}
 					break;
 				case EClientType::simple:
-					if (EClientType::legacy != ct) // legacy reflectors don't get packet data
+					if (EClientType::legacy == ct) break; // legacy reflectors don't get packet data
+					if (EClientType::reflector == ct)
 					{
-						if (EClientType::reflector == ct)
-						{
-							const auto size = packet.GetSize();
-							packet.SetSize(size+1);
-							packet.GetData()[size] = uint8_t(mod);
-							client->SendPacket(packet);
-							packet.SetSize(size);
-						}
-						else
-							client->SendPacket(packet);
+						const auto size = packet.GetSize();
+						packet.SetSize(size+1);
+						packet.GetData()[size] = uint8_t(mod);
+						client->SendPacket(packet);
+						packet.SetSize(size);
 					}
+					else
+						client->SendPacket(packet);
 					break;
 				default:
 					break;
@@ -982,11 +980,11 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	// is it from a client, so is this a viable packet?
 	if ((' ' == char(buf[3])) and (0x1u == (0x1u & buf[19])) and ((54u == size) or (55u == size)))
 	{
-		packet.SetType(true);
+		packet.Initialize(size, true);
 	}
 	else if (('P' == char(buf[3])) and ((sizeof(SInterConnect) < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
 	{
-		packet.SetType(false);
+		packet.Initialize(size, false);
 	}
 	else
 	{
