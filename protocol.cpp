@@ -188,6 +188,7 @@ void CProtocol::Task(void)
 					uint8_t disc[4];
 					EncodeDisconnectedPacket(disc);
 					Send(disc, 4, ip);
+					g_Reflector.GetClients()->RemoveClient(client);
 				}
 				else
 				{
