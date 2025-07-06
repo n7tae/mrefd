@@ -975,6 +975,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 		return nullptr;
 	// is there a client with this address?
 	auto client = g_Reflector.GetClients()->FindClient(ip);
+	g_Reflector.ReleaseClients();
 	if (not client)
 		return nullptr;
 	// is it from a client, so is this a viable packet?

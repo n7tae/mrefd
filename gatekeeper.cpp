@@ -104,6 +104,7 @@ bool CGateKeeper::ClientMayLink(const CCallsign &cs, const CIp &ip) const
 	}
 	else
 		ok = IsNodeListed(cs);
+
 	g_Reflector.ReleaseClients();
 
 	return ok;
