@@ -321,9 +321,7 @@ void CProtocol::Task(void)
 			auto client = GetClient(ip, len, pack, mod, dst, src);
 			if (client)
 			{
-			#ifdef DEBUG
-				std::cout << "Data:" << (pack.IsStreamData()?"Stream":"Packet") << " Module:" << mod << " Client:" << client->GetCallsign() << " SRC:" << src << " IP:" << ip << std::endl;
-			#endif
+				//std::cout << "Data:" << (pack.IsStreamData()?"Stream":"Packet") << " Module:" << mod << " Client:" << client->GetCallsign() << " SRC:" << src << " IP:" << ip << std::endl;
 				// make sure the SRC callsign is not blacklisted
 				const CCallsign src(pack.GetCSrcAddress());
 				if (g_GateKeeper.MayTransmit(src, ip))
