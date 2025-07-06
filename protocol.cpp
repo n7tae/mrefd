@@ -56,6 +56,7 @@ CProtocol::~CProtocol()
 ////////////////////////////////////////////////////////////////////////////////////////
 // initialization
 
+// returns true on error
 bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
 {
 	// init reflector apparent callsign
@@ -70,8 +71,8 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		CIp ip4(AF_INET, port, strIPv4.c_str());
 		if ( ip4.IsSet() )
 		{
-			if (! m_Socket4.Open(ip4))
-				return false;
+			if (m_Socket4.Open(ip4))
+				return true;
 		}
 		std::cout << "Listening on " << ip4 << std::endl;
 	}
@@ -81,10 +82,10 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		CIp ip6(AF_INET6, port, strIPv6.c_str());
 		if ( ip6.IsSet() )
 		{
-			if (! m_Socket6.Open(ip6))
+			if (m_Socket6.Open(ip6))
 			{
 				m_Socket4.Close();
-				return false;
+				return true;
 			}
 			std::cout << "Listening on " << ip6 << std::endl;
 		}
@@ -120,7 +121,7 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		std::cerr << "Could not start protocol on port " << port << ": " << e.what() << std::endl;
 		m_Socket4.Close();
 		m_Socket6.Close();
-		return false;
+		return true;
 	}
 
 	// update time
@@ -128,7 +129,7 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 	m_LastPeersLinkTime.Start();
 
 	// done
-	return true;
+	return false;
 }
 
 void CProtocol::Thread()

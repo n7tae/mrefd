@@ -123,7 +123,7 @@ bool CReflector::Start(const char *cfgfilename)
 
 	// create protocols
 	std::cout << "Starting the M17 Protocol..." << std::endl;
-	if (not m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
+	if (m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
 	{
 		m_Protocol.Close();
 		return true;
