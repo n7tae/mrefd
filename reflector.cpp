@@ -70,15 +70,18 @@ CReflector::~CReflector()
 
 bool CReflector::Start(const char *cfgfilename)
 {
+	std::cout << "Reading " << cfgfilename << "..." << std::endl;
 	if (g_CFG.ReadData(cfgfilename))
 		return true;
 	// let's go!
 	keep_running = true;
 
 	// init gate keeper. It can only return true!
+	std::cout << "Starting Gatekeeper..." << std::endl;
 	g_GateKeeper.Init();
 
 #ifndef NO_DHT
+	std::cout << "Connecting to the Ham-DHT..." << std::endl;
 	// start the dht instance
 	refhash = dht::InfoHash::get(g_CFG.GetCallsign());
 	node.run(17171, dht::crypto::generateIdentity(g_CFG.GetCallsign()), true, 59973);
@@ -119,13 +122,15 @@ bool CReflector::Start(const char *cfgfilename)
 #endif
 
 	// create protocols
-	if (! m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
+	std::cout << "Starting the M17 Protocol..." << std::endl;
+	if (not m_Protocol.Initialize(g_CFG.GetPort(), g_CFG.GetIPv4BindAddr(), g_CFG.GetIPv6BindAddr()))
 	{
 		m_Protocol.Close();
 		return true;
 	}
 
 	// start the reporting threads
+	std::cout << "Starting the XML thread..." << std::endl;
 	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
 #ifndef NO_DHT
 	PutDHTConfig();

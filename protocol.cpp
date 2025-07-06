@@ -65,7 +65,7 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 	keep_running = true;
 
 	// create our sockets
-	if (! strIPv4.empty())
+	if (not strIPv4.empty())
 	{
 		CIp ip4(AF_INET, port, strIPv4.c_str());
 		if ( ip4.IsSet() )
@@ -76,7 +76,7 @@ bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, cons
 		std::cout << "Listening on " << ip4 << std::endl;
 	}
 
-	if (! strIPv6.empty())
+	if (not strIPv6.empty())
 	{
 		CIp ip6(AF_INET6, port, strIPv6.c_str());
 		if ( ip6.IsSet() )
