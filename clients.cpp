@@ -78,25 +78,17 @@ void CClients::AddClient(SPClient client)
 
 void CClients::RemoveClient(SPClient client)
 {
-	// look for the client
-	for ( auto it=begin(); it!=end(); it++ )
+	if (not client)
+		return;
+	for (auto it=begin(); it!=end(); it++)
 	{
-		// compare object pointers
-		if ( *it == client )
+		const auto c = *it;
+		if (c == client)
 		{
 			// found it !
-			if ( !(*it)->IsTransmitting() )
-			{
-				// remove it
-				std::cout << "Client " << (*it)->GetCallsign() << " at " << (*it)->GetIp() << " removed with protocol " << (*it)->GetProtocolName();
-				if ( (*it)->GetReflectorModule() != ' ' )
-				{
-					std::cout << " on module " << (*it)->GetReflectorModule();
-				}
-				std::cout << std::endl;
-				m_Clients.erase(it);
-				break;
-			}
+			std::cout << "Client " << c->GetCallsign() << " on module " << c->GetReflectorModule() << " at " << c->GetIp() << " using protocol " << c->GetProtocolName() << " removed" << std::endl;
+			m_Clients.erase(it);
+			break;
 		}
 	}
 }
