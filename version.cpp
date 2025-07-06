@@ -25,7 +25,7 @@
 
 #include "version.h"
 
-CVersion g_Version(1, 0, 6);	// the global object
+CVersion g_Version(1, 0, 7);	// the global object
 
 unsigned CVersion::GetMajor(void) const
 {

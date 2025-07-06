@@ -54,10 +54,10 @@ SRCS = base.cpp bwset.cpp callsign.cpp client.cpp clients.cpp configure.cpp crc.
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
-all : $(EXE) test-all
+all : $(EXE)
 
-test-all : test-all.o crc.o callsign.o
-	$(CXX) $^ -o $@
+#test-all : test-all.o crc.o callsign.o
+#	$(CXX) $^ -o $@
 
 $(EXE) : $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS)

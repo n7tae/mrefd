@@ -1000,9 +1000,33 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	{
 		return nullptr;
 	}
-	// check validity of packet
+	// get the callsigns out of the packet
 	dst.CodeIn(packet.GetCDstAddress());
 	src.CodeIn(packet.GetCSrcAddress());
+	// we need to make sure we have the correct client
+	const auto ct = client->GetClientType();
+	packet.SetFromType(ct);
+	if (EClientType::simple != ct) // if this a simple client, then we are good
+	{ // this client is a reflector. we need the peer
+		auto peer = g_Reflector.GetPeers().FindPeer(ip);
+		if (peer->GetNbClients() > 1)
+		{ // this peer has more than one interlinked module
+			// we have to get the right one
+			if (EClientType::reflector == ct)
+			{
+				// for this kind of a reflector, the module is in the last byte, buf[size-1]
+				mod = char(buf[size-1]);
+			}
+			else
+			{
+				// for a legacy reflector, the module is the module of the DST
+				mod = dst.GetModule();
+			}
+			client = peer->GetClient(mod);
+		}
+		packet.SetSize(size - 1);
+	}
+	// check validity of packet
 	if (std::regex_match(src.GetCS(), clientRegEx))
 	{ // looks like a valid source
 		if (packet.IsStreamData() and (0x18u & packet.GetFrameType()))
@@ -1020,25 +1044,6 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 		if (packet.IsLastPacket())
 			std::cout << src.GetCS() << " Source C/S FAILED RegEx test" << std::endl;
 		return nullptr;
-	}
-	// we need to make sure we have the correct client
-	const auto ct = client->GetClientType();
-	packet.SetFromType(ct);
-	// if this a simple client, then we are good
-	if (EClientType::simple != ct)
-	{ // this client is a reflector. we need the peer
-		auto peer = g_Reflector.GetPeers().FindPeer(ip);
-		if (peer->GetNbClients() > 1)
-		{ // this peer has more than one interlinked module
-			// we have to get the right one
-			if (EClientType::reflector == ct)
-				// for this kind of a reflector, the module is in the last byte, buf[size-1]
-				client = peer->GetClient(buf[size - 1]);
-			else
-				// for a legacy reflector, the module is the module of the DST
-				client = peer->GetClient(dst.GetModule());
-		}
-		packet.SetSize(size - 1);
 	}
 	return client;
 }
@@ -1225,10 +1230,14 @@ CPacketStream *CProtocol::OpenStream(CPacket &packet, SPClient client)
 
 void CProtocol::CloseStream(char module)
 {
+	if (not g_CFG.IsValidModule(module))
+	{
+		Dump("CProtocol::CloseStream can find module:", &module, 1);
+		return;
+	}
 	auto pit = m_streamMap.find(module);
 	if (m_streamMap.end() == pit)
 	{
-		std::cerr << "Protocol::CLoseStream can find a packet stream for moudule '" << module << "'" << std::endl;
 		return;
 	}
 	auto stream = pit->second.get();
