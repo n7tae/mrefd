@@ -38,10 +38,10 @@ CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::stri
 	std::cout << "Adding M17 peer " << cs << " module(s) " << mods << std::endl;
 
 	// and construct the M17 clients
-	//CCallsign clientcs(m_Callsign);
+	CCallsign clientcs(m_Callsign);
 	for (auto m : m_sharedModules)
 	{
-		//clientcs.SetModule(m);
+		clientcs.SetModule(m);
 		// create and append to list
 		m_Clients[m] = std::make_shared<CClient>(m_Callsign, ip, type, m, sock);
 	}
@@ -101,7 +101,7 @@ bool CPeer::IsAlive(void) const
 {
 	for (auto item : m_Clients)
 	{
-		if (item.second->IsAlive())
+		if (not item.second->IsAlive())
 			return false;
 	}
 	return true;

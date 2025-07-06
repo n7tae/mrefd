@@ -892,6 +892,10 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			}
 		}
 	}
+	else
+	{
+		client->Heard();
+	}
 	// update last heard
 	CCallsign src(packet.GetCSrcAddress());
 	auto cli = client->GetCallsign();
