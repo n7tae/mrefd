@@ -50,8 +50,7 @@ void CStreamParrot::playThread()
 	state = EParrotState::play;
 	CPacket pack;
 	memcpy(pack.GetData(), "M17 ", 4);
-	pack.SetSize(54u);
-	pack.SetType(true);
+	pack.Initialize(54u, true);
 	pack.SetStreamId(NewSID.Make());
 	memset(pack.GetDstAddress(), 0xffu, 6);
 	src.CodeOut(pack.GetSrcAddress());

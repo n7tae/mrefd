@@ -560,7 +560,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod, const CCallsign &dst)
 {
 	#ifdef DEBUG
-	if (not packet.IsStreamPacket())
+	if (packet.IsPacketData())
 	{
 		Dump("Incoming SendToAllClients() PM packet:", packet.GetCData(), packet.GetSize());
 		std::cout << "DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
