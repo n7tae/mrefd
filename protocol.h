@@ -66,7 +66,7 @@ public:
 
 protected:
 	// queue helper
-	void SendToClients(CPacket &, const SPClient &, const char);
+	void SendToClients(CPacket &, const SPClient &, const char, const CCallsign &dst);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);

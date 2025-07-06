@@ -327,7 +327,7 @@ void CProtocol::Task(void)
 					// if there is a problem, return false
 					if (OnPacketIn(pack, client))
 					{
-						SendToClients(pack, client, mod);
+						SendToClients(pack, client, mod, dst);
 						if (pack.IsStreamData() and pack.IsLastPacket())
 						{
 							CloseStream(mod); // so this only closes streams, PM packets time out the PacketStream
@@ -557,7 +557,7 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // queue helper
 
-void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod)
+void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod, const CCallsign &dst)
 {
 	#ifdef DEBUG
 	if (not packet.IsStreamPacket())
@@ -586,9 +586,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 					if (EClientType::simple == fromtype)
 					{
 						// legacy reflectors have to be properly addressed
-						// save the DST address and the CRC
-						uint8_t dsta[6];
-						memcpy(dsta, packet.GetCDstAddress(), 6);
+						// save the CRC
 						const auto crc = packet.GetCRC();
 
 						// set the address and calculate the CRC
@@ -604,7 +602,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 						client->SendPacket(packet);
 
 						// restore the DST address and CRC
-						memcpy(packet.GetDstAddress(), dsta, 6);
+						dst.CodeOut(packet.GetDstAddress());
 						packet.SetCRC(crc);
 						packet.SetSize(54u);
 					}
@@ -614,7 +612,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 					if (EClientType::simple == fromtype)
 					{
 						packet.SetSize(55u);
-						packet.GetData()[54] = uint8_t(client->GetReflectorModule());
+						packet.GetData()[54] = uint8_t(mod);
 						client->SendPacket(packet);
 						packet.SetSize(54u);
 					}
@@ -639,13 +637,13 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const c
 						client->SendPacket(packet);
 					break;
 				case EClientType::simple:
-					if (EClientType::legacy != ct)
+					if (EClientType::legacy != ct) // legacy reflectors don't get packet data
 					{
 						if (EClientType::reflector == ct)
 						{
 							const auto size = packet.GetSize();
 							packet.SetSize(size+1);
-							packet.GetData()[size] = uint8_t(client->GetReflectorModule());
+							packet.GetData()[size] = uint8_t(mod);
 							client->SendPacket(packet);
 							packet.SetSize(size);
 						}
@@ -977,7 +975,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	auto client = g_Reflector.GetClients()->FindClient(ip);
 	if (not client)
 		return nullptr;
-	// is it from a client, so is this a vialbe packet?
+	// is it from a client, so is this a viable packet?
 	if ((' ' == char(buf[3])) and (0x1u == (0x1u & buf[19])) and ((54u == size) or (55u == size)))
 	{
 		packet.SetType(true);
@@ -999,8 +997,8 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 		{	// looks like this packet is encrypted
 			if (not g_CFG.IsEncyrptionAllowed(mod))
 			{
-				if (0u == packet.GetFrameNumber())	// we only log this once
-					std::cout << "Blocking " << src.GetCS() << " to module " << mod << " because it is encrypted!" << std::endl;
+				if (0 == packet.GetFrameNumber())	// we only log this once
+					std::cout << "Blocking " << src.GetCS() << " on module " << mod << " because it is encrypted!" << std::endl;
 				return nullptr;
 			}
 		}
@@ -1011,18 +1009,18 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 			std::cout << src.GetCS() << " Source C/S FAILED RegEx test" << std::endl;
 		return nullptr;
 	}
-	// do we have the correct client?
+	// we need to make sure we have the correct client
 	const auto ct = client->GetClientType();
 	packet.SetFromType(ct);
-
+	// if this a simple client, then we are good
 	if (EClientType::simple != ct)
-	{	// this client is a reflector
+	{	// this client is a reflector. we need the peer
 		auto peer = g_Reflector.GetPeers().FindPeer(ip);
 		if (peer->GetNbClients() > 1)
-		{
+		{	// this peer has more than one interlinked module
 			// we have to get the right one
 			if (EClientType::reflector == ct)
-				// for this kind of a reflector, the module is in the last byte
+				// for this kind of a reflector, the module is in the last byte, buf[size-1]
 				client = peer->GetClient(buf[size-1]);
 			else
 				// for a legacy reflector, the module is the module of the DST
