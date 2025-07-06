@@ -562,10 +562,8 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 
 void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const char mod, const CCallsign &dst)
 {
-	#ifdef DEBUG
-	std::cout << "SendToAll DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
-	Dump(packet.GetCData(), packet.GetSize());
-	#endif
+	//std::cout << "SendToAll DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
+	//Dump(packet.GetCData(), packet.GetSize());
 	// push it to all our clients linked to the module
 	SPClient client = nullptr;
 	auto clients = g_Reflector.GetClients();
