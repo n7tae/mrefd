@@ -43,7 +43,7 @@ CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::stri
 	{
 		clientcs.SetModule(m);
 		// create and append to list
-		m_Clients[m] = std::make_shared<CClient>(m_Callsign, ip, type, m, sock);
+		m_Clients[m] = std::make_shared<CClient>(clientcs, ip, type, m, sock);
 	}
 }
 
