@@ -106,6 +106,6 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 			return;
 		}
 		else
-			m_Ip.Initialize(AF_INET6, m_Port, m_IPv4.c_str());
+			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
 	}
 }
