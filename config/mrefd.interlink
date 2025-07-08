@@ -1,35 +1,49 @@
 ############################################################################
-# M17 interlink file
+#                        M17 interlink file
+
+# One line per entry, and a target reflector can only have one line.
+# Each entry specifies all the parameters that are need to interlink one
+# or more module of a remote M17 Reflector:
+
+#       <target_designation>[L]  [ip]  [port]  <shared_modules>
+
+# Compaired to the legacy mrefd.interlink format, the only thing new is
+# the optional trailing 'L' after the target designation. So let's review.
 #
-# One line per entry, and a reflector can only have one line.
-# Each entry specifies a remote M17 Reflector to peer with format:
-#    <M17 callsign> <ip> <port> <list of shared modules>
-# The port is optional and defaults to 17000.
-# Example:
-#    M17-ABC 44.123.213.112 17001 ACD
-#    M17-XYZ 2600:400:bc03::100 ACD
+# There will be 2, 3 or 4 different parameters seperated by white space.
+# All leading and trailing white space is ignored. If the first
+# non-white space character is a '#', the entire line will be ignored.
+
+#                       Here are some examples.
+#----------------------------------  1  -----------------------------------
+# If your reflector and the target reflector are both using the Ham-DHT:
+
+#                           M17-QQQ ABC
+
+# Please note that that the target can be running any version, but
+# both you and the target NUST be using the Ham-DHT.
+#----------------------------------  2  -----------------------------------
+# If you or the target is not running with the Ham-DHT, but you both are
+# running version >= 1.0.0:
+
+#                   M17-QQQ 44.45.45.100 17001 ABC
+
+# You can use an IPv6 address if both you and the target supports it.
+# If the target is using the default port of 17000, you can leave that out.
+#----------------------------------  3  -----------------------------------
+# If you or the target is not on Ham-DHT and the target is running on
+# version  <= 1.0.0, i.e., a legacy version:
+
+#                     M17-QQQL 44.45.45.100 ABC
+
+# The 'L' lets your system know it's connecting to a legacy mrefd reflector.
+# Without the 'L', the system may, or may not link, but traffic WILL NOT
+# PASS in either direction, even if it successfully links!
 #
-# In the above example, this reflector would link modules A, C and D
-# with both M17-ABC and M17-XYZ. Reflector ABC is using the non-standard
-# port of 17001. This example implies both this reflector and M17-XYZ
-# support IPv6.
+# If you are using method #2 or #3 you need to make sure the encryptions
+# capabilities of each shared module match. Please don't link a module that
+# supports encrypted Stream data with a module that doesn't!
 #
-# These remote reflectors must list this reflector and modules
-# exactly in their interlink file for the link to be established.
-#
-# Every reflector in an interlink group must link to every other
-# reflector in the group or clients in a group may not hear everybody.
-#
-# If your reflector and the target reflector are both configured for
-# DHT, you don't need to supply the IP address or the port. They will be
-# retrieved from the DHT network:
-#
-# Example if every system is using DHT:
-#    M17-ABC ACD
-#    M17-XYZ ACD
-#
-# If both ends of the interlink support IPv6, then the interlink will
-# use IPv6. Otherwise, IPv4 will be used. The interlink will fail if
-# one end is an IPv4-only reflector and the other end is an IPv6-only
-# reflector.
+# Once you understand this format, you can delete this entire explanation.
+# This file will always be in the config folder.
 #############################################################################

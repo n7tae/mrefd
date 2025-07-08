@@ -2,13 +2,14 @@
 
 This *mrefd* repository builds a new kind of M17 open-source Reflector. Although *mrefd* has evolved, most of the code is originally based on groundbreaking development of XLXD and the copyrights of all relevant source files reflect this. The sources are published under GPL Licenses. *mrefd* works with both M17 modes, Stream and Packet Mode.
 
-**Note:** This version of *mrefd* will ***not*** interlink with *mrefd* Version 0.x.x!
+**Note:** This version of *mrefd* will link with older version of *mrefd*, called *legacy* (versions **0**.x.y), but there are some thinks you should know about that and there may be some extra steps involved to get the link to work properly!
 
 ## Introduction
 
-The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be configured with up to 26 different channels. M17 clients (M17 repeaters, M17 hot-spots and other MREFD reflectors) can be linked to a channel. An incoming M17 voice stream or data packet from one of the clients will be sent to all the other clients.
+The *mrefd* reflector is for connecting M17 clients together. *mrefd* can be configured with up to 26 different channels. M17 clients (M17 repeaters, M17 hot-spots and other *mrefd* reflectors) can be linked to a channel. An incoming M17 voice stream or data packet from one of the clients will be sent to all the other clients.
 
-Encrypted voice streams will pass through an *mrefd* channel, but **only** if that channel configured for it.
+Encrypted voice streams will pass through an *mrefd* channel, but **only** if that channel is configured for it. However, there might be special changes if you
+are interlinking to an older version of mrefd. Please see the example `mrefd.interlink` file in the `config` folder.
 
 *mrefd* uses **Ham-DHT**, a distributed hash table network for sharing digital information for ham radio. A **Ham-DHT**-enabled *mrefd* publishes a two-part document on the DHT network. The two parts:
 1. Configuration - Connecting clients can use this to know how to connect.
@@ -107,11 +108,9 @@ cp config/mrefd.interlink .
 
 Use your favorite editor to modify each of these files. If you want a totally open network, the blacklist and whitelist files are ready to go. The blacklist determine which callsigns can't use the reflector. The whitelist determines which callsigns can use the reflector. The mrefd reflector will monitor these file and dynamically update itself whenever anything changes. There is no need to stop and restart the reflector.
 
-The mrefd.interlink file sets up the M17<--->M17 peer group linking. Please read the comments in this file. An M17 interlink has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **Ham-DHT** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **Ham-DHT** will provided it, and this information comes directly from the peer. Using the **Ham-DHT** will prevent you from interlinking a channel where the peer channel has encryption enabled and you do not, or *vis versa*.
+The `mrefd.interlink` file sets up the M17<--->M17 peer group linking. Please read the comments in this file in the `config` folder. An M17 interlink has to be configured on both sides of the link. Linked reflectors can share multiple modules, but cross module linking, for example, linking M17-000 module A to M17-001 module B is not supported. Using the **Ham-DHT** greatly simplifies setting up a peer group. You don't have to specify an IP address or port number as the **Ham-DHT** will provided it, along with any other information it needs to interlink with a peer. Using the **Ham-DHT** will prevent you from interlinking a channel where the peer module has encryption enabled and you do not, or *vis versa*.
 
 If your reflector or your desired peer doesn't use **Ham-DHT**, you can specify the IP address and port in the mrefd.interlink file. It will be then up to the reflector admins to make sure the encryption configurations match.
-
-Inter-linking a channel to more than one other reflector demands all reflector in a group are linked to all other reflectors in the group. This will result in the shortest possible latency between a client and any other client on the group. This XLX-like mode of linking is enforced by implementing a *one hop* policy where a voice stream is marked by a reflector when it is passed to another reflector. The receiving reflector will then know not to pass the voice stream on to any other reflector.
 
 Group administration will require coordination among the admins of all involved reflectors. If a group member drops out or if a new member wants to join a group, all other group members will need to remove or add a line to their mrefd.interlink file.
 
@@ -166,7 +165,7 @@ This a a dashboard based on the `go` programming language. If you don't have it,
 
 ### An alternative dashboard is also available
 
-Also include in this repo is a simple php-based dashboard that's easy to install any use. This dashboard is the `php-dash` directory and contains a `README.md` file explaining how to configure and install it. There is an example of setting up a simple web server included in the readme.
+Also include in this repo is a simple php-based dashboard that's easy to install and use. This dashboard is the `php-dash` folder and contains a `README.md` file explaining how to configure and install it. There is an example of setting up a simple web server included in the readme.
 
 ## Updating mrefd
 
@@ -180,7 +179,7 @@ make
 sudo make install
 ```
 
-If, after doing the `git pull`, you see that it's downloaded a new example.cfg file, it would probably be a good idea to remake your mrefd.cfg file. There may be new options of which you might want to take advantage.
+If, after doing the `git pull`, you see that it's downloaded a new example.cfg file, it would probably be a good idea to remake your mrefd.cfg file. There may be new options of which you might want to take advantage, or old options that are no longer supported or needed.
 
 ## Running multiple instances
 
@@ -191,6 +190,7 @@ It should be fairly straightforward to install multiple mrefd instances on a sin
 - Each instance will need its own config files with unique paths to those files.
 - Each instance will need a unique url so that each will have its own webpage.
 - Need to add unix sockets for interlinking between instances.
+- Only one reflector can use the Ham-DHT.
 
 This is **not** a task for a beginner!
 
@@ -198,7 +198,7 @@ This is **not** a task for a beginner!
 
 MREFD requires the following port to be open to inbound network traffic:
 
-- UDP port 17000 for M17
+- UDP port 17000 (or whatever port you have configured) for M17
 - UDP port 17171 for DHT
 - TCP port 80 for HTTP
 - TCP port 443 for HTTPS
