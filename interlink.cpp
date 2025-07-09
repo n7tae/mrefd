@@ -88,23 +88,24 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	{
 		m_Port = port;
 	}
-	if (g_CFG.GetIPv6BindAddr().empty())
+	if (g_CFG.GetIPv6BindAddr().empty()) // this reflector is IPv4 only
 	{
 		if (m_IPv4.empty())
-		{
-			std::cout << "ERROR: " << m_Callsign.GetCS() << " doesn't have an IPv4 address" << std::endl;
-			return;
-		}
+			std::cout << "ERROR: " << m_Callsign.GetCS() << " doesn't have an IPv4 address and this reflector is IPv4 only" << std::endl;
 		else
 			m_Ip.Initialize(AF_INET, m_Port, m_IPv4.c_str());
 	}
-	else
+	else if (g_CFG.GetIPv4BindAddr().empty()) // this reflector is IPv6 only
 	{
 		if (m_IPv6.empty())
-		{
-			std::cout << "ERROR: " << m_Callsign.GetCS() << " doesn't have an IPv6 address" << std::endl;
-			return;
-		}
+			std::cout << "ERROR: " << m_Callsign.GetCS() << "doesn't have an IPv6 addess and this reflector is IPv6 only" << std::endl;
+		else
+			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
+	}
+	else	// this reflector is dual stack
+	{
+		if (m_IPv6.empty())
+			m_Ip.Initialize(AF_INET, m_Port, m_IPv4.c_str());
 		else
 			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
 	}
