@@ -788,7 +788,10 @@ void CProtocol::HandlePeerLinks(void)
 #ifdef NO_DHT
 			std::cerr << "ERROR: " << cs << " doesn't have a vaild IP address!" << std::endl;
 #else
-			g_Reflector.GetDHTConfig(cs);
+			if (item->IsUsingDHT())
+				g_Reflector.GetDHTConfig(cs);
+			else
+				std::cerr << "ERROR: IP adress for " << item->GetCallsign() << " has not been initialized!" << std::endl;
 #endif
 		}
 	}

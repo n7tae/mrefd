@@ -42,10 +42,12 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_Using
 
 CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
 {
-	if (addr.npos == addr.find(':'))
+	if (g_CFG.IsIPv4Address(addr))
 		UpdateItem(mods, "", addr, "", port, islegacy);
-	else
+	else if (g_CFG.IsIPv6Address(addr))
 		UpdateItem(mods, "", "", addr, port, islegacy);
+	else
+		std::cerr << "ERROR: '" << addr << "' is not a valid internet address!" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -104,9 +106,11 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	}
 	else	// this reflector is dual stack
 	{
-		if (m_IPv6.empty())
+		if (not m_IPv6.empty())
+			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
+		else if (not m_IPv4.empty())
 			m_Ip.Initialize(AF_INET, m_Port, m_IPv4.c_str());
 		else
-			m_Ip.Initialize(AF_INET6, m_Port, m_IPv6.c_str());
+			std::cerr << "ERROR: Could not find an IP address for " << m_Callsign << std::endl;
 	}
 }

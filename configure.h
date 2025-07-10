@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <regex>
 #include "refmods.h"
 
 #define IS_TRUE(a) ((a)=='t' || (a)=='T' || (a)=='1')
@@ -41,10 +42,12 @@ using CFGDATA = struct CFGData_struct {
 class CConfigure
 {
 public:
-	CConfigure() {}
+	CConfigure();
 	bool ReadData(const std::string &path);
 	bool IsValidModule(char c) const { return std::string::npos != data.refmods.GetModules().find(c); }
 	bool IsEncyrptionAllowed(const char mod) const;
+	bool IsIPv4Address(const std::string &addr) const;
+	bool IsIPv6Address(const std::string &addr) const;
 
 	const std::string &GetCallsign()         const { return data.callsign;         }
 	const CReflMods   &GetRefMods()          const { return data.refmods;          }
@@ -75,5 +78,6 @@ private:
 #ifndef NO_DHT
 	void CurlAddresses(std::string &v4, std::string &v6);
 #endif
+	std::regex IPv4RegEx, IPv6RegEx;
 	CFGDATA data;
 };
