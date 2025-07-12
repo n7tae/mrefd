@@ -2,7 +2,7 @@
 #                        M17 interlink file
 
 # One line per entry, and a target reflector can only have one line.
-# Each entry specifies all the parameters that are need to interlink one
+# Each entry specifies all the parameters that are needed to interlink one
 # or more module of a remote M17 Reflector:
 
 #       <target_designation>[L]  [ip]  [port]  <shared_modules>
@@ -14,14 +14,17 @@
 # All leading and trailing white space is ignored. If the first
 # non-white space character is a '#', the entire line will be ignored.
 
-#                       Here are some examples.
+# Here are three different examples that discribe every possible situation.
 #----------------------------------  1  -----------------------------------
 # If your reflector and the target reflector are both using the Ham-DHT:
 
 #                           M17-QQQ ABC
 
 # Please note that that the target can be running any version, but
-# both you and the target NUST be using the Ham-DHT.
+# both you and the target NUST be using the Ham-DHT. When using this
+# 2-parameter, DHT-enabled form of interlinking, BOTH sides of the
+# interlink should be using the 2-parameter method else the interlink
+# might fail.
 #----------------------------------  2  -----------------------------------
 # If you or the target is not running with the Ham-DHT, but you both are
 # running version >= 1.0.0:
@@ -36,11 +39,12 @@
 
 #                     M17-QQQL 44.45.45.100 ABC
 
-# The 'L' lets your system know it's connecting to a legacy mrefd reflector.
-# Without the 'L', the system may, or may not link, but traffic WILL NOT
-# PASS in either direction, even if it successfully links!
+# The 'L' suffix on the reflector designator lets your system know it's 
+#connecting to a legacy mrefd reflector. Without the 'L', the system may,
+# or may not link, but traffic WILL NOT PASS in either direction, even if
+# it successfully links!
 #
-# If you are using method #2 or #3 you need to make sure the encryptions
+# If you are using method #2 or #3 you need to make sure the encryption
 # capabilities of each shared module match. Please don't link a module that
 # supports encrypted Stream data with a module that doesn't!
 #
