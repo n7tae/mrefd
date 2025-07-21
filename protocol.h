@@ -66,7 +66,7 @@ public:
 
 protected:
 	// queue helper
-	void SendToClients(CPacket &, const SPClient &, const char, const CCallsign &dst);
+	void SendToClients(CPacket &, const SPClient &, const CCallsign &dst);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
@@ -74,13 +74,13 @@ protected:
 
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, SPClient);
-	void CloseStream(char module);
+	void CloseStream(char mod);
 	bool OnPacketIn(CPacket &, const SPClient);
 	CPacketStream *GetStream(CPacket &, const SPClient);
 	void CheckStreamsTimeout(void);
 
 	// packet decoding helpers
-	SPClient GetClient(const CIp &ip, const unsigned size, CPacket &p, char &m,  CCallsign &dst, CCallsign &src);
+	SPClient GetClient(const CIp &ip, const unsigned size, CPacket &p, CCallsign &dst, CCallsign &src);
 	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
