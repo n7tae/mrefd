@@ -221,7 +221,6 @@ void CInterlinks::Update(const std::string &cs, const std::string &cmods, const 
 	}
 	std::cerr << "ERROR: Can't Update CInterlinks item '" << cs << "' because it doesn't exist!";
 }
-#endif
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 {
@@ -229,6 +228,7 @@ void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;
 }
+#endif
 
 void CInterlinks::Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy)
 {

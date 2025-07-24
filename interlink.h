@@ -59,8 +59,5 @@ private:
 	std::string m_dashUrl;
 	uint16_t    m_Port;
 	bool        m_IsNotLegacy;
-
-#ifndef NO_DHT
 	std::string m_IPv4, m_IPv6;
-#endif
 };
