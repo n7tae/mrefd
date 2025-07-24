@@ -40,7 +40,7 @@ class CPeer
 public:
 	// constructors
 	CPeer() = delete;
-	CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock);
+	CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const std::string &url, const CUdpSocket &sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor
@@ -50,6 +50,7 @@ public:
 	const CCallsign &GetCallsign(void) const        { return m_Callsign; }
 	const CIp &GetIp(void) const                    { return m_Ip; }
 	const std::string &GetSharedModules(void) const { return m_sharedModules; }
+	const std::string &GetDashboardUrl(void) const  { return m_dashUrl; }
 	std::time_t GetConnectTime(void) const          { return m_ConnectTime; }
 	EClientType GetType(void) const                 { return m_refType; }
 
@@ -82,7 +83,7 @@ protected:
 	const CCallsign   m_Callsign;
 	const CIp         m_Ip;
 	const EClientType m_refType;
-	const std::string m_sharedModules;
+	const std::string m_sharedModules, m_dashUrl;
 	std::map<char, SPClient> m_Clients;
 
 	// status

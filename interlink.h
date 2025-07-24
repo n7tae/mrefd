@@ -38,7 +38,7 @@ public:
 #endif
 	CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 
-	void UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy);
+	void UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port, bool islegacy);
 
 	// get
 	const CIp &GetIp(void) const              { return m_Ip; }
@@ -47,6 +47,7 @@ public:
 	bool IsUsingDHT(void) const               { return m_UsingDHT; }
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
+	const std::string &GetDashUrl(void) const { return m_dashUrl; }
 	const std::string &GetReqMods(void) const { return m_reqMods; }
 
 private:
@@ -55,6 +56,7 @@ private:
 	const std::string m_reqMods;
 	const CCallsign   m_Callsign;
 	CIp         m_Ip;
+	std::string m_dashUrl;
 	uint16_t    m_Port;
 	bool        m_IsNotLegacy;
 

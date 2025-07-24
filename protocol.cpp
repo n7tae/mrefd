@@ -208,7 +208,7 @@ void CProtocol::Task(void)
 		}
 		break;
 	case 11:
-		if (IsValidConnect(pack.GetCData(), cs, mod))
+		if (IsValidConnect(pack.GetCData(), ip, cs, mod))
 		{
 			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
 
@@ -271,7 +271,7 @@ void CProtocol::Task(void)
 		}
 		break;
 	case sizeof(SInterConnect):
-		if (IsValidInterlinkConnect(pack.GetCData(), cs, mods))
+		if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods))
 		{
 			std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
 
@@ -307,9 +307,9 @@ void CProtocol::Task(void)
 						// create the new peer
 						// this also create one client per module
 						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, item->GetDashUrl(), m_Socket6));
 						else
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, item->GetDashUrl(), m_Socket4));
 						publish = true;
 					}
 					else
@@ -910,7 +910,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 ////////////////////////////////////////////////////////////////////////////////////////
 // packet decoding helpers
 
-bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char &mod)
+bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char &mod)
 {
 	if (0 == memcmp(buf, "CONN", 4))
 	{
@@ -922,12 +922,12 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char &mod)
 			{
 				return true;
 			}
-			std::cout << "Bad CONN from '" << cs.GetCS() << "'." << std::endl;
+			std::cout << "Bad CONN from '" << cs.GetCS() << "'. at " << ip << std::endl;
 			Dump("The requested module is not a letter:", buf, 11);
 		}
 		else
 		{
-			std::cout << "CONN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+			std::cout << "CONN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
 	else if (0 == memcmp(buf, "LSTN", 4))
@@ -940,12 +940,12 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, CCallsign &cs, char &mod)
 			{
 				return true;
 			}
-			std::cout << "Bad LSTN from '" << cs.GetCS() << "'." << std::endl;
+			std::cout << "Bad LSTN from '" << cs.GetCS() << "'. at " << ip << std::endl;
 			Dump("The requested module is not a letter:", buf, 11);
 		}
 		else
 		{
-			std::cout << "LSTN packet rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+			std::cout << "LSTN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
 	return false;
@@ -1053,7 +1053,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	return client;
 }
 
-bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char *mods)
+bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char *mods)
 {
 	if (memcmp(buf, "CONN", 4))
 		return false;
@@ -1061,14 +1061,14 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	cs.CodeIn(buf + 4);
 	if (cs.GetCS(4).compare("M17-"))
 	{
-		std::cout << "Interlink request from '" << cs << "' denied" << std::endl;
+		std::cout << "Interlink request from '" << cs << "' at " << ip << " denied" << std::endl;
 		return false;
 	}
 
 	auto pmods = (const char *)buf + 10;
 	if (strnlen(pmods, 27) > 26)
 	{
-		std::cout << "Could not fine a null in the mods field of a CONN packet from " << cs << std::endl;
+		std::cout << "Could not fine a null in the mods field of a CONN packet from " << cs << " at " << ip << std::endl;
 		return false;
 	}
 
@@ -1076,7 +1076,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	auto pInterlinkItem = g_Interlinks.Find(cs.GetCS());
 	if (nullptr == pInterlinkItem)
 	{
-		std::cout << "Interlink request from " << cs.GetCS() << " is not defined in the mrefd interlink file" << std::endl;
+		std::cout << "Interlink request from " << cs.GetCS() << " at " << ip << " is not defined in the mrefd interlink file" << std::endl;
 		return false;
 	}
 
@@ -1084,7 +1084,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, CCallsign &cs, char 
 	const std::string imods(pInterlinkItem->GetReqMods());
 	if (imods.compare(rmods))
 	{
-		std::cout << cs.GetCS() << " CONN packet is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
+		std::cout << cs.GetCS() << " CONN packet from " << cs.GetCS() << " at " << ip << " is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
 		return false;
 	}
 

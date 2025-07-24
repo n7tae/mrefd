@@ -81,11 +81,11 @@ protected:
 
 	// packet decoding helpers
 	SPClient GetClient(const CIp &ip, const unsigned size, CPacket &p, CCallsign &dst, CCallsign &src);
-	bool IsValidConnect(const uint8_t *, CCallsign &, char &);
+	bool IsValidConnect(const uint8_t *, const CIp &, CCallsign &, char &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
-	bool IsValidInterlinkConnect(const uint8_t *, CCallsign &, char *);
+	bool IsValidInterlinkConnect(const uint8_t *, const CIp &, CCallsign &, char *);
 	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
 
 	// packet encoding helpers

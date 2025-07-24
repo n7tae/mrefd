@@ -43,9 +43,9 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_Using
 CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
 {
 	if (g_CFG.IsIPv4Address(addr))
-		UpdateItem(mods, "", addr, "", port, islegacy);
+		UpdateItem(mods, "", addr, "", "", port, islegacy);
 	else if (g_CFG.IsIPv6Address(addr))
-		UpdateItem(mods, "", "", addr, port, islegacy);
+		UpdateItem(mods, "", "", addr, "", port, islegacy);
 	else
 		std::cerr << "ERROR: '" << addr << "' is not a valid internet address!" << std::endl;
 }
@@ -53,7 +53,7 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
-void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
+void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port, bool islegacy)
 {
 	m_IsNotLegacy = not islegacy;	// this is the gatekeeper for sending packets to a reflector
 
@@ -113,4 +113,5 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 		else
 			std::cerr << "ERROR: Could not find an IP address for " << m_Callsign << std::endl;
 	}
+	m_dashUrl.assign(url);
 }

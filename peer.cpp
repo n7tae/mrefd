@@ -30,7 +30,7 @@
 #include "reflector.h"
 #include "peer.h"
 
-CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_refType(type), m_sharedModules(mods)
+CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const std::string &url, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_refType(type), m_sharedModules(mods), m_dashUrl(url)
 {
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
@@ -83,6 +83,7 @@ void CPeer::WriteXml(std::ofstream &xmlFile) const
 	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;
 	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
 	xmlFile << "\t<LINKEDMODULE>" << m_sharedModules << "</LINKEDMODULE>" << std::endl;
+	xmlFile << "\t<DASHBOARDURL>" << m_dashUrl << "</DASHBOARDURL>" << std::endl;
 	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
 	char mbstr[100];
 	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))

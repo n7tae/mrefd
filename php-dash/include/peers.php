@@ -20,12 +20,16 @@ if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
 $Reflector->LoadFlags();
 
 for ($i=0;$i<$Reflector->PeerCount();$i++) {
+	$url = $Reflector->Peers[$i]->GetDashboardUrl();
 	echo '
 	<tr class="table-center">
-	<td>' . ($i+1).'</td>';
-	echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
-	echo '
-	<td>' . date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()) . '<br />'
+	<td>' . ($i+1) . '</td>';
+	if (strlen($url) > 0) {
+		echo '<td><a href="' . $url . '" class="pl" target="_blank">' . $Reflector->Peers[$i]->GetCallsign() . '</a></td>';
+	} else {
+		echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
+	}
+	echo '<td>' . date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()) . '<br />'
 	. elapsedTime($Reflector->Peers[$i]->GetLastHeardTime()) . ' ago</td>
 	<td>' . date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()) . '<br />for '
 	. elapsedTime($Reflector->Peers[$i]->GetConnectTime()) . '</td>

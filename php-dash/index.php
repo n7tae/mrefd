@@ -111,7 +111,7 @@ $Reflector->LoadXML();
             <li<?php echo ($_GET['show'] == "links") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=links">Links (<?php echo $Reflector->NodeCount();  ?>)</a></li>
             <li<?php echo ($_GET['show'] == "peers") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=peers">Peers (<?php echo $Reflector->PeerCount();  ?>)</a></li>
         </ul>
-        <span class="navbar-text px-2">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard v1.4.0 <?php echo $PageOptions['LocalModification']; ?></span>
+        <span class="navbar-text px-2">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard v1.4.1 <?php echo $PageOptions['LocalModification']; ?></span>
         <span class="navbar-text px-2">Service uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></span>
     </div>
 </nav>

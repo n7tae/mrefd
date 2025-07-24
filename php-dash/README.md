@@ -2,7 +2,7 @@
 
 This dashboard is a php alternative to the GO based "gomrefdash" dashboard.
 
-### Version 1.4.0
+### Version 1.4.1
 
 You will need to install webserver software (such as Apache, nginx, lighttpd, and others) on the system hosting your reflector to use this dash. In addition, you will 
 need the php/php-fpm packages as well. You can use the following instructions to install lighttpd and php on a debian based operating system:
