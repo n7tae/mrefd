@@ -59,7 +59,9 @@ public:
 	const CInterlink *Find(const std::string &) const;
 
 protected:
+#ifndef NO_DHT
 	void Emplace(const std::string &cs, const std::string &mods);
+#endif
 	void Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
 	bool GetLastModTime(time_t *);
 	void ToUpper(std::string &s);

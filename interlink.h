@@ -57,8 +57,5 @@ private:
 	CIp         m_Ip;
 	uint16_t    m_Port;
 	bool        m_IsNotLegacy;
-
-#ifndef NO_DHT
 	std::string m_IPv4, m_IPv6;
-#endif
 };
