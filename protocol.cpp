@@ -927,7 +927,8 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs,
 		}
 		else
 		{
-			std::cout << "CONN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+			if (cs.GetCS(4).compare("WPSD"))
+				std::cout << "CONN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
 	else if (0 == memcmp(buf, "LSTN", 4))
