@@ -146,7 +146,7 @@ void CProtocol::Thread()
 void CProtocol::Task(void)
 {
 	CIp ip;
-	char mod;
+	char mod = 0;
 	char mods[27];
 	CCallsign cs;
 	CPacket pack;
