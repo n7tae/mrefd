@@ -592,9 +592,6 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				if (EClientType::simple == fromtype)
 				{
 					// legacy reflectors have to be properly addressed
-					// save the CRC
-					const auto crc = packet.GetCRC();
-
 					// set the address and calculate the CRC
 					client->GetCallsign().CodeOut(packet.GetDstAddress());
 					packet.CalcCRC();
@@ -609,7 +606,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 
 					// restore the DST address and CRC
 					dst.CodeOut(packet.GetDstAddress());
-					packet.SetCRC(crc);
+					packet.CalcCRC();
 				}
 				break;
 			case EClientType::reflector:

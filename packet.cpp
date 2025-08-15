@@ -60,9 +60,18 @@ void CPacket::SetStreamId(uint16_t sid)
 {
 	if (isstream)
 	{
-		data[4] = 0xffu & (sid >> 8);
-		data[5] = 0xffu & sid;
+		Set16At(4, sid);
 	}
+}
+
+uint8_t *CPacket::GetMetaData()
+{
+	return data + (isstream ? 20 : 18);
+}
+
+const uint8_t *CPacket::GetCMetaData() const
+{
+	return data + (isstream ? 20 : 18);
 }
 
 // returns LSD:TYPE in host byte order
@@ -74,9 +83,7 @@ uint16_t CPacket::GetFrameType() const
 
 void CPacket::SetFrameType(uint16_t ft)
 {
-	int offset = isstream ? 18 : 16;
-	data[offset]   = 0xffu & (ft >> 8);
-	data[offset+1] = 0xffu & ft;
+	Set16At(isstream ? 18 : 16, ft);
 }
 
 uint16_t CPacket::GetFrameNumber() const
@@ -88,8 +95,7 @@ void CPacket::SetFrameNumber(uint16_t fn)
 {
 	if (isstream)
 	{
-		data[34] = 0xffu & (fn >> 8);
-		data[35] = 0xffu & fn;
+		Set16At(34, fn);
 	}
 }
 
@@ -104,33 +110,13 @@ void CPacket::CalcCRC()
 {
 	if (isstream)
 	{
-		auto crc = CRC.CalcCRC(data, 52);
-		data[52] = 0xffu & (crc >> 8);
-		data[53] = 0xffu & crc;
+		Set16At(52, CRC.CalcCRC(data, 52));
 	}
 	else
 	{	// set the CRC for the LSF
-		auto crc = CRC.CalcCRC(data+4, 28);
-		data[32] = 0xffu & (crc >> 8);
-		data[33] = 0xffu & crc;
+		Set16At(32, CRC.CalcCRC(data+4, 28));
 		// now for the payload
-		crc = CRC.CalcCRC(data+34, size-36);
-		data[size-2] = 0xffu & (crc >> 8);
-		data[size-1] = 0xffu & crc;
-	}
-}
-
-void CPacket::SetCRC(uint16_t crc)
-{
-	if (isstream)
-	{
-		data[52] = 0xffu & (crc >> 8);
-		data[53] = 0xffu & crc;
-	}
-	else
-	{	// set the CRC for the LSF
-		data[32] = 0xffu & (crc >> 8);
-		data[33] = 0xffu & crc;
+		Set16At(size-2, CRC.CalcCRC(data+34, size-36));
 	}
 }
 
@@ -164,4 +150,10 @@ uint16_t CPacket::GetCRC(bool first) const
 uint16_t CPacket::Get16At(size_t pos) const
 {
 	return 0x100u * data[pos] + data[pos+1];
+}
+
+void CPacket::Set16At(size_t pos, uint16_t val)
+{
+	data[pos++] = 0xffu & (val >> 8);
+	data[pos]   = 0xffu & val;
 }
