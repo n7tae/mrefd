@@ -35,6 +35,7 @@ class CParrot
 {
 public:
 	CParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record) {}
+	virtual ~CParrot() {}
 	virtual void Add(const CPacket &pack) = 0;
 	virtual bool IsExpired() const = 0;
 	virtual void Play() = 0;
