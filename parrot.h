@@ -54,7 +54,7 @@ protected:
 class CStreamParrot : public CParrot
 {
 public:
-	CStreamParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft), is3200(0u == (0x2u & ft)) {}
+	CStreamParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, 0x787u & ft), is3200(0u == (0x2u & ft)) {}
 	void Add(const CPacket &pack);
 	void Play();
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
@@ -73,7 +73,7 @@ private:
 class CPacketParrot : public CParrot
 {
 public:
-	CPacketParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
+	CPacketParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, 0x781u & ft) {}
 	void Add(const CPacket &pack);
 	bool IsExpired() const { return false; }
 	void Play();
