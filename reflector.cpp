@@ -201,7 +201,7 @@ void CReflector::XmlReportThread()
 		if ( xmlFile.is_open() )
 		{
 			// write xml file
-			WriteXmlFile(xmlFile);
+			WriteStateFile(xmlFile);
 
 			// and close file
 			xmlFile.close();
@@ -220,7 +220,7 @@ void CReflector::XmlReportThread()
 ////////////////////////////////////////////////////////////////////////////////////////
 // xml helpers
 
-void CReflector::WriteXmlFile(std::ofstream &xmlFile)
+void CReflector::WriteStateFile(std::ofstream &xmlFile)
 {
 	const std::string Callsign(g_CFG.GetCallsign());
 	// write header
@@ -240,7 +240,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	SPPeer p;
 	while ( (p = m_Peers.FindNextPeer(item)) )
 	{
-		p->WriteXml(xmlFile);
+		p->WriteState(xmlFile);
 	}
 	// unlock
 	xmlFile << "</PEERS>" << std::endl;
@@ -254,7 +254,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	{
 		if ( (*cit)->IsNode() && (*cit)->GetCallsign().GetCS(4).compare("M17-") )
 		{
-			(*cit)->WriteXml(xmlFile);
+			(*cit)->WriteState(xmlFile);
 		}
 	}
 	// unlock
@@ -268,7 +268,7 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	// iterate on users
 	for ( auto it=users->begin(); it!=users->end(); it++ )
 	{
-		it->WriteXml(xmlFile);
+		it->WriteState(xmlFile);
 	}
 	// unlock
 	ReleaseUsers();

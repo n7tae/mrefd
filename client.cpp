@@ -78,7 +78,7 @@ void CClient::SendPacket(const CPacket &pack) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CClient::WriteXml(std::ofstream &xmlFile) const
+void CClient::WriteState(std::ofstream &xmlFile) const
 {
 	xmlFile << "<NODE>" << std::endl;
 	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;

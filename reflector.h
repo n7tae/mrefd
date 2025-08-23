@@ -70,7 +70,7 @@ protected:
 	void XmlReportThread(void);
 
 	// xml helpers
-	void WriteXmlFile(std::ofstream &);
+	void WriteStateFile(std::ofstream &);
 
 protected:
 	// objects

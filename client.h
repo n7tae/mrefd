@@ -74,7 +74,7 @@ public:
 	// function
 	void SendPacket(const CPacket &pack) const;
 	// reporting
-	void WriteXml(std::ofstream &) const;
+	void WriteState(std::ofstream &) const;
 
 protected:
 	const CCallsign   m_Callsign;

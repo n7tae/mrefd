@@ -56,7 +56,7 @@ public:
 	bool operator <(const CUser &) const;
 
 	// reporting
-	void WriteXml(std::ofstream &);
+	void WriteState(std::ofstream &);
 
 protected:
 	// data

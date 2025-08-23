@@ -63,7 +63,7 @@ bool CUser::operator <(const CUser &user) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CUser::WriteXml(std::ofstream &xmlFile)
+void CUser::WriteState(std::ofstream &xmlFile)
 {
 	xmlFile << "<STATION>" << std::endl;
 	xmlFile << "\t<SOURCE>" << m_Source << "</SOURCE>" << std::endl;

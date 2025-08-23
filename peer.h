@@ -75,7 +75,7 @@ public:
 	std::map<char, SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
-	virtual void WriteXml(std::ofstream &) const;
+	virtual void WriteState(std::ofstream &) const;
 
 protected:
 	// data

@@ -70,7 +70,7 @@ void CPeer::Alive(void)
 	}
 }
 
-void CPeer::WriteXml(std::ofstream &xmlFile) const
+void CPeer::WriteState(std::ofstream &xmlFile) const
 {
 	time_t lht = 0;
 	for (auto &item : m_Clients)
