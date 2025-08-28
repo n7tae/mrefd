@@ -42,22 +42,22 @@ void CGNSS::Get(const uint8_t *data)
 	// position
 	if (positionValid)
 	{
-		constexpr float a = 1.0f / (8388607.0f);
+		constexpr double a = 1.0 / (8388607.0);
 		auto nlat = (int32_t(data[3] << 24) + (data[4] << 16) + (data[5] << 8)) >> 8;
-		latitude = 90.0f * nlat * a;
+		latitude = 90.0 * nlat * a;
 		auto nlon = (int32_t(data[6] << 24) + (data[7] << 16) + (data[8] << 8)) >> 8;
-		longitude = 180.0f * nlon * a;
+		longitude = 180.0 * nlon * a;
 	}
 	// altitude
 	if (altitudeValid)
 	{
-		altitude = 0.5f * (256 * data[9] + data[10]) - 500.0f;
+		altitude = 0.5 * (256 * data[9] + data[10]) - 500.0;
 	}
 	// velocity
 	if (velocityValid)
 	{
 		bearing = 256u * (data[1] & 0x1u) + data[2];
-		speed = 0.5f * (16 * data[11] + (data[12] / 16));
+		speed = 0.5 * (16 * data[11] + (data[12] / 16));
 	}
 	// radius
 	if (radiusValid)

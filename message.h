@@ -16,23 +16,14 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <string.h>
 #include <cstdint>
 #include <string>
-#include <nlohmann/json.hpp>
 
-class CGNSS
+class CMessage
 {
-public:
-	CGNSS() = delete;
-	CGNSS(const uint8_t *data);
-	virtual ~CGNSS() {}
-
-	void Get(const uint8_t *pdata);
-	void MakeJson(nlohmann::json &gpsobj) const;
-
+	CMessage() : got(0), need(0) { message[52] = 0; }
 private:
-	// Meta data
-	double latitude, longitude, altitude, speed;
-	unsigned station, source, bearing, radius;
-	bool positionValid, altitudeValid, velocityValid, radiusValid;
+	uint8_t got, need;
+	char message[53];
 };
