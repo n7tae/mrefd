@@ -157,7 +157,7 @@ The blacklist, whitelist and interlink files can be modified in real time while 
 
 Also include in this repo is a simple php-based dashboard that's easy to install and use. This dashboard is in the `php-dash` folder. The `php-dash/README.md` file explains how to configure your dashboard. If you are new to setting up a webserver there are also instructions for installing and configuring a simple webserver.
 
-Unfortunately the former [go-based dashboard](https://github.com/kc1awv/gomrefdash) is no longer compatible with this version of *mrefd*. If someone wants to clone or fork this repo and get it working again, let me know and I will replace this paragraph with a link to your work. Or if you don't like the looks of the `php-dash` and have something better and want to share, let me know.
+As an alternative, DU8BL has updated the original go-based dashboard so it now supports the latest version of mrefd and is available [here](https://github.com/DU8BL/gomrefdash).
 
 ## Updating mrefd
 
