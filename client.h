@@ -24,6 +24,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <nlohmann/json.hpp>
 
 #include "udpsocket.h"
 #include "callsign.h"
@@ -74,7 +75,7 @@ public:
 	// function
 	void SendPacket(const CPacket &pack) const;
 	// reporting
-	void WriteState(std::ofstream &) const;
+	void AddClientState(nlohmann::json &jdata) const;
 
 protected:
 	const CCallsign   m_Callsign;

@@ -26,6 +26,7 @@
 
 #include <ctime>
 #include <memory>
+#include <nlohmann/json.hpp>
 
 #include "callsign.h"
 #include "client.h"
@@ -56,7 +57,7 @@ public:
 	bool operator <(const CUser &) const;
 
 	// reporting
-	void WriteState(std::ofstream &);
+	void AddUserState(nlohmann::json &jdata);
 
 protected:
 	// data

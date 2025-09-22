@@ -41,7 +41,7 @@ extern CInterlinks g_Interlinks;
 CProtocol::CProtocol() : keep_running(true), publish(true)
 {
 	peerRegEx = std::regex("^M17-[A-Z0-9]{3,3}( [A-Z])?$", std::regex::extended);
-	clientRegEx = std::regex("^[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}([ -/\\.].*)?$", std::regex::extended);
+	clientRegEx = std::regex("^([0-9]?[A-Z]{1,2}[0-9]{0,2}/)?[0-9]?[A-Z]{1,2}[0-9]{1,2}[A-Z]{1,4}([ -/\\.][A-Z0-9 -/\\.]*)?$", std::regex::extended);
 	lstnRegEx = std::regex("^[0-9]?[A-Z][A-Z0-9]{2,8}$", std::regex::extended);
 }
 
@@ -634,10 +634,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 			case EClientType::reflector:
 				if (EClientType::simple == ct or EClientType::listenonly == ct)
 				{
-					const auto size = packet.GetSize();
-					packet.SetSize(size - 1);
 					client->SendPacket(packet);
-					packet.SetSize(size);
 				}
 				break;
 			case EClientType::simple:

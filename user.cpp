@@ -63,24 +63,16 @@ bool CUser::operator <(const CUser &user) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CUser::WriteState(std::ofstream &xmlFile)
+void CUser::AddUserState(nlohmann::json &jdata)
 {
-	xmlFile << "<STATION>" << std::endl;
-	xmlFile << "\t<SOURCE>" << m_Source << "</SOURCE>" << std::endl;
-	xmlFile << "\t<DESTINATION>" << m_Destination << "</DESTINATION>" << std::endl;
-	xmlFile << "\t<MODE>";
-	if (m_Mode == EMode::sm)
-		xmlFile << "Stream";
-	else
-		xmlFile << "Packet";
-	xmlFile << "</MODE>" << std::endl;
-	xmlFile << "\t<VIA>" << m_ClientCS << "</VIA>" << std::endl;
-	xmlFile << "\t<ONMODULE>" << m_OnModule << "</ONMODULE>" << std::endl;
+	nlohmann::json json;
+	json["Source"] = m_Source;
+	json["Destinatio"] = m_Destination;
+	json["Mode"] = (m_Mode == EMode::sm) ? "Stream" : "Packet";
+	json["Via"] = m_ClientCS;
+	json["OnModule"] = std::string(m_OnModule, 1);
 
 	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime)))
-	{
-		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
-	}
-	xmlFile << "</STATION>" << std::endl;
+	json["LastHeardTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime))) ? mbstr : nullptr;
+	jdata.emplace_back(json);
 }

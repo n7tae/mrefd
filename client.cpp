@@ -78,24 +78,18 @@ void CClient::SendPacket(const CPacket &pack) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CClient::WriteState(std::ofstream &xmlFile) const
+void CClient::AddClientState(nlohmann::json &jdata) const
 {
-	xmlFile << "<NODE>" << std::endl;
-	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;
-	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
-	xmlFile << "\t<LINKEDMODULE>" << m_ReflectorModule << "</LINKEDMODULE>" << std::endl;
-	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
-	xmlFile << "\t<LISTENONLY>" << ((IsListenOnly()) ? "true" : "false") << "</LISTENONLY>" << std::endl;
+	nlohmann::json json;
+	json["Callsign"] = m_Callsign.GetCS();
+	json["IP"] = m_Ip.GetAddress();
+	json["Module"] = std::string(m_ReflectorModule, 1);
+	json["Protocol"] = GetProtocolName();
+	json["IsListenOnly"] = IsListenOnly();
 	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))
-	{
-		xmlFile << "\t<CONNECTTIME>" << mbstr << "</CONNECTTIME>" << std::endl;
-	}
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime)))
-	{
-		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
-	}
-	xmlFile << "</NODE>" << std::endl;
+	json["ConnectTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime))) ? mbstr : nullptr;
+	json["LastHeardTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime))) ? mbstr : nullptr;
+	jdata.push_back(json);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

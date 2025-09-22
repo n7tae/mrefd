@@ -16,14 +16,28 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <string.h>
 #include <cstdint>
 #include <string>
+#include <nlohmann/json.hpp>
 
 class CMessage
 {
-	CMessage() : got(0), need(0) { message[52] = 0; }
+public:
+	CMessage() { Init(); }
+	virtual ~CMessage() {}
+
+	void Init();
+	// returns true when the message string is completely constructed
+	bool GetBlock(const uint8_t *pdata);
+	const std::string &GetMessage();
+	void MakeJson(nlohmann::json &gpsobj) const;
+
 private:
-	uint8_t got, need;
-	char message[53];
+	// Meta data
+	uint8_t ctl;
+	char msg[53];
+	std::string str;
+
+	void Clean(char *to, const uint8_t *from);
+	void Trim();
 };

@@ -131,7 +131,7 @@ bool CReflector::Start(const char *cfgfilename)
 
 	// start the reporting threads
 	std::cout << "Starting the XML thread..." << std::endl;
-	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
+	m_XmlReportFuture = std::async(std::launch::async, &CReflector::stateReportThread, this);
 #ifndef NO_DHT
 	PutDHTConfig();
 #endif
@@ -190,25 +190,27 @@ void CReflector::Stop(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // report threads
 
-void CReflector::XmlReportThread()
+void CReflector::stateReportThread()
 {
 	while (keep_running)
 	{
-		const std::string xmlfilepath(g_CFG.GetXmlPath());
+		nlohmann::json json;
+		const std::string stateFilePath(g_CFG.GetDBDataPath());
 		// report to xml file
-		std::ofstream xmlFile;
-		xmlFile.open(xmlfilepath, std::ios::out | std::ios::trunc);
-		if ( xmlFile.is_open() )
+		std::ofstream stateFile;
+		stateFile.open(stateFilePath, std::ios::out | std::ios::trunc);
+		if ( stateFile.is_open() )
 		{
 			// write xml file
-			WriteStateFile(xmlFile);
+			CreateJsonObject(json);
+			stateFile << json.dump(4) << std::endl;
 
 			// and close file
-			xmlFile.close();
+			stateFile.close();
 		}
 		else
 		{
-			std::cout << "Failed to open " << xmlfilepath << std::endl;
+			std::cout << "Failed to open " << stateFilePath << std::endl;
 		}
 
 		// and wait a bit
@@ -220,62 +222,45 @@ void CReflector::XmlReportThread()
 ////////////////////////////////////////////////////////////////////////////////////////
 // xml helpers
 
-void CReflector::WriteStateFile(std::ofstream &xmlFile)
+void CReflector::CreateJsonObject(nlohmann::json &json)
 {
-	const std::string Callsign(g_CFG.GetCallsign());
-	// write header
-	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
-
-	// reflector start
-	xmlFile << "<REFLECTOR CALLSIGN=\"" << Callsign << "\">" << std::endl;
-
-	// software version
-	xmlFile << "<VERSION>" << g_Version << "</VERSION>" << std::endl;
-
-	// linked peers
-	xmlFile << "<PEERS>" << std::endl;
-	// lock
+	json["Callsign"] = g_CFG.GetCallsign();
+	std::stringstream ss;
+	ss << g_Version;
+	json["Version"] = ss.str();
+	json["Peers"] = json.array();
 	// iterate on peers
 	auto item = m_Peers.Begin();
 	SPPeer p;
 	while ( (p = m_Peers.FindNextPeer(item)) )
 	{
-		p->WriteState(xmlFile);
+		p->AddPeerState(json["Peers"]);
 	}
-	// unlock
-	xmlFile << "</PEERS>" << std::endl;
 
 	// linked nodes
-	xmlFile << "<NODES>" << std::endl;
-	// lock
+	json["Clients"] = json.array();
 	auto clients = GetClients();
 	// iterate on clients
 	for ( auto cit=clients->cbegin(); cit!=clients->cend(); cit++ )
 	{
 		if ( (*cit)->IsNode() && (*cit)->GetCallsign().GetCS(4).compare("M17-") )
 		{
-			(*cit)->WriteState(xmlFile);
+			(*cit)->AddClientState(json["Clients"]);
 		}
 	}
 	// unlock
 	ReleaseClients();
-	xmlFile << "</NODES>" << std::endl;
 
 	// last heard users
-	xmlFile << "<STATIONS>" << std::endl;
-	// lock
+	json["Users"] = json.array();
 	CUsers *users = GetUsers();
 	// iterate on users
 	for ( auto it=users->begin(); it!=users->end(); it++ )
 	{
-		it->WriteState(xmlFile);
+		it->AddUserState(json["Users"]);
 	}
 	// unlock
 	ReleaseUsers();
-	xmlFile << "</STATIONS>" << std::endl;
-
-	// reflector end
-	xmlFile << "</REFLECTOR>" << std::endl;
 }
 
 #ifndef NO_DHT

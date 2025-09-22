@@ -23,6 +23,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <nlohmann/json.hpp>
 
 #include "users.h"
 #include "clients.h"
@@ -67,10 +68,10 @@ public:
 
 protected:
 	// thread
-	void XmlReportThread(void);
+	void stateReportThread(void);
 
-	// xml helpers
-	void WriteStateFile(std::ofstream &);
+	// json helpers
+	void CreateJsonObject(nlohmann::json &json);
 
 protected:
 	// objects
