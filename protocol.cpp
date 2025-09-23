@@ -338,7 +338,7 @@ void CProtocol::Task(void)
 						SendToClients(pack, client, dst);
 						if (pack.IsStreamData() and pack.IsLastPacket())
 						{
-							CloseStream(mod); // so this only closes streams
+							CloseStream(client->GetReflectorModule()); // so this only closes streams
 						}
 					}
 				}
