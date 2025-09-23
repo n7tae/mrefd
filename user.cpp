@@ -67,7 +67,7 @@ void CUser::AddUserState(nlohmann::json &jdata)
 {
 	nlohmann::json json;
 	json["Source"] = m_Source;
-	json["Destinatio"] = m_Destination;
+	json["Destination"] = m_Destination;
 	json["Mode"] = (m_Mode == EMode::sm) ? "Stream" : "Packet";
 	json["Via"] = m_ClientCS;
 	json["OnModule"] = std::string(1, m_OnModule);
