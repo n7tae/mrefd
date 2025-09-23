@@ -83,7 +83,7 @@ void CClient::AddClientState(nlohmann::json &jdata) const
 	nlohmann::json json;
 	json["Callsign"] = m_Callsign.GetCS();
 	json["IP"] = m_Ip.GetAddress();
-	json["Module"] = std::string(m_ReflectorModule, 1);
+	json["Module"] = std::string(1, m_ReflectorModule);
 	json["Protocol"] = GetProtocolName();
 	json["IsListenOnly"] = IsListenOnly();
 	char mbstr[100];
