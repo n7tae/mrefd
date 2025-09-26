@@ -120,13 +120,13 @@ if (isset($_GET['do'])) {
                                 }
                             echo '</td>
                             <td>';
-                                list ($Flag, $Name) = $Reflector->GetFlag(GetCSOnly($Json->Users[$i]->Callsign));
+                                list ($Flag, $Name) = $Reflector->GetFlag(GetCSOnly($Json->Users[$i]->Source));
                                 if (file_exists("./images/flags/" . $Flag . ".svg")) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
                             echo '</td>
-                            <td><a href="https://www.qrz.com/db/' . GetCSOnly($Json->Users[$i]->Callsign) . '" class="pl" target="_blank">' . $Json->Users[$i]->Source . '</a></td>
-							<td>' . $Json->Users[$i]->Destination() . '</td>
+                            <td><a href="https://www.qrz.com/db/' . GetCSOnly($Json->Users[$i]->Source) . '" class="pl" target="_blank">' . $Json->Users[$i]->Source . '</a></td>
+							<td>' . $Json->Users[$i]->Destination . '</td>
                             <td>' . $Json->Users[$i]->Mode . '</td>
                             <td>' . $Json->Users[$i]->Via . '</td>
                             <td>' . date("Y-m-d H:i", $Json->Users[$i]->LastHeardTime) . '<br />' . elapsedTime($Json->Users[$i]->LastHeardTime) . ' ago</td>
