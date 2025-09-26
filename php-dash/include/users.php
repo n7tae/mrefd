@@ -92,7 +92,7 @@ if (isset($_GET['do'])) {
          </tr>
         <?php
             $Reflector->LoadFlags();
-            for ($i=0;$i<$UserCount();$i++) {
+            for ($i=0;$i<$UserCount;$i++) {
                 $ShowThisStation = true;
                 if ($PageOptions['UserPage']['ShowFilter']) {
                     $CS = true;
@@ -125,12 +125,12 @@ if (isset($_GET['do'])) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
                             echo '</td>
-                            <td><a href="https://www.qrz.com/db/' . GetCSOnly($Json->Users[$i]->Callsign) . '" class="pl" target="_blank">' . $Json->Users[$i]->GetSource() . '</a></td>
-							<td>' . $Json->Users[$i]->GetDestination() . '</td>
-                            <td>' . $Json->Users[$i]->GetMode() . '</td>
-                            <td>' . $Json->Users[$i]->GetVia() . '</td>
+                            <td><a href="https://www.qrz.com/db/' . GetCSOnly($Json->Users[$i]->Callsign) . '" class="pl" target="_blank">' . $Json->Users[$i]->Source . '</a></td>
+							<td>' . $Json->Users[$i]->Destination() . '</td>
+                            <td>' . $Json->Users[$i]->Mode . '</td>
+                            <td>' . $Json->Users[$i]->Via . '</td>
                             <td>' . date("Y-m-d H:i", $Json->Users[$i]->LastHeardTime) . '<br />' . elapsedTime($Json->Users[$i]->LastHeardTime) . ' ago</td>
-                            <td>' . $Json->Users[$i]->GetModule() . '</td>
+                            <td>' . $Json->Users[$i]->OnModule . '</td>
                         </tr>';
                 }
                 if ($i == $PageOptions['LastHeardPage']['LimitTo']) {
