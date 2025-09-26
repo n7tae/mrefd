@@ -97,13 +97,13 @@ if (isset($_GET['do'])) {
                 if ($PageOptions['UserPage']['ShowFilter']) {
                     $CS = true;
                         if ($_SESSION['FilterCallSign'] != null) {
-                            if (!fnmatch($_SESSION['FilterCallSign'], $Json->Users[$i]->GetCallSign(), FNM_CASEFOLD)) {
+                            if (!fnmatch($_SESSION['FilterCallSign'], $Json->Users[$i]->CallSign, FNM_CASEFOLD)) {
                                 $CS = false;
                             }
                         }
                     $MO = true;
                     if ($_SESSION['FilterModule'] != null) {
-                        if (trim(strtolower($_SESSION['FilterModule'])) != strtolower($Json->Users[$i]->GetModule())) {
+                        if (trim(strtolower($_SESSION['FilterModule'])) != strtolower($Json->Users[$i]->OnModule)) {
                             $MO = false;
                         }
                     }

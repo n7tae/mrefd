@@ -31,8 +31,9 @@ if ($Json === null) {
 
 $PeerCount = count($Json->Peers);
 $UserCount = count($Json->Users);
+echo $PeerCount, $UserCount, 
 $ClientCount = count($Json->Clients);
-for ($i=0;i<$ClientCount;$i++) {
+for ($i=0;$i<$ClientCount;$i++) {
 	$Json->Clients[$i]->RandomID = CreateCode(16);
 }
 
@@ -51,7 +52,7 @@ for ($i=0;i<$ClientCount;$i++) {
 	<meta name="robots" content="<?php echo $PageOptions['MetaRobots']; ?>"/>
 
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title><?php echo $Reflector->GetReflectorName(); ?> Reflector Dashboard</title>
+	<title><?php echo $Json->Callsign; ?> Reflector Dashboard</title>
 	<link rel="icon" type="image/png" href="/images/icons/favicon-16x16.png" sizes="16x16">
 	<link rel="icon" type="image/png" href="/images/icons/favicon-32x32.png" sizes="32x32">
 	<link rel="icon" type="image/png" href="/images/icons/favicon-96x96.png" sizes="96x96">
