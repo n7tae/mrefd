@@ -18,7 +18,6 @@ date_default_timezone_set(trim(file_get_contents("/etc/timezone")));
 // For a list of PHP-approved timezones, see https://www.php.net/manual/en/timezones.php
 
 $Service     = array();
-$CallHome    = array();
 $PageOptions = array();
 
 $PageOptions['ContactEmail']                         = 'your_email';                            // Support E-Mail address
@@ -62,6 +61,6 @@ $PageOptions['MetaRobots']                           = 'index,follow';
 $PageOptions['UserPage']['ShowFilter']               = true;                                 // Show Filter on Users page
 
 $Service['PIDFile']                                  = '/var/run/mrefd.pid';
-$Service['XMLFile']                                  = '/var/log/mrefd.xml';
+$Service['JsonFile']                                 = '/var/log/mrefd.json';
 
 ?>

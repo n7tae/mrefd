@@ -71,8 +71,6 @@ void CUser::AddUserState(nlohmann::json &jdata)
 	json["Mode"] = (m_Mode == EMode::sm) ? "Stream" : "Packet";
 	json["Via"] = m_ClientCS;
 	json["OnModule"] = std::string(1, m_OnModule);
-
-	char mbstr[100];
-	json["LastHeardTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime))) ? mbstr : nullptr;
+	json["LastHeardTime"] = m_LastHeardTime;
 	jdata.emplace_back(json);
 }

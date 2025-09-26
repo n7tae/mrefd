@@ -86,9 +86,8 @@ void CClient::AddClientState(nlohmann::json &jdata) const
 	json["Module"] = std::string(1, m_ReflectorModule);
 	json["Protocol"] = GetProtocolName();
 	json["IsListenOnly"] = IsListenOnly();
-	char mbstr[100];
-	json["ConnectTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime))) ? mbstr : nullptr;
-	json["LastHeardTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime))) ? mbstr : nullptr;
+	json["ConnectTime"] = m_ConnectTime;
+	json["LastHeardTime"] = m_LastHeardTime;
 	jdata.push_back(json);
 }
 

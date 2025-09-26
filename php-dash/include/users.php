@@ -92,18 +92,18 @@ if (isset($_GET['do'])) {
          </tr>
         <?php
             $Reflector->LoadFlags();
-            for ($i=0;$i<$Reflector->StationCount();$i++) {
+            for ($i=0;$i<$UserCount();$i++) {
                 $ShowThisStation = true;
                 if ($PageOptions['UserPage']['ShowFilter']) {
                     $CS = true;
                         if ($_SESSION['FilterCallSign'] != null) {
-                            if (!fnmatch($_SESSION['FilterCallSign'], $Reflector->Stations[$i]->GetCallSign(), FNM_CASEFOLD)) {
+                            if (!fnmatch($_SESSION['FilterCallSign'], $Json->Users[$i]->GetCallSign(), FNM_CASEFOLD)) {
                                 $CS = false;
                             }
                         }
                     $MO = true;
                     if ($_SESSION['FilterModule'] != null) {
-                        if (trim(strtolower($_SESSION['FilterModule'])) != strtolower($Reflector->Stations[$i]->GetModule())) {
+                        if (trim(strtolower($_SESSION['FilterModule'])) != strtolower($Json->Users[$i]->GetModule())) {
                             $MO = false;
                         }
                     }
@@ -113,28 +113,28 @@ if (isset($_GET['do'])) {
                     echo '
                         <tr class="table-center">
                             <td>';
-                                if ($i == 0 && $Reflector->Stations[$i]->GetLastHeardTime() > (time() - 60)) {
+                                if ($i == 0 && $Json->Users[$i]->LastHeardTime > (time() - 60)) {
                                     echo '<img src="./images/tx.gif" style="margin-top:3px;" height="20"/>';
                                 } else {
                                     echo($i + 1);
                                 }
                             echo '</td>
                             <td>';
-                                list ($Flag, $Name) = $Reflector->GetFlag($Reflector->Stations[$i]->GetCallSignOnly());
+                                list ($Flag, $Name) = $Reflector->GetFlag(GetCSOnly($Json->Users[$i]->Callsign));
                                 if (file_exists("./images/flags/" . $Flag . ".svg")) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
                             echo '</td>
-                            <td><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank">' . $Reflector->Stations[$i]->GetSource() . '</a></td>
-							<td>' . $Reflector->Stations[$i]->GetDestination() . '</td>
-                            <td>' . $Reflector->Stations[$i]->GetMode() . '</td>
-                            <td>' . $Reflector->Stations[$i]->GetVia() . '</td>
-                            <td>' . @date("Y-m-d H:i", $Reflector->Stations[$i]->GetLastHeardTime()) . '<br />' . elapsedTime($Reflector->Stations[$i]->GetLastHeardTime()) . ' ago</td>
-                            <td>' . $Reflector->Stations[$i]->GetModule() . '</td>
+                            <td><a href="https://www.qrz.com/db/' . GetCSOnly($Json->Users[$i]->Callsign) . '" class="pl" target="_blank">' . $Json->Users[$i]->GetSource() . '</a></td>
+							<td>' . $Json->Users[$i]->GetDestination() . '</td>
+                            <td>' . $Json->Users[$i]->GetMode() . '</td>
+                            <td>' . $Json->Users[$i]->GetVia() . '</td>
+                            <td>' . date("Y-m-d H:i", $Json->Users[$i]->LastHeardTime) . '<br />' . elapsedTime($Json->Users[$i]->LastHeardTime) . ' ago</td>
+                            <td>' . $Json->Users[$i]->GetModule() . '</td>
                         </tr>';
                 }
                 if ($i == $PageOptions['LastHeardPage']['LimitTo']) {
-                    $i = $Reflector->StationCount() + 1;
+                    $i = $ClientCount() + 1;
                 }
             }
         ?>
@@ -162,7 +162,7 @@ if (isset($_GET['do'])) {
             echo '</tr><tr>';
             $GlobalPositions = array();
             for ($i=0;$i<count($Modules);$i++) {
-                $Users = $Reflector->GetNodesInModulesByID($Modules[$i]);
+                $Users = $Reflector->GetNodesInModulesById($Modules[$i]);
                 echo '<td><table class="table table-hover">';
                 $UserCheckedArray = array();
                 for ($j=0;$j<count($Users);$j++) {

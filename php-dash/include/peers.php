@@ -7,32 +7,31 @@
 		<th>M17 Peer</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
-		<th>Module</th><?php
-
+		<th>Module</th>
+<?php
 if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
-	echo '<th>IP</th>';
+	echo "\t\t<th>IP</th>";
 }
-
 ?>
- </tr>
+		</tr>
 <?php
 
 $Reflector->LoadFlags();
 
-for ($i=0;$i<$Reflector->PeerCount();$i++) {
+for ($i=0;$i<$PeerCount();$i++) {
 	echo '
 	<tr class="table-center">
 	<td>' . ($i+1).'</td>';
-	echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
+	echo '<td>' . $Json->Peers[$i]->CallSign . '</td>';
 	echo '
-	<td>' . date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()) . '<br />'
-	. elapsedTime($Reflector->Peers[$i]->GetLastHeardTime()) . ' ago</td>
-	<td>' . date("Y-m-d H:i", $Reflector->Peers[$i]->GetConnectTime()) . '<br />for '
-	. elapsedTime($Reflector->Peers[$i]->GetConnectTime()) . '</td>
-	<td>' . $Reflector->Peers[$i]->GetLinkedModule() . '</td>';
+	<td>' . date("d-m-Y H:i", $Json->Peers[$i]->LastHeardTime) . '<br />'
+	. elapsedTime($Json->Peers[$i]->LastHeardTime) . ' ago</td>
+	<td>' . date("Y-m-d H:i", $Json->Peers[$i]->ConnectTime) . '<br />for '
+	. elapsedTime($Json->Peers[$i]->ConnectTime) . '</td>
+	<td>' . $Json->Peers[$i]->Modules . '</td>';
 	if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
 		echo '<td>';
-		$Bytes = explode(".", $Reflector->Peers[$i]->GetIP());
+		$Bytes = explode(".", $Json->Peers[$i]->IP);
 		$MC = $PageOptions['PeerPage']['MasqueradeCharacter'];
 		if ($Bytes !== false && count($Bytes) == 4) {
 			switch ($PageOptions['PeerPage']['IPModus']) {
@@ -46,10 +45,10 @@ for ($i=0;$i<$Reflector->PeerCount();$i++) {
 					echo $MC.'.'.$Bytes[1].'.'.$Bytes[2].'.'.$Bytes[3];
 					break;
 				default:
-					echo '<a href="http://'.$Reflector->Peers[$i]->GetIP().'" target="_blank" style="text-decoration:none;color:#000000;">'.$Reflector->Peers[$i]->GetIP().'</a>';
+					echo '<a href="http://'.$Json->Peers[$i]->IP.'" target="_blank" style="text-decoration:none;color:#000000;">'.$Json->Peers[$i]->IP.'</a>';
 			}
 		} else {
-			$ipstr = $Reflector->Peers[$i]->GetIP();
+			$ipstr = $Json->Peers[$i]->IP;
 			$count = substr_count($ipstr, ":");
 			if ($count > 1) {
 				if (1 == substr_count($ipstr, "::")) { $ipstr = str_replace("::", str_repeat(":", 9 - $count), $ipstr); }

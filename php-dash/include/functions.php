@@ -12,9 +12,6 @@ function Debug($message) {
 }
 
 function ParseTime($Input) {
-    if (strpos($Input, "<") !== false) {
-       $Input = substr($Input, 0, strpos($Input, "<"));
-    }
 	sscanf($Input, "%d-%d-%dT%d:%d:%dZ", $year, $month, $day, $hour, $minute, $second);
 	return gmmktime($hour, $minute, $second, $month, $day, $year);
 }
@@ -44,7 +41,7 @@ function FormatSeconds($seconds) {
   return sprintf("%d days %02d:%02d:%02d", $seconds/60/60/24,($seconds/60/60)%24,($seconds/60)%60,$seconds%60);
 } 
 
-function CreateCode ($laenge) {   
+function CreateCode($laenge) {   
 	$zeichen = "1234567890abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWYXZ";   
 	mt_srand( (double) microtime() * 1000000); 
 	$out = "";
@@ -52,6 +49,10 @@ function CreateCode ($laenge) {
 		$out .= $zeichen[mt_rand(0,(strlen($zeichen)-1))];       
 	}         
 	return $out;  
+}
+
+function GetCSOnly($Source) {
+	return strtok($Source, ' -/.');
 }
 
 ?>

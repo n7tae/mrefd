@@ -84,9 +84,8 @@ void CPeer::AddPeerState(nlohmann::json &jdata) const
 	json["IP"] = m_Ip.GetAddress();
 	json["Modules"] = m_sharedModules;
 	json["Protocol"] = GetProtocolName();
-	char mbstr[100];
-	json["ConnectTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime))) ? mbstr : nullptr;
-	json["LastHeardTime"] = (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&lht))) ? mbstr : nullptr;
+	json["ConnectTime"] = m_ConnectTime;
+	json["LastHeardTime"] = lht;
 	jdata.emplace_back(json);
 }
 
