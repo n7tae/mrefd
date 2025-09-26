@@ -62,7 +62,7 @@ for ($i=0;$i<$PeerCount();$i++) {
 		echo '</td>';
 	}
 	echo '</tr>';
-	if ($i == $PageOptions['PeerPage']['LimitTo']) { $i = $Reflector->PeerCount()+1; }
+	if ($i == $PageOptions['PeerPage']['LimitTo']) { $i = $PeerCount+1; }
 }
 
 ?>

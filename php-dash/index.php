@@ -112,8 +112,8 @@ for ($i=0;i<$ClientCount;$i++) {
 	<div id="navbarCollapse" class="collapse navbar-collapse">
 		<ul class="navbar-nav mr-auto">
 		<li<?php echo (($_GET['show'] == "users") || ($_GET['show'] == "")) ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php">Last Heard</a></li>
-		<li<?php echo ($_GET['show'] == "links") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=links">Links (<?php echo $ClientCount();  ?>)</a></li>
-		<li<?php echo ($_GET['show'] == "peers") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=peers">Peers (<?php echo $PeerCount();  ?>)</a></li>
+		<li<?php echo ($_GET['show'] == "links") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=links">Links (<?php echo $ClientCount;  ?>)</a></li>
+		<li<?php echo ($_GET['show'] == "peers") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=peers">Peers (<?php echo $PeerCount;  ?>)</a></li>
 		</ul>
 		<span class="navbar-text px-2">mrefd v<?php echo $Json->Version; ?> - Dashboard v2.0.0 <?php echo $PageOptions['LocalModification']; ?></span>
 		<span class="navbar-text px-2">Service uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></span>

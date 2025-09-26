@@ -64,7 +64,7 @@ for ($i=0;$i<$ClientCount;$i++) {
 		echo '</td>';
    }
    echo '</tr>';
-   if ($i == $PageOptions['LinksPage']['LimitTo']) { $i = $Reflector->NodeCount()+1; }
+   if ($i == $PageOptions['LinksPage']['LimitTo']) { $i = $ClientCount+1; }
 }
 
 ?>

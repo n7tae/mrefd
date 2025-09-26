@@ -134,7 +134,7 @@ if (isset($_GET['do'])) {
                         </tr>';
                 }
                 if ($i == $PageOptions['LastHeardPage']['LimitTo']) {
-                    $i = $ClientCount() + 1;
+                    $i = $UserCount + 1;
                 }
             }
         ?>

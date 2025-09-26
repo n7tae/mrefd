@@ -64,9 +64,9 @@ class xReflector {
 		$suffix   = "";
 		$callsign = "";
 		$i        = 0;
-		while ($i < $this->NodeCount()) {
-			if ($this->Nodes[$i]->GetRandomID() == $RandomId) {
-			return $this->Nodes[$i]->GetCallSign();
+		while ($i < $ClientCount) {
+			if ($Json->Clients[$i]->GetRandomID == $RandomId) {
+			return $Json->Clients[$i]->CallSign;
 			}
 			$i++;
 		}
@@ -91,17 +91,17 @@ class xReflector {
 
 	public function GetModules() {
 		$out = array();
-		for ($i=0;$i<$this->NodeCount();$i++) {
+		for ($i=0;$i<$ClientCount;$i++) {
 			$Found = false;
 			$b = 0;
 			while ($b < count($out) && !$Found) {
-				if ($out[$b] == $this->Nodes[$i]->GetLinkedModule()) {
+				if ($out[$b] == $Json->Clients[$i]->LinkedModule) {
 				$Found = true;
 				}
 				$b++;
 			}
-			if (!$Found && (trim($this->Nodes[$i]->GetLinkedModule()) != "")) {
-				$out[] = $this->Nodes[$i]->GetLinkedModule();
+			if (!$Found && (trim($Json->Clients[$i]->Module) != "")) {
+				$out[] = $Json->Clients[$i]->Module;
 			}
 		}
 		return $out;
@@ -109,9 +109,9 @@ class xReflector {
 
 	public function GetNodesInModulesById($Module) {
 		$out = array();
-		for ($i=0;$i<$this->NodeCount();$i++) {
-			if ($this->Nodes[$i]->GetLinkedModule() == $Module) {
-				$out[] = $this->Nodes[$i]->GetRandomID();
+		for ($i=0;$i<$ClientCount;$i++) {
+			if ($Json->Clients[$i]->Module == $Module) {
+				$out[] = $Json->Clients[$i]->RandomID;
 			}
 		}
 		return $out;
