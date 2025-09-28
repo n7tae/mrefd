@@ -21,13 +21,13 @@ class xReflector {
 
 	public function LoadJson() {
 		if ($this->JsonFile != null) {
-			$JsonString = file_get_contents(this->JsonFile);
+			$JsonString = file_get_contents($this->JsonFile);
 			if ($JsonString === false) {
-				die('Could not read '.this->JsonFile);
+				die('Could not read '.$this->JsonFile);
 			}
 			$Json = json_decode($JsonString);
 			if ($Json === null) {
-				die('Could not parse '.this->JsonFile);
+				die('Could not parse '.$this->JsonFile);
 			}
 
 			foreach ($Json->Clients as $client) {
