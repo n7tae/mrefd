@@ -15,8 +15,8 @@ class Node {
 		$this->IP            = $IP;
 
 		$this->ListenOnly    = ($ListenOnly === 'true') ? 'Yes' : 'No';
-		$this->ConnectTime   = ParseTime($ConnectTime);
-		$this->LastHeardTime = ParseTime($LastHeardTime);
+		$this->ConnectTime   = $ConnectTime;
+		$this->LastHeardTime = $LastHeardTime;
 		$this->Callsign      = trim($Callsign);
 		$this->LinkedModule  = trim($LinkedModule);
 		$this->RandomID      = $RandomID;

@@ -14,7 +14,7 @@ class Station {
       $this->Source        = trim($Source);
 	  $this->Destination   = trim($Destination);
       $this->Via           = trim($Via);
-      $this->LastHeardTime = ParseTime($LastHeardTime);
+      $this->LastHeardTime = $LastHeardTime;
       $this->Mode          = $Mode;
       $this->CallsignOnly  = strtok($Source, " -/.");
       $this->OnModule      = $OnModule;

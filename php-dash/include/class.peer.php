@@ -10,8 +10,8 @@ class Peer {
    public function __construct($Callsign, $IP, $LinkedModule, $ConnectTime, $LastHeardTime) {
       
       $this->IP            = $IP;
-      $this->ConnectTime   = ParseTime($ConnectTime);
-      $this->LastHeardTime = ParseTime($LastHeardTime);
+      $this->ConnectTime   = $ConnectTime;
+      $this->LastHeardTime = $LastHeardTime;
       $this->Callsign      = trim($Callsign);      
       $this->LinkedModule  = trim($LinkedModule);
    }

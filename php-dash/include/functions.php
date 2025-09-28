@@ -11,14 +11,6 @@ function Debug($message) {
    echo '</pre><hr><br>';
 }
 
-function ParseTime($Input) {
-    if (strpos($Input, "<") !== false) {
-       $Input = substr($Input, 0, strpos($Input, "<"));
-    }
-	sscanf($Input, "%d-%d-%dT%d:%d:%dZ", $year, $month, $day, $hour, $minute, $second);
-	return gmmktime($hour, $minute, $second, $month, $day, $year);
-}
-
 function elapsedTime($time) {
 	$time = time() - $time; // to get the time since that moment
 	$time = ($time<1)? 1 : $time;
