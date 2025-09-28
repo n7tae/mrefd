@@ -55,7 +55,7 @@ sudo apt upgrade
 ### Required packages (some of these may already be installed)
 
 ```bash
-sudo apt install git build-essential g++ libcurl4-gnutls-dev
+sudo apt install git build-essential g++ libcurl4-gnutls-dev nlohmann-json3-dev
 ```
 
 The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT and gomrefdash both have their own requirements.

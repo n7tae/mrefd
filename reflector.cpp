@@ -58,9 +58,9 @@ CReflector::CReflector()
 CReflector::~CReflector()
 {
 	keep_running = false;
-	if ( m_XmlReportFuture.valid() )
+	if ( m_JsonReportFuture.valid() )
 	{
-		m_XmlReportFuture.get();
+		m_JsonReportFuture.get();
 	}
 }
 
@@ -131,7 +131,7 @@ bool CReflector::Start(const char *cfgfilename)
 
 	// start the reporting threads
 	std::cout << "Starting the XML thread..." << std::endl;
-	m_XmlReportFuture = std::async(std::launch::async, &CReflector::XmlReportThread, this);
+	m_JsonReportFuture = std::async(std::launch::async, &CReflector::DashboardDataThread, this);
 #ifndef NO_DHT
 	PutDHTConfig();
 #endif
@@ -145,9 +145,9 @@ void CReflector::Stop(void)
 	keep_running = false;
 
 	// stop & delete report threads
-	if ( m_XmlReportFuture.valid() )
+	if ( m_JsonReportFuture.valid() )
 	{
-		m_XmlReportFuture.get();
+		m_JsonReportFuture.get();
 	}
 
 	// close protocols
@@ -190,25 +190,26 @@ void CReflector::Stop(void)
 ////////////////////////////////////////////////////////////////////////////////////////
 // report threads
 
-void CReflector::XmlReportThread()
+void CReflector::DashboardDataThread()
 {
 	while (keep_running)
 	{
-		const std::string xmlfilepath(g_CFG.GetXmlPath());
+		nlohmann::json json;
+		WriteDashboardData(json);
+		const std::string jsonfilepath(g_CFG.GetJsonPath());
 		// report to xml file
-		std::ofstream xmlFile;
-		xmlFile.open(xmlfilepath, std::ios::out | std::ios::trunc);
-		if ( xmlFile.is_open() )
+		std::ofstream jsonFile;
+		jsonFile.open(jsonfilepath, std::ios::out | std::ios::trunc);
+		if ( jsonFile.is_open() )
 		{
-			// write xml file
-			WriteXmlFile(xmlFile);
+			jsonFile << json.dump(4);
 
 			// and close file
-			xmlFile.close();
+			jsonFile.close();
 		}
 		else
 		{
-			std::cout << "Failed to open " << xmlfilepath << std::endl;
+			std::cout << "Failed to open " << jsonfilepath << std::endl;
 		}
 
 		// and wait a bit
@@ -220,33 +221,24 @@ void CReflector::XmlReportThread()
 ////////////////////////////////////////////////////////////////////////////////////////
 // xml helpers
 
-void CReflector::WriteXmlFile(std::ofstream &xmlFile)
+void CReflector::WriteDashboardData(nlohmann::json &data)
 {
-	const std::string Callsign(g_CFG.GetCallsign());
-	// write header
-	xmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	data["Callsign"] = g_CFG.GetCallsign();
+	std::stringstream ss;
+	ss << g_Version;
+	data["Version"] = ss.str();
+	data["Peers"]   = nlohmann::json::array();
+	data["Clients"] = nlohmann::json::array();
+	data["Users"]   = nlohmann::json::array();
 
-	// reflector start
-	xmlFile << "<REFLECTOR CALLSIGN=\"" << Callsign << "\">" << std::endl;
-
-	// software version
-	xmlFile << "<VERSION>" << g_Version << "</VERSION>" << std::endl;
-
-	// linked peers
-	xmlFile << "<PEERS>" << std::endl;
-	// lock
 	// iterate on peers
 	auto item = m_Peers.Begin();
 	SPPeer p;
 	while ( (p = m_Peers.FindNextPeer(item)) )
 	{
-		p->WriteXml(xmlFile);
+		p->AddPeer(data["Peers"]);
 	}
-	// unlock
-	xmlFile << "</PEERS>" << std::endl;
 
-	// linked nodes
-	xmlFile << "<NODES>" << std::endl;
 	// lock
 	auto clients = GetClients();
 	// iterate on clients
@@ -254,28 +246,21 @@ void CReflector::WriteXmlFile(std::ofstream &xmlFile)
 	{
 		if ( (*cit)->IsNode() && (*cit)->GetCallsign().GetCS(4).compare("M17-") )
 		{
-			(*cit)->WriteXml(xmlFile);
+			(*cit)->AddClient(data["Clients"]);
 		}
 	}
 	// unlock
 	ReleaseClients();
-	xmlFile << "</NODES>" << std::endl;
 
-	// last heard users
-	xmlFile << "<STATIONS>" << std::endl;
 	// lock
 	CUsers *users = GetUsers();
 	// iterate on users
 	for ( auto it=users->begin(); it!=users->end(); it++ )
 	{
-		it->WriteXml(xmlFile);
+		it->AddUser(data["Users"]);
 	}
 	// unlock
 	ReleaseUsers();
-	xmlFile << "</STATIONS>" << std::endl;
-
-	// reflector end
-	xmlFile << "</REFLECTOR>" << std::endl;
 }
 
 #ifndef NO_DHT

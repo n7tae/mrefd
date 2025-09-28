@@ -23,6 +23,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <nlohmann/json.hpp>
 
 #include "users.h"
 #include "clients.h"
@@ -67,10 +68,10 @@ public:
 
 protected:
 	// thread
-	void XmlReportThread(void);
+	void DashboardDataThread(void);
 
 	// xml helpers
-	void WriteXmlFile(std::ofstream &);
+	void WriteDashboardData(nlohmann::json &data);
 
 protected:
 	// objects
@@ -81,7 +82,7 @@ protected:
 
 	// threads
 	std::atomic<bool> keep_running;
-	std::future<void> m_XmlReportFuture, m_JsonReportFuture;
+	std::future<void> m_JsonReportFuture;
 
 	// Distributed Hash Table
 #ifndef NO_DHT

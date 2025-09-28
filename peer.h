@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <nlohmann/json.hpp>
 
 #include "version.h"
 #include "timer.h"
@@ -75,7 +76,7 @@ public:
 	std::map<char, SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
-	virtual void WriteXml(std::ofstream &) const;
+	void AddPeer(nlohmann::json &data) const;
 
 protected:
 	// data

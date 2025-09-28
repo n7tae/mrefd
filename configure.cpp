@@ -240,9 +240,9 @@ bool CConfigure::ReadData(const std::string &path)
 			data.country.assign(value.substr(0, 2));
 		}
 #endif
-		else if (0 == key.compare("XmlPath"))
+		else if (0 == key.compare("JsonPath"))
 		{
-			data.xmlpath.assign(value);
+			data.jsonpath.assign(value);
 		}
 		else if (0 == key.compare("PidPath"))
 		{
@@ -495,14 +495,14 @@ bool CConfigure::ReadData(const std::string &path)
 	}
 #endif
 
-	if (data.xmlpath.empty())
+	if (data.jsonpath.empty())
 	{
-		std::cerr << "ERROR - XMLPath is empty" << std::endl;
+		std::cerr << "ERROR - JsonPath is empty" << std::endl;
 		rval = true;
 	}
 	else
 	{
-		std::cout << "XmlPath='" << data.xmlpath << "'" << std::endl;
+		std::cout << "JsonPath='" << data.jsonpath << "'" << std::endl;
 	}
 
 	if (data.pidpath.empty())

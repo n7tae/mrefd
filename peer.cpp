@@ -70,7 +70,7 @@ void CPeer::Alive(void)
 	}
 }
 
-void CPeer::WriteXml(std::ofstream &xmlFile) const
+void CPeer::AddPeer(nlohmann::json &data) const
 {
 	time_t lht = 0;
 	for (auto &item : m_Clients)
@@ -79,21 +79,15 @@ void CPeer::WriteXml(std::ofstream &xmlFile) const
 		if (t > lht)
 			lht = t;
 	}
-	xmlFile << "<PEER>" << std::endl;
-	xmlFile << "\t<CALLSIGN>" << m_Callsign << "</CALLSIGN>" << std::endl;
-	xmlFile << "\t<IP>" << m_Ip.GetAddress() << "</IP>" << std::endl;
-	xmlFile << "\t<LINKEDMODULE>" << m_sharedModules << "</LINKEDMODULE>" << std::endl;
-	xmlFile << "\t<PROTOCOL>" << GetProtocolName() << "</PROTOCOL>" << std::endl;
-	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_ConnectTime)))
-	{
-		xmlFile << "\t<CONNECTTIME>" << mbstr << "</CONNECTTIME>" << std::endl;
-	}
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&lht)))
-	{
-		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
-	}
-	xmlFile << "</PEER>" << std::endl;
+
+	data += {
+		{ "Callsign",      m_Callsign.GetCS() },
+		{ "IP",            m_Ip.GetAddress()  },
+		{ "Modules",       m_sharedModules    },
+		{ "Protocol",      GetProtocolName()  },
+		{ "ConnectTime",   m_ConnectTime      },
+		{ "LastHeardTime", lht                }
+	};
 }
 
 bool CPeer::IsAlive(void) const

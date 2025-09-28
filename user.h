@@ -26,6 +26,7 @@
 
 #include <ctime>
 #include <memory>
+#include <nlohmann/json.hpp>
 
 #include "callsign.h"
 #include "client.h"
@@ -56,7 +57,7 @@ public:
 	bool operator <(const CUser &) const;
 
 	// reporting
-	void WriteXml(std::ofstream &);
+	void AddUser(nlohmann::json &data) const;
 
 protected:
 	// data

@@ -63,24 +63,17 @@ bool CUser::operator <(const CUser &user) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CUser::WriteXml(std::ofstream &xmlFile)
+void CUser::AddUser(nlohmann::json &data) const
 {
-	xmlFile << "<STATION>" << std::endl;
-	xmlFile << "\t<SOURCE>" << m_Source << "</SOURCE>" << std::endl;
-	xmlFile << "\t<DESTINATION>" << m_Destination << "</DESTINATION>" << std::endl;
-	xmlFile << "\t<MODE>";
-	if (m_Mode == EMode::sm)
-		xmlFile << "Stream";
-	else
-		xmlFile << "Packet";
-	xmlFile << "</MODE>" << std::endl;
-	xmlFile << "\t<VIA>" << m_ClientCS << "</VIA>" << std::endl;
-	xmlFile << "\t<ONMODULE>" << m_OnModule << "</ONMODULE>" << std::endl;
-
-	char mbstr[100];
-	if (std::strftime(mbstr, sizeof(mbstr), "%FT%TZ", std::gmtime(&m_LastHeardTime)))
-	{
-		xmlFile << "\t<LASTHEARDTIME>" << mbstr << "</LASTHEARDTIME>" << std::endl;
-	}
-	xmlFile << "</STATION>" << std::endl;
+	const std::string mode(((EMode::sm==m_Mode) ? "Stream" : "Packet"));
+	std::string module;
+	module.assign(1, m_OnModule);
+	data += {
+		{ "Source",        m_Source        },
+		{ "Destination",   m_Destination   },
+		{ "Mode",          mode            },
+		{ "Via",           m_ClientCS      },
+		{ "Module",        module          },
+		{ "LastHeardTime", m_LastHeardTime }
+	};
 }
