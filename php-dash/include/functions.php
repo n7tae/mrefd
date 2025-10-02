@@ -40,9 +40,14 @@ function elapsedTime($time) {
 }
 
 function FormatSeconds($seconds) {
-  $seconds = abs($seconds); 
-  return sprintf("%d days %02d:%02d:%02d", $seconds/60/60/24,($seconds/60/60)%24,($seconds/60)%60,$seconds%60);
-} 
+  $seconds = abs($seconds);
+  return sprintf("%d days %02d:%02d:%02d", 
+    intval($seconds / 86400),        // days (86400 = 60*60*24)
+    intval($seconds / 3600) % 24,  // hours (3600 = 60*60)
+    intval($seconds / 60) % 60,    // minutes
+    $seconds % 60                    // seconds
+  );
+}
 
 function CreateCode ($laenge) {   
 	$zeichen = "1234567890abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWYXZ";   

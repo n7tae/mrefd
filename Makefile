@@ -77,16 +77,20 @@ install : $(EXE).blacklist $(EXE).whitelist $(EXE).interlink $(EXE).cfg
 	$(CPORLN) $(shell pwd)/$(EXE).cfg $(CFGDIR)/$(EXE).cfg
 	sed -e "s#XXX#$(CFGDIR)#" -e "s#YYY#$(EXE)#" systemd/mrefd.service > /etc/systemd/system/$(EXE).service
 	cp -f $(EXE) $(BINDIR)
+ifeq ($(DAEMON), true)
 	systemctl enable $(EXE).service
 	systemctl daemon-reload
 	systemctl start $(EXE)
+endif
 
 uninstall :
 	rm -f $(CFGDIR)/$(EXE).blacklist
 	rm -f $(CFGDIR)/$(EXE).whitelist
 	rm -f $(CFGDIR)/$(EXE).interlink
 	rm -f $(CFGDIR)/$(EXE).cfg
+ifeq ($(DAEMON), true)
 	systemctl stop $(EXE).service
 	systemctl disable $(EXE).service
 	rm -f /etc/systemd/system/$(EXE).service
 	systemctl daemon-reload
+endif

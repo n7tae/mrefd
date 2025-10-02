@@ -45,6 +45,32 @@ The packages which are described in this document are designed to install server
 
 Below are instructions for building an mrefd reflector.
 
+### Running with Docker
+
+```bash
+# First, copy the configuration files to your working directory and edit them as you see fit according to the rest of the documentation
+cp config/mrefd.blacklist .
+cp config/mrefd.whitelist .
+cp config/mrefd.interlink .
+cp example.cfg mrefd.cfg
+# Note: in mrefd.cfg, a few edits are expected in order to run properly in the containerized environment:
+#   - IPv4ExtAddr _must be set_, as the automated way of fetching the external IP does not work when in a container
+#   - PidPath = /app/data/mrefd.pid
+#   - XmlPath = /app/data/mrefd.xml
+#   - WhitelistPath = /app/config/mrefd.whitelist
+#   - BlacklistPath = /app/config/mrefd.blacklist
+#   - InterlinkPath = /app/config/mrefd.interlink
+
+cp php-dash/include/config.inc.php.dist php-dash/include/config.inc.php
+# Edit the php-dash/include/config.inc.php file with your editor of choice
+# Note: $PageOptions['IPV4'] needs to be set to "mrefd-mrefd" thanks to docker magic
+# Note: PIDFile and XMLFile need to be set to /app/data/mrefd.pid and /app/data/mrefd.xml accordingly
+# Note: comment out the date_default_timezone_set line, since we're setting timezone via env vars instead
+cp .env.example .env
+# Edit the .env file as you need for your deployment
+docker compose up
+```
+
 ### After a clean installation of a Debian-based OS make sure to run update and upgrade
 
 ```bash
