@@ -75,7 +75,7 @@ public:
 	// function
 	void SendPacket(const CPacket &pack) const;
 	// reporting
-	void AddClientState(nlohmann::json &jdata) const;
+	void AddClient(nlohmann::json &data) const;
 
 protected:
 	const CCallsign   m_Callsign;

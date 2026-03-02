@@ -68,10 +68,10 @@ public:
 
 protected:
 	// thread
-	void stateReportThread(void);
+	void DashboardDataThread(void);
 
-	// json helpers
-	void CreateJsonObject(nlohmann::json &json);
+	// xml helpers
+	void WriteDashboardData(nlohmann::json &data);
 
 protected:
 	// objects
@@ -82,7 +82,7 @@ protected:
 
 	// threads
 	std::atomic<bool> keep_running;
-	std::future<void> m_XmlReportFuture, m_JsonReportFuture;
+	std::future<void> m_JsonReportFuture;
 
 	// Distributed Hash Table
 #ifndef NO_DHT

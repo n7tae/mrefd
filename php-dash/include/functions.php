@@ -11,11 +11,14 @@ function Debug($message) {
    echo '</pre><hr><br>';
 }
 
+<<<<<<< HEAD
 function ParseTime($Input) {
 	sscanf($Input, "%d-%d-%dT%d:%d:%dZ", $year, $month, $day, $hour, $minute, $second);
 	return gmmktime($hour, $minute, $second, $month, $day, $year);
 }
 
+=======
+>>>>>>> rc2
 function elapsedTime($time) {
 	$time = time() - $time; // to get the time since that moment
 	$time = ($time<1)? 1 : $time;

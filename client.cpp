@@ -78,17 +78,19 @@ void CClient::SendPacket(const CPacket &pack) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CClient::AddClientState(nlohmann::json &jdata) const
+void CClient::AddClient(nlohmann::json &data) const
 {
-	nlohmann::json json;
-	json["Callsign"] = m_Callsign.GetCS();
-	json["IP"] = m_Ip.GetAddress();
-	json["Module"] = std::string(1, m_ReflectorModule);
-	json["Protocol"] = GetProtocolName();
-	json["IsListenOnly"] = IsListenOnly();
-	json["ConnectTime"] = m_ConnectTime;
-	json["LastHeardTime"] = m_LastHeardTime;
-	jdata.push_back(json);
+	std::string m;
+	m.append(1, m_ReflectorModule);
+	data += {
+		{ "Callsign",      m_Callsign.GetCS() },
+		{ "IP",            m_Ip.GetAddress()  },
+		{ "Module",        m                  },
+		{ "Protocol",      GetProtocolName()  },
+		{ "ListenOnly",    IsListenOnly()     },
+		{ "ConnectTime",   m_ConnectTime      },
+		{ "LastHeardTime", m_LastHeardTime    }
+	};
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

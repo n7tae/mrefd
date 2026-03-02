@@ -634,6 +634,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 			case EClientType::reflector:
 				if (EClientType::simple == ct or EClientType::listenonly == ct)
 				{
+					// the packet has already been trimmed in GetClient()
 					client->SendPacket(packet);
 				}
 				break;
@@ -1021,6 +1022,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 				// for a legacy reflector, the module is the module of the DST
 				mod = dst.GetModule();
 			}
+			// because is came from a reflector, we don't need the last byte anymore
 			client = peer->GetClient(mod);
 		}
 		packet.SetSize(size - 1);

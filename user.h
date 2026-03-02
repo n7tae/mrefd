@@ -57,7 +57,7 @@ public:
 	bool operator <(const CUser &) const;
 
 	// reporting
-	void AddUserState(nlohmann::json &jdata);
+	void AddUser(nlohmann::json &data) const;
 
 protected:
 	// data

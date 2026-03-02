@@ -70,7 +70,7 @@ void CPeer::Alive(void)
 	}
 }
 
-void CPeer::AddPeerState(nlohmann::json &jdata) const
+void CPeer::AddPeer(nlohmann::json &data) const
 {
 	time_t lht = 0;
 	for (auto &item : m_Clients)
@@ -79,14 +79,15 @@ void CPeer::AddPeerState(nlohmann::json &jdata) const
 		if (t > lht)
 			lht = t;
 	}
-	nlohmann::json json;
-	json["Callsign"] = m_Callsign.GetCS();
-	json["IP"] = m_Ip.GetAddress();
-	json["Modules"] = m_sharedModules;
-	json["Protocol"] = GetProtocolName();
-	json["ConnectTime"] = m_ConnectTime;
-	json["LastHeardTime"] = lht;
-	jdata.emplace_back(json);
+
+	data += {
+		{ "Callsign",      m_Callsign.GetCS() },
+		{ "IP",            m_Ip.GetAddress()  },
+		{ "Modules",       m_sharedModules    },
+		{ "Protocol",      GetProtocolName()  },
+		{ "ConnectTime",   m_ConnectTime      },
+		{ "LastHeardTime", lht                }
+	};
 }
 
 bool CPeer::IsAlive(void) const

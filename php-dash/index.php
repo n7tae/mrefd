@@ -10,15 +10,23 @@ if (file_exists("./include/config.inc.php")) {
 	die("config.inc.php does not exist. Be sure to copy /include/config.inc.php.dist to /include/config.inc.php and edit the file accordingly.");
 }
 
+<<<<<<< HEAD
 if (!class_exists('xReflector')) {
 	require_once("./include/class.reflector.php");
 } else {
 	die("./include/class.reflector.php does not exist.");
 }
+=======
+if (!class_exists('Node')) require_once("./include/class.node.php");
+if (!class_exists('xReflector')) require_once("./include/class.reflector.php");
+if (!class_exists('Station')) require_once("./include/class.station.php");
+if (!class_exists('Peer')) require_once("./include/class.peer.php");
+>>>>>>> rc2
 
 $Reflector = new xReflector;
 $Reflector->SetFlagFile("./include/country.csv");
 $Reflector->SetPIDFile($Service['PIDFile']);
+<<<<<<< HEAD
 
 $jsonString = file_get_contents($Service['JsonFile']);
 if ($jsonString === false) {
@@ -36,6 +44,11 @@ $ClientCount = count($Json->Clients);
 for ($i=0;$i<$ClientCount;$i++) {
 	$Json->Clients[$i]->RandomID = CreateCode(16);
 }
+=======
+$Reflector->SetJsonFile($Service['JsonFile']);
+
+$Reflector->LoadJson();
+>>>>>>> rc2
 
 ?>
 
@@ -105,6 +118,7 @@ for ($i=0;$i<$ClientCount;$i++) {
 	include_once("tracking.php");
 } ?>
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+<<<<<<< HEAD
 	<img style="background-color: white; border-radius: 50%; height: 42px; width: 42px;" src="images/icons/round-logo.png"></img>&nbsp;&nbsp;
 	<a class="navbar-brand" href="#"><?php echo $Json->Callsign; ?> Reflector</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,6 +133,22 @@ for ($i=0;$i<$ClientCount;$i++) {
 		<span class="navbar-text px-2">mrefd v<?php echo $Json->Version; ?> - Dashboard v2.0.0 <?php echo $PageOptions['LocalModification']; ?></span>
 		<span class="navbar-text px-2">Service uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></span>
 	</div>
+=======
+    <img style="background-color: white; border-radius: 50%; height: 42px; width: 42px;" src="images/icons/round-logo.png"></img>&nbsp;&nbsp;
+    <a class="navbar-brand" href="#"><?php echo $Reflector->GetReflectorName(); ?> Reflector</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div id="navbarCollapse" class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+            <li<?php echo (($_GET['show'] == "users") || ($_GET['show'] == "")) ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php">Last Heard</a></li>
+            <li<?php echo ($_GET['show'] == "links") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=links">Links (<?php echo $Reflector->NodeCount();  ?>)</a></li>
+            <li<?php echo ($_GET['show'] == "peers") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=peers">Peers (<?php echo $Reflector->PeerCount();  ?>)</a></li>
+        </ul>
+        <span class="navbar-text px-2">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard v1.4.0 <?php echo $PageOptions['LocalModification']; ?></span>
+        <span class="navbar-text px-2">Service uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></span>
+    </div>
+>>>>>>> rc2
 </nav>
 <main role="main">
 	<div class="container-fluid">

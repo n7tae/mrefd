@@ -33,7 +33,7 @@ using CFGDATA = struct CFGData_struct {
 	std::string sponsor, country;
 	std::string dhtsavepath;
 #endif
-	std::string pidpath, dbdatapath, whitepath, blackpath, interlinkpath;
+	std::string pidpath, jsonpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
 	bool swlencryptedmods;
 	CReflMods refmods;
@@ -63,7 +63,7 @@ public:
 	const std::string &GetCountry()          const { return data.country;          }
 	const std::string &GetDHTSavePath()      const { return data.dhtsavepath;      }
 #endif
-	const std::string &GetDBDataPath()       const { return data.dbdatapath;       }
+	const std::string &GetJsonPath()         const { return data.jsonpath;         }
 	const std::string &GetPidPath()          const { return data.pidpath;          }
 	const std::string &GetWhitePath()        const { return data.whitepath;        }
 	const std::string &GetBlackPath()        const { return data.blackpath;        }

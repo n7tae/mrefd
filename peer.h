@@ -76,7 +76,7 @@ public:
 	std::map<char, SPClient>::const_iterator cend() const   { return m_Clients.cend(); }
 
 	// reporting
-	virtual void AddPeerState(nlohmann::json &jdata) const;
+	void AddPeer(nlohmann::json &data) const;
 
 protected:
 	// data

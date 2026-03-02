@@ -63,14 +63,17 @@ bool CUser::operator <(const CUser &user) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
 
-void CUser::AddUserState(nlohmann::json &jdata)
+void CUser::AddUser(nlohmann::json &data) const
 {
-	nlohmann::json json;
-	json["Source"] = m_Source;
-	json["Destination"] = m_Destination;
-	json["Mode"] = (m_Mode == EMode::sm) ? "Stream" : "Packet";
-	json["Via"] = m_ClientCS;
-	json["OnModule"] = std::string(1, m_OnModule);
-	json["LastHeardTime"] = m_LastHeardTime;
-	jdata.emplace_back(json);
+	const std::string mode(((EMode::sm==m_Mode) ? "Stream" : "Packet"));
+	std::string module;
+	module.assign(1, m_OnModule);
+	data += {
+		{ "Source",        m_Source        },
+		{ "Destination",   m_Destination   },
+		{ "Mode",          mode            },
+		{ "Via",           m_ClientCS      },
+		{ "Module",        module          },
+		{ "LastHeardTime", m_LastHeardTime }
+	};
 }
