@@ -96,11 +96,11 @@ if (isset($_GET['do'])) {
                 $ShowThisStation = true;
                 if ($PageOptions['UserPage']['ShowFilter']) {
                     $CS = true;
-                        if ($_SESSION['FilterCallSign'] != null) {
-                            if (!fnmatch($_SESSION['FilterCallSign'], $Reflector->Stations[$i]->GetCallSign(), FNM_CASEFOLD)) {
-                                $CS = false;
-                            }
-                        }
+					if ($_SESSION['FilterCallSign'] != null) {
+						if (!fnmatch($_SESSION['FilterCallSign'], $Reflector->Stations[$i]->GetCallSign(), FNM_CASEFOLD)) {
+							$CS = false;
+						}
+					}
                     $MO = true;
                     if ($_SESSION['FilterModule'] != null) {
                         if (trim(strtolower($_SESSION['FilterModule'])) != strtolower($Reflector->Stations[$i]->GetModule())) {

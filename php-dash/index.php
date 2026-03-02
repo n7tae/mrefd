@@ -102,7 +102,7 @@ $Reflector->LoadJson();
     <img style="background-color: white; border-radius: 50%; height: 42px; width: 42px;" src="images/icons/round-logo.png"></img>&nbsp;&nbsp;
     <a class="navbar-brand" href="#"><?php echo $Reflector->GetReflectorName(); ?> Reflector</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+    <span class="navbar-toggler-icon"></span>
     </button>
     <div id="navbarCollapse" class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">

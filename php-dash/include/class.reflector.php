@@ -147,8 +147,8 @@ class xReflector {
 	}
 
 	public function GetPeer($ArrayIndex) {
-		if (isset($this->Peer[$ArrayIndex])) {
-			return $this->Peer[$ArrayIndex];
+		if (isset($this->Peers[$ArrayIndex])) {
+			return $this->Peers[$ArrayIndex];
 		}
 		return false;
 	}
@@ -157,22 +157,22 @@ class xReflector {
 		if (is_object($StationObject)) {
 
 			if ($AllowDouble) {
-			$this->Stations[] = $StationObject;
-			}
-			else {
-			$FoundStationInList = false;
-			$i                  = 0;
-
-			while (!$FoundStationInList && $i<$this->StationCount()) {
-				if ($this->Stations[$i]->GetSource() == $StationObject->GetSource()) {
-					$FoundStationInList = true;
-				}
-				$i++;
-			}
-
-			if (!$FoundStationInList) {
 				$this->Stations[] = $StationObject;
 			}
+			else {
+				$FoundStationInList = false;
+				$i = 0;
+
+				while (!$FoundStationInList && $i<$this->StationCount()) {
+					if ($this->Stations[$i]->GetSource() == $StationObject->GetSource()) {
+						$FoundStationInList = true;
+					}
+					$i++;
+				}
+
+				if (!$FoundStationInList) {
+					$this->Stations[] = $StationObject;
+				}
 			}
 		}
 	}

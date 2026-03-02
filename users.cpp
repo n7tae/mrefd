@@ -39,13 +39,15 @@ CUsers::CUsers() {}
 
 void CUsers::AddUser(const CUser &user)
 {
-	// add
+	// delete user if found
+	m_Users.remove_if([&user](const CUser &u){ return 0 == u.GetSource().compare(user.GetSource()); });
+	// now add it
 	m_Users.push_front(user);
 
 	// if list size too big, remove oldest
-	if ( m_Users.size() >= (LASTHEARD_USERS_MAX_SIZE-1) )
+	if ( m_Users.size() >= LASTHEARD_USERS_MAX_SIZE )
 	{
-		m_Users.resize(m_Users.size()-1);
+		m_Users.resize(m_Users.size());
 	}
 }
 
