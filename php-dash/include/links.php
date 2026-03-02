@@ -6,35 +6,38 @@
 		<th>Last Heard</th>
 		<th>Linked</th>
 		<th>ListenOnly</th>
-		<th>Module</th>
-<?php
+		<th>Module</th><?php
+
 if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {
-	echo "\t\t<th>IP</th>";
+	echo '
+	<th>IP</th>';
 }
+
 ?>
 		</tr>
 <?php
 
 $Reflector->LoadFlags();
 
-for ($i=0;$i<$ClientCount;$i++) {
+for ($i=0;$i<$Reflector->NodeCount();$i++) {
+
 	echo '<tr class="table-center">
 	<td>'.($i+1).'</td>
 	<td>';
-	list ($Flag, $Name) = $Reflector->GetFlag($Json->Clients[$i]->Callsign);
+	list ($Flag, $Name) = $Reflector->GetFlag($Reflector->Nodes[$i]->GetCallSign());
 	if (file_exists("./images/flags/".$Flag.".svg")) {
 		echo '<a href="#" class="tip"><img src="./images/flags/'.$Flag.'.svg" class="table-flag" alt="'.$Name.'"><span>'.$Name.'</span></a>';
 	}
 	echo '</td>
-	<td>'.$Json->Clients[$i]->Callsign;
+	<td>'.$Reflector->Nodes[$i]->GetCallSign();
 	echo '</td>
-	<td>' . date("Y-m-d H:i", $Json->Clients[$i]->LastHeardTime) . '<br />'.elapsedTime($Json->Clients[$i]->LastHeardTime) . ' ago</td>
-	<td>' . date("Y-m-d H:i", $Json->Clients[$i]->ConnectTime) . '<br />for ' . elapsedTime($Json->Clients[$i]->ConnectTime) . '</td>
-	<td>'.($Json->Clients[$i]->GetListenOnly?'Yes':'No').'</td>
-	<td>'.$Json->Clients[$i]->Module.'</td>';
+	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()) . '<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()) . ' ago</td>
+	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()) . '<br />for ' . elapsedTime($Reflector->Nodes[$i]->GetConnectTime()) . '</td>
+	<td>'.$Reflector->Nodes[$i]->GetListenOnly().'</td>
+	<td>'.$Reflector->Nodes[$i]->GetLinkedModule().'</td>';
 	if ($PageOptions['LinksPage']['IPModus'] != 'HideIP') {
 		echo '<td>';
-		$Bytes = explode(".", $Json->Clients[$i]->IP);
+		$Bytes = explode(".", $Reflector->Nodes[$i]->GetIP());
 		$MC = $PageOptions['LinksPage']['MasqueradeCharacter'];
 		if ($Bytes !== false && count($Bytes) == 4) {
 			switch ($PageOptions['LinksPage']['IPModus']) {
@@ -47,10 +50,10 @@ for ($i=0;$i<$ClientCount;$i++) {
 					echo $MC.'.'.$Bytes[1].'.'.$Bytes[2].'.'.$Bytes[3];
 					break;
 				default:
-					echo $Json->Clients[$i]->IP;
+					echo $Reflector->Nodes[$i]->GetIP();
 			}
 		} else {
-			$ipstr = $Json->Clients[$i]->IP;
+			$ipstr = $Reflector->Nodes[$i]->GetIP();
 			$count = substr_count($ipstr, ":");
 			if ($count > 1) {
 				if (1 == substr_count($ipstr, "::")) { $ipstr = str_replace("::", str_repeat(":", 9 - $count), $ipstr); }
@@ -64,7 +67,7 @@ for ($i=0;$i<$ClientCount;$i++) {
 		echo '</td>';
    }
    echo '</tr>';
-   if ($i == $PageOptions['LinksPage']['LimitTo']) { $i = $ClientCount+1; }
+   if ($i == $PageOptions['LinksPage']['LimitTo']) { $i = $Reflector->NodeCount()+1; }
 }
 
 ?>
