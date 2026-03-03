@@ -31,6 +31,7 @@ public:
 	void CSIn(const std::string &cs);
 	void CodeIn(const uint8_t *code);
 	const std::string GetCS(unsigned len = 0) const;
+	const char *c_str(void) const { return cs; }
 	void CodeOut(uint8_t *out) const;
 	uint64_t Hash() const { return coded; }
 	bool operator==(const CCallsign &rhs) const;
