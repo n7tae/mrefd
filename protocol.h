@@ -67,6 +67,8 @@ public:
 protected:
 	// queue helper
 	void SendToClients(CPacket &, const SPClient &, const CCallsign &dst);
+	// dashboard data
+	void UpdateDashData(const CCallsign &src, const CCallsign &dst, SPClient client, const CPacket &pack);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);

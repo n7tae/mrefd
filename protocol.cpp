@@ -337,6 +337,8 @@ void CProtocol::Task(void)
 					// if there is a problem, return false
 					if (OnPacketIn(pack, client))
 					{
+						if (0 == ((0x7fffu & pack.GetFrameNumber()) % 6))
+							UpdateDashData(src, dst, client, pack);
 						SendToClients(pack, client, dst);
 						if (pack.IsStreamData() and pack.IsLastPacket())
 						{
@@ -399,6 +401,26 @@ void CProtocol::Close(void)
 	m_streamMap.clear();
 	m_Socket4.Close();
 	m_Socket6.Close();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// dashboard data handler
+
+void CProtocol::UpdateDashData(const CCallsign &src, const CCallsign &dst, SPClient client, const CPacket &pack)
+{
+	const CFrameType t(pack.GetFrameType());
+	auto users = g_Reflector.GetUsers();
+	users->Hearing(src, dst, client->GetCallsign(), client->GetReflectorModule(), (pack.IsStreamData() ? EMode::sm : EMode::pm));
+	if (EMetaDatType::gnss == t.GetMetaDataType())
+	{
+			CPosition p(pack.GetCMetaData());
+			std::string lat, lon;
+			const std::string maid(p.GetPosition(lat, lon));
+			if (not maid.empty())
+					users->Location(src, maid, lat, lon);
+	}
+	g_Reflector.ReleaseUsers();
+	client->Heard();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -880,7 +902,6 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			// stream already open
 			// skip packet, but tickle the stream
 			stream->Tickle();
-			return true;
 		}
 		else
 		{
@@ -891,30 +912,6 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 				return false;
 			}
 		}
-	}
-	else
-	{
-		client->Heard();
-	}
-	// update last heard
-	CCallsign src(packet.GetCSrcAddress());
-	auto cli = client->GetCallsign();
-	// we only need to do this for every superframe
-	const auto fn = 0x7fffu & packet.GetFrameNumber();
-	if (0u == fn % 6u)
-	{
-		const CFrameType t(packet.GetFrameType());
-		auto users = g_Reflector.GetUsers();
-		users->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamData() ? EMode::sm : EMode::pm));
-		if (EMetaDatType::gnss == t.GetMetaDataType())
-		{
-			CPosition p(packet.GetCMetaData());
-			std::string lat, lon;
-			const std::string maid(p.GetPosition(lat, lon));
-			if (not maid.empty())
-				users->Location(src, maid, lat, lon);
-		}
-		g_Reflector.ReleaseUsers();
 	}
 	return true;
 }
