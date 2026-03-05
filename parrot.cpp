@@ -33,7 +33,7 @@ void CStreamParrot::Add(const CPacket &pack)
 {
 	if (data.size() < 500u)
 	{
-		size_t length = is3200 ? 16 : 8;
+		size_t length = (EPayloadType::c2_3200==frameType.GetPayloadType()) ? 16 : 8;
 		auto voice = pack.GetCVoice();
 		data.emplace_back(voice, voice+length);
 	}
@@ -54,13 +54,13 @@ void CStreamParrot::playThread()
 	pack.SetStreamId(NewSID.Make());
 	memset(pack.GetDstAddress(), 0xffu, 6);
 	src.CodeOut(pack.GetSrcAddress());
-	pack.SetFrameType(frameType);
+	pack.SetFrameType(frameType.GetOriginType());
 	auto clock = std::chrono::steady_clock::now();
 	CUdpSocket sock;
 	size = data.size();
 	for (size_t n=0; n<size; n++)
 	{
-		memcpy(pack.GetVoice(), data[n].data(), is3200 ? 16 : 8);
+		memcpy(pack.GetVoice(), data[n].data(), (EPayloadType::c2_3200==frameType.GetPayloadType()) ? 16 : 8);
 		pack.SetFrameNumber((size-n == 1) ? 0x8000u + n : n);
 		pack.CalcCRC();
 		clock = clock + std::chrono::milliseconds(40);
@@ -115,7 +115,7 @@ void CPacketParrot::returnPacket()
 		
 		const std::string str = ss.str();
 		const auto l = str.length();
-		packet.SetFrameType(frameType);
+		packet.SetFrameType(frameType.GetOriginType());
 		packet.GetData()[34] = 0x5u; // SMS type
 		memcpy(packet.GetData()+35, str.c_str(), l);
 		size_t tps = 4 + 30 + 3 + l;

@@ -35,7 +35,7 @@ class xReflector {
 			}
 
 			foreach ($Json->Users as $user) {
-				$Station = new Station($user->Source, $user->Destination, $user->Mode, $user->Via, $user->Module, $user->LastHeardTime);
+				$Station = new Station($user->Source, $user->Maidenhead, $user->Latitude, $user->Longitude, $user->Destination, $user->Mode, $user->Via, $user->Module, $user->LastHeardTime);
 				$this->AddStation($Station, false);
 			}
 

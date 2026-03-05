@@ -26,7 +26,7 @@ $PageOptions['IPV6']                                 = 'refl_ipv6_address';     
                                                                                                 // if none use NONE or null
 
 $PageOptions['LocalModification']                    = '';                 // If you modify the dashboard code, you can say so here
-                                                                           // with your mod version number, otherwise leave blank
+                                                                           // with your module version number, otherwise leave blank
 
 $PageOptions['PageRefreshActive']                    = true;                               // Activate automatic refresh
 $PageOptions['PageRefreshDelay']                     = '10000';                            // Page refresh time in miliseconds

@@ -29,44 +29,44 @@
 
 extern CReflector g_Reflector;
 
-////////////////////////////////////////////////////////////////////////////////////////
-// constructor
-
-CUsers::CUsers() {}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// users management
-
-void CUsers::AddUser(const CUser &user)
+UsersList::iterator CUsers::findUser(const CCallsign &src)
 {
-	// delete user if found
-	m_Users.remove_if([&user](const CUser &u){ return 0 == u.GetSource().compare(user.GetSource()); });
-	// now add it
-	m_Users.push_front(user);
-
-	// if list size too big, remove oldest
-	if ( m_Users.size() >= LASTHEARD_USERS_MAX_SIZE )
+	for (UsersList::iterator it=m_Users.begin(); it!=m_Users.end(); it++)
 	{
-		m_Users.resize(m_Users.size());
+		if (0 == (*it)->GetSource().compare(src.c_str()))
+			return it;
+	}
+	return m_Users.end();
+}
+
+void CUsers::move2Front(UsersList::iterator &it)
+{
+	m_Users.push_front(std::move(*it));
+	m_Users.erase(it);
+}
+
+void CUsers::Hearing(const CCallsign &src, const CCallsign &dst, const CCallsign &cli, char module, EMode mode)
+{
+	auto it = findUser(src);
+	if (m_Users.end() == it) {
+		m_Users.push_front(std::make_unique<CUser>(src, dst, cli, module, mode));
+		if (m_Users.size() >> LASTHEARD_USERS_MAX_SIZE)
+			m_Users.resize(LASTHEARD_USERS_MAX_SIZE);
+	} else {
+		(*it)->Update(dst, cli, module, mode);
+		if (it != m_Users.begin())
+			move2Front(it);
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// operation
-
-void CUsers::Hearing(const CCallsign &src, const CCallsign &dst, const CCallsign &cli, char mod, EMode mode)
+void CUsers::Location(const CCallsign &src, const std::string &maid, const std::string &lat, const std::string &lon)
 {
-	CUser heard(src.GetCS(), dst.GetCS(), cli.GetCS(), mod, mode);
-
-	// first check if this user is already listed. If so, erase him.
-	for ( auto it=begin(); it!=end(); it++ )
-	{
-		if (*it == heard)
-		{
-			m_Users.erase(it);
-			break;
-		}
+	auto it = findUser(src);
+	if (m_Users.end() == it) {
+		std::cout << "WARNING: Could not update the location of user '" << src.c_str() << "'" << std::endl;
+	} else {
+		(*it)->Position(maid, lat, lon);
+		if (it != m_Users.begin())
+			move2Front(it);
 	}
-
-	AddUser(heard);
 }

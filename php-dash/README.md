@@ -16,7 +16,7 @@ cloned mrefd. /opt/This program is used in the example, so be sure to update thi
 
 ```bash
 sudo rm -rf /var/www/html
-sudo lighttpd-enable-mod fastcgi-php-fpm
+sudo lighttpd-enable-module fastcgi-php-fpm
 ln -s /opt/mrefd/php-dash /var/www/html
 sudo systemctl restart lighttpd
 ```

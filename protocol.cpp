@@ -29,6 +29,8 @@
 #include "gatekeeper.h"
 #include "configure.h"
 #include "interlinks.h"
+#include "frametype.h"
+#include "position.h"
 
 extern CConfigure g_CFG;
 extern CGateKeeper g_GateKeeper;
@@ -820,17 +822,17 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 		auto item = parrotMap.find(client);
 		if (parrotMap.end() == item)
 		{
-			const auto ft = packet.GetFrameType();
+			CFrameType t(packet.GetFrameType());
 			if (packet.IsStreamData())
 			{
 				if (not packet.IsLastPacket())
 				{
 					const CCallsign src(packet.GetCSrcAddress());
-					if ((ft & 0x1du) == 0x5u)
+					if (EEncryptType::none == t.GetEncryptType())
 					{
 						// it is not the last packet and it is a stream packet and it is not enrypted
 						std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
-						parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, ft);
+						parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, t);
 						parrotMap[client]->Add(packet);
 					}
 					else
@@ -843,7 +845,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			{
 				const CCallsign src(packet.GetCSrcAddress());
 				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
-				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, ft);
+				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, t);
 				parrotMap[client]->Add(packet);
 				parrotMap[client]->Play();
 			}
@@ -897,8 +899,23 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 	// update last heard
 	CCallsign src(packet.GetCSrcAddress());
 	auto cli = client->GetCallsign();
-	g_Reflector.GetUsers()->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamData() ? EMode::sm : EMode::pm));
-	g_Reflector.ReleaseUsers();
+	// we only need to do this for every superframe
+	const auto fn = 0x7fffu & packet.GetFrameNumber();
+	if (0u == fn % 6u)
+	{
+		const CFrameType t(packet.GetFrameType());
+		auto users = g_Reflector.GetUsers();
+		users->Hearing(src, dst, cli, client->GetReflectorModule(), (packet.IsStreamData() ? EMode::sm : EMode::pm));
+		if (EMetaDatType::gnss == t.GetMetaDataType())
+		{
+			CPosition p(packet.GetCMetaData());
+			std::string lat, lon;
+			const std::string maid(p.GetPosition(lat, lon));
+			if (not maid.empty())
+				users->Location(src, maid, lat, lon);
+		}
+		g_Reflector.ReleaseUsers();
+	}
 	return true;
 }
 
@@ -1030,7 +1047,8 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	// check validity of packet
 	if (std::regex_match(src.GetCS(), clientRegEx))
 	{ // looks like a valid source
-		if (packet.IsStreamData() and (0x18u & packet.GetFrameType()))
+		const CFrameType t(packet.GetFrameType());
+		if (packet.IsStreamData() and (EEncryptType::none != t.GetEncryptType()))
 		{ // looks like this packet is encrypted
 			const auto mod = client->GetReflectorModule();
 			if (not g_CFG.IsEncyrptionAllowed(mod))

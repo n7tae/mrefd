@@ -23,36 +23,36 @@
 
 #include <list>
 #include <mutex>
+#include <memory>
 
 #include "user.h"
+
+using UsersList = std::list<std::unique_ptr<CUser>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
 class CUsers
 {
 public:
-	// constructor
-	CUsers();
-
 	// locks
 	void Lock(void)                     { m_Mutex.lock(); }
 	void Unlock(void)                   { m_Mutex.unlock(); }
 
 	// management
 	int    GetSize(void) const          { return (int)m_Users.size(); }
-	void   AddUser(const CUser &);
 
 	// pass-through
-	std::list<CUser>::iterator begin()  { return m_Users.begin(); }
-	std::list<CUser>::iterator end()    { return m_Users.end(); }
-	std::list<CUser>::const_iterator cbegin()  { return m_Users.cbegin(); }
-	std::list<CUser>::const_iterator cend()    { return m_Users.cend(); }
+	UsersList::const_iterator cbegin()  { return m_Users.cbegin(); }
+	UsersList::const_iterator cend()    { return m_Users.cend(); }
 
 	// operation
-	void   Hearing(const CCallsign &, const CCallsign &, const CCallsign &, char, EMode);
+	void Hearing(const CCallsign &src, const CCallsign &dst, const CCallsign &cli, char module, EMode mode);
+	void Location(const CCallsign &src, const std::string &maid, const std::string &lat, const std::string &lon);
 
 protected:
+	void move2Front(UsersList::iterator &it);
+	UsersList::iterator findUser(const CCallsign &src);
 	// data
-	std::mutex        m_Mutex;
-	std::list<CUser>  m_Users;
+	std::mutex m_Mutex;
+	UsersList  m_Users;
 };

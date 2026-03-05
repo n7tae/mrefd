@@ -255,9 +255,9 @@ void CReflector::WriteDashboardData(nlohmann::json &data)
 	// lock
 	CUsers *users = GetUsers();
 	// iterate on users
-	for ( auto it=users->begin(); it!=users->end(); it++ )
+	for ( auto it=users->cbegin(); it!=users->cend(); it++ )
 	{
-		it->AddUser(data["Users"]);
+		(*it)->AddUser(data["Users"]);
 	}
 	// unlock
 	ReleaseUsers();

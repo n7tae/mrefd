@@ -37,31 +37,18 @@ class CUser
 {
 public:
 	// constructor
-	CUser();
-	CUser(const std::string, const std::string, const std::string, char, EMode);
-
-	// get data
-	const std::string &GetSource(void)        const { return m_Source; }
-	const std::string &GetDestination(void)   const { return m_Destination; }
-	const std::string &GetClient(void)        const { return m_ClientCS; }
-	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
-	bool IsStreamMode(void)            const { return m_Mode == EMode::sm; }
-	std::string GetClientCS(void)      const { return m_ClientCS; }
-	char GetModule(void)               const { return m_OnModule; }
-
-	// operation
-	void HeardNow(void)     { m_LastHeardTime = std::time(nullptr); }
-
-	// operators
-	bool operator ==(const CUser &) const;
-	bool operator <(const CUser &) const;
+	CUser() = delete;
+	CUser(const CCallsign &src, const CCallsign &dst, const CCallsign &cli, char module, EMode mode);
+	const std::string &GetSource() { return m_Source; }
+	void Update(const CCallsign &dst, const CCallsign &cli, char module, EMode mode);
+	void Position(const std::string &maid, const std::string &lat, const std::string &lon);
 
 	// reporting
 	void AddUser(nlohmann::json &data) const;
 
 protected:
 	// data
-	const std::string m_Source, m_Destination, m_ClientCS;
+	std::string m_Source, m_Destination, m_ClientCS, m_Maidenhead, m_Latitude, m_Longitude;
 	char m_OnModule;
 	EMode m_Mode;
 	std::time_t m_LastHeardTime;

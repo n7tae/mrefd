@@ -26,39 +26,38 @@
 
 #include "user.h"
 
-
-////////////////////////////////////////////////////////////////////////////////////////
-// constructors
-
-CUser::CUser()
-{
-	m_LastHeardTime = std::time(nullptr);
-}
-
-CUser::CUser(const std::string src, const std::string dst, const std::string cli, char mod, EMode mode)
-: m_Source(src)
-, m_Destination(dst)
-, m_ClientCS(cli)
-, m_OnModule(mod)
+CUser::CUser(const CCallsign &src, const CCallsign &dst, const CCallsign &cli, char module, EMode mode)
+: m_Source(src.c_str())
+, m_Destination(dst.c_str())
+, m_ClientCS(cli.c_str())
+, m_OnModule(module)
 , m_Mode(mode)
+, m_LastHeardTime(std::time(nullptr))
 {
+}
+
+void CUser::Update(const CCallsign &dst, const CCallsign &cli, char module, EMode mode)
+{
+	if (m_Destination.compare(dst.c_str()))
+		m_Destination.assign(dst.c_str());
+	if (m_ClientCS.compare(cli.c_str()))
+		m_ClientCS.assign(cli.c_str());
+	m_OnModule = module;
+	m_Mode = mode;
 	m_LastHeardTime = std::time(nullptr);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// operators
-
-bool CUser::operator ==(const CUser &user) const
+void CUser::Position(const std::string &maid, const std::string &lat, const std::string &lon)
 {
-	return ((user.m_Source == m_Source) and (user.m_Destination == m_Destination) and (user.m_ClientCS == m_ClientCS));
+	if (m_Maidenhead.compare(maid))
+		m_Maidenhead.assign(maid);
+	if (m_Latitude.compare(lat))
+		m_Latitude.assign(lat);
+	if (m_Longitude.compare(lon))
+		m_Longitude.assign(lon);
+	m_LastHeardTime = std::time(nullptr);
 }
 
-
-bool CUser::operator <(const CUser &user) const
-{
-	// smallest is youngest
-	return (std::difftime(m_LastHeardTime, user.m_LastHeardTime) > 0);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // reporting
@@ -66,14 +65,16 @@ bool CUser::operator <(const CUser &user) const
 void CUser::AddUser(nlohmann::json &data) const
 {
 	const std::string mode(((EMode::sm==m_Mode) ? "Stream" : "Packet"));
-	std::string module;
-	module.assign(1, m_OnModule);
+	const std::string module(1, m_OnModule);
 	data += {
 		{ "Source",        m_Source        },
 		{ "Destination",   m_Destination   },
 		{ "Mode",          mode            },
 		{ "Via",           m_ClientCS      },
 		{ "Module",        module          },
-		{ "LastHeardTime", m_LastHeardTime }
+		{ "LastHeardTime", m_LastHeardTime },
+		{ "Maidenhead",    m_Maidenhead    },
+		{ "Latitude",      m_Latitude      },
+		{ "Longitude",     m_Longitude     }
 	};
 }
