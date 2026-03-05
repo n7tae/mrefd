@@ -126,10 +126,10 @@ if (isset($_GET['do'])) {
                                     echo '<a href="#" class="tip"><img src="./images/flags/' . $Flag . '.svg" class="table-flag" alt="' . $Name . '"><span>' . $Name . '</span></a>';
                                 }
                             echo '</td>
-                            <td><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank">' . $Reflector->Stations[$i]->GetSource() . '</a></td>
+                            <td><a href="https://www.qrz.com/db/' . $Reflector->Stations[$i]->GetCallsignOnly() . '" class="pl" target="_blank" rel="noopener noreferrer">' . $Reflector->Stations[$i]->GetSource() . '</a></td>
 							<td>';
 						if (0 < strlen($Reflector->Stations[$i]->GetMaidenhead()))
-							echo '<a href="https://www.openstreetmap.org/?mlat=' . $Reflector->Stations[$i]->GetLatitude() . '&mlon=' . $Reflector->Stations[$i]->GetLongitude() . '#map=16/' . $Reflector->Stations[$i]->GetLatitude() . '/' . $Reflector->Stations[$i]->GetLongitude() . '" class="pl", target="_blank_">' . $Reflector->Stations[$i]->GetMaidenhead() . '</a>';
+							echo '<a href="https://www.openstreetmap.org/?mlat=' . $Reflector->Stations[$i]->GetLatitude() . '&mlon=' . $Reflector->Stations[$i]->GetLongitude() . '#map=16/' . $Reflector->Stations[$i]->GetLatitude() . '/' . $Reflector->Stations[$i]->GetLongitude() . '" class="pl", target="_blank" rel="noopener noreferrer">' . $Reflector->Stations[$i]->GetMaidenhead() . '</a>';
 						echo '</dt>
 							<td>' . $Reflector->Stations[$i]->GetDestination() . '</td>
                             <td>' . $Reflector->Stations[$i]->GetMode() . '</td>
