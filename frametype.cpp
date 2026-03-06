@@ -108,6 +108,8 @@ void CFrameType::SetFrameType(uint16_t t)
 		m_legacy = t;
 		m_v3 = 0;
 		// 1 Get the payload type
+		m_encrypt = EEncryptType::none;
+		m_metatype = EMetaDatType::none;
 		if (t & 1u)
 		{
 			switch ((t >> 1) & 0x3u)
@@ -134,7 +136,7 @@ void CFrameType::SetFrameType(uint16_t t)
 			{
 			default:
 			case 0u:
-				m_metatype = EMetaDatType::none;
+				m_metatype = EMetaDatType::text;
 				break;
 			case 1u:
 				m_metatype = EMetaDatType::gnss;
