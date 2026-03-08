@@ -35,7 +35,7 @@ enum class EParrotState { record, play, done };
 class CParrot
 {
 public:
-	CParrot(const uint8_t *src_addr, SPClient spc, CFrameType &ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record)
+	CParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : src(src_addr), client(spc), frameType(ft), state(EParrotState::record)
 	{
 		frameType.SetEncryptType(EEncryptType::none);
 		frameType.SetSigned(false);
@@ -53,7 +53,7 @@ public:
 protected:
 	const CCallsign src;
 	SPClient client;
-	CFrameType &frameType;
+	CFrameType frameType;
 	std::atomic<EParrotState> state;
 	std::future<void> fut;
 };
@@ -61,7 +61,7 @@ protected:
 class CStreamParrot : public CParrot
 {
 public:
-	CStreamParrot(const uint8_t *src_addr, SPClient spc, CFrameType &ft) : CParrot(src_addr, spc, ft) {}
+	CStreamParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
 	void Add(const CPacket &pack);
 	void Play();
 	bool IsExpired() const { return lastHeard.Time() > STREAM_TIMEOUT; }
@@ -79,7 +79,7 @@ private:
 class CPacketParrot : public CParrot
 {
 public:
-	CPacketParrot(const uint8_t *src_addr, SPClient spc, CFrameType &ft) : CParrot(src_addr, spc, ft) {}
+	CPacketParrot(const uint8_t *src_addr, SPClient spc, uint16_t ft) : CParrot(src_addr, spc, ft) {}
 	void Add(const CPacket &pack);
 	bool IsExpired() const { return false; }
 	void Play();

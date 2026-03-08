@@ -854,7 +854,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 					{
 						// it is not the last packet and it is a stream packet and it is not enrypted
 						std::cout << "Parrot stream from " << src << " on " << client->GetCallsign() << " with SID 0x" << std::hex << packet.GetStreamId() << std::dec << " at " << client->GetIp() << std::endl;
-						parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, t);
+						parrotMap[client] = std::make_unique<CStreamParrot>(packet.GetCSrcAddress(), client, packet.GetFrameType());
 						parrotMap[client]->Add(packet);
 					}
 					else
@@ -867,7 +867,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			{
 				const CCallsign src(packet.GetCSrcAddress());
 				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
-				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, t);
+				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, packet.GetFrameType());
 				parrotMap[client]->Add(packet);
 				parrotMap[client]->Play();
 			}
