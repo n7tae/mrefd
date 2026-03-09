@@ -335,7 +335,7 @@ void CProtocol::Task(void)
 				{
 					// might open a new stream if it's the first packet
 					// if there is a problem, return false
-					if (OnPacketIn(pack, client))
+					if (OnPacketIn(pack, client, src, dst))
 					{
 						if (0 == ((0x7fffu & pack.GetFrameNumber()) % 6))
 							UpdateDashData(src, dst, client, pack);
@@ -595,6 +595,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 	// Dump(packet.GetCData(), packet.GetSize());
 	//  push it to all our clients linked to the module
 	SPClient client = nullptr;
+	const CCallsign all("@ALL");
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	const auto mod = txclient->GetReflectorModule();
@@ -634,12 +635,25 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				}
 				break;
 			case EClientType::reflector:
-				// reflectors will only get data from streaming client
+				// reflectors will only get data from simple clients
 				if (EClientType::simple == fromtype)
 				{
+					// we will readdress, if necessary
+					bool dstchange = false;
+					if (strstr(dst.c_str(), "M17-"))
+					{
+						all.CodeOut(packet.GetDstAddress());
+						packet.CalcCRC();
+						dstchange = true;
+					}
 					packet.SetSize(55u);
 					packet.GetData()[54] = uint8_t(mod);
 					client->SendPacket(packet);
+					if (dstchange)
+					{
+						dst.CodeOut(packet.GetDstAddress());
+						packet.CalcCRC();
+					}
 				}
 				break;
 			default:
@@ -828,18 +842,18 @@ void CProtocol::HandlePeerLinks(void)
 // streams helpers
 
 // returns true if the packet is ready for distribution
-bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
+bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client, const CCallsign &src, const CCallsign &dst)
 {
-	// if the packet dst looks like an M17 reflector, change the dst to @ALL
-	CCallsign dst(packet.GetCDstAddress());
-	const auto cs = dst.GetCS();
-	if (0 == cs.compare(0, 4, "M17-"))
+	// uh-oh, a listen only client is trying to transmit!
+	if (client->IsListenOnly())
 	{
-		dst.CSIn("@ALL");
-		dst.CodeOut(packet.GetDstAddress());
-		packet.CalcCRC();
+		if (packet.IsLastPacket())
+			std::cerr << "Listen-only client " << client->GetCallsign() << " is sending data!" << std::endl;
+		return false;
 	}
-	else if (std::string::npos != cs.find("PARROT"))
+
+	// take care of PARROTing here
+	if (strstr(dst.c_str(), "PARROT"))
 	{
 		auto item = parrotMap.find(client);
 		if (parrotMap.end() == item)
@@ -849,7 +863,6 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			{
 				if (not packet.IsLastPacket())
 				{
-					const CCallsign src(packet.GetCSrcAddress());
 					if (EEncryptType::none == t.GetEncryptType())
 					{
 						// it is not the last packet and it is a stream packet and it is not enrypted
@@ -865,7 +878,6 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 			}
 			else
 			{
-				const CCallsign src(packet.GetCSrcAddress());
 				std::cout << "Parrot Packet from " << src << " on " << client->GetCallsign() << " at " << client->GetIp() << std::endl;
 				parrotMap[client] = std::make_unique<CPacketParrot>(packet.GetCSrcAddress(), client, packet.GetFrameType());
 				parrotMap[client]->Add(packet);
@@ -884,13 +896,6 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 				}
 			}
 		}
-		return false;
-	}
-
-	if (client->IsListenOnly())
-	{
-		if (packet.IsLastPacket())
-			std::cerr << "Listen-only client " << client->GetCallsign() << " is sending data!" << std::endl;
 		return false;
 	}
 

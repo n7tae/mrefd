@@ -76,7 +76,8 @@ OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Bu
 
 ```bash
 # Install OpenDHT dependencies
-sudo apt install libncurses5-dev libreadline-dev nettle-dev libgnutls28-dev libargon2-0-dev libmsgpack-dev  libssl-dev libfmt-dev libjsoncpp-dev libhttp-parser-dev libasio-dev cmake pkg-config libcppunit-dev
+sudo apt install libncurses5-dev libreadline-dev nettle-dev libgnutls28-dev libargon2-dev libmsgpack-dev  libssl-dev libfmt-dev libjsoncpp-dev libhttp-parser-dev libasio-dev cmake pkg-config libcppunit-dev
+# some older systems may have to use libargon2-0-dev
 
 # clone the repo
 git clone https://github.com/savoirfairelinux/opendht.git
@@ -175,7 +176,7 @@ If, after doing the `git pull`, you see that it's downloaded a new example.cfg f
 
 ## Running multiple instances
 
-It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to me aware of:
+It should be fairly straightforward to install multiple mrefd instances on a single server. Make sure each instance is using a different listening port. Things to be aware of:
 
 - The reflector executable name is defined in the Makefile at the line "EXE=mrefd".
 - The configuration file is read at start-up and defined in mrefd.service file. Each instance would require a different service file.
@@ -197,4 +198,4 @@ MREFD requires the following port to be open to inbound network traffic:
 
 ## Copyright
 
-- Copyright © 2020-2025 Thomas A. Early N7TAE
+- Copyright © 2020-2026 Thomas A. Early N7TAE

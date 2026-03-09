@@ -77,7 +77,7 @@ protected:
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, SPClient);
 	void CloseStream(char mod);
-	bool OnPacketIn(CPacket &, const SPClient);
+	bool OnPacketIn(CPacket &, const SPClient, const CCallsign &src, const CCallsign &dst);
 	CPacketStream *GetStream(CPacket &, const SPClient);
 	void CheckStreamsTimeout(void);
 
