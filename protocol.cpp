@@ -59,7 +59,7 @@ CProtocol::~CProtocol()
 // initialization
 
 // returns true on error
-bool CProtocol::Initialize(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
+bool CProtocol::StartProtocol(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
 {
 	// init reflector apparent callsign
 	m_ReflectorCallsign = g_CFG.GetCallsign();
@@ -613,7 +613,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 			switch (client->GetClientType())
 			{
 			case EClientType::legacy:
-				// reflectors will only get streaming data from simple clients
+				// legacy reflectors will only get streaming data from simple clients
 				if (EClientType::simple == fromtype)
 				{
 					// legacy reflectors have to be properly addressed
@@ -635,21 +635,21 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				}
 				break;
 			case EClientType::reflector:
-				// reflectors will only get data from simple clients
+				// modern reflectors will only get data from simple clients
 				if (EClientType::simple == fromtype)
 				{
 					// we will readdress, if necessary
-					bool dstchange = false;
+					bool dstChange = false;
 					if (strstr(dst.c_str(), "M17-"))
 					{
 						all.CodeOut(packet.GetDstAddress());
 						packet.CalcCRC();
-						dstchange = true;
+						dstChange = true;
 					}
 					packet.SetSize(55u);
 					packet.GetData()[54] = uint8_t(mod);
 					client->SendPacket(packet);
-					if (dstchange)
+					if (dstChange)
 					{
 						dst.CodeOut(packet.GetDstAddress());
 						packet.CalcCRC();
@@ -659,8 +659,20 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 			default:
 				// all local clients, simple and listen-only, get data from anywhere
 				// bogus listen-only input is blocked in OnPacketIn
+				bool dstChange = false;
 				packet.SetSize(54u);
+				if (strstr(dst.c_str(), "M17-"))
+				{
+					all.CodeOut(packet.GetDstAddress());
+					packet.CalcCRC();
+					dstChange = true;
+				}
 				client->SendPacket(packet);
+				if (dstChange)
+				{
+					dst.CodeOut(packet.GetDstAddress());
+					packet.CalcCRC();
+				}
 				break;
 			}
 		}

@@ -54,7 +54,7 @@ public:
 	virtual ~CProtocol();
 
 	// initialization
-	bool Initialize(const uint16_t port, const std::string &ipv4bind, const std::string &ipv6bind);
+	bool StartProtocol(const uint16_t port, const std::string &ipv4bind, const std::string &ipv6bind);
 	void Close(void);
 
 	// get
