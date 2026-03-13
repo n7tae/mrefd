@@ -32,11 +32,13 @@ class CVersion
 {
 public:
 	// constructor
-	CVersion() = delete;
+	CVersion();
+	CVersion(const std::string &vstr);
 	CVersion(const CVersion &v) : maj(v.GetMajor()), min(v.GetMinor()), rev(v.GetRevision()) {}
 	CVersion(uint8_t a, uint8_t b, uint16_t c) : maj(a), min(b), rev(c) {}
 	CVersion &operator=(const CVersion &v) { maj=v.maj; min=v.min; rev=v.rev; return *this; }
 	~CVersion() {}
+	void Parse(const std::string &vstr);
 
 	// get
 	unsigned GetMajor(void) const;

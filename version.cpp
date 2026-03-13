@@ -23,9 +23,21 @@
 //    with this software.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <sstream>
 #include "version.h"
 
-CVersion g_Version(1, 1, 1);	// the global object
+CVersion g_Version(1, 2, 0);	// the global object
+
+CVersion::CVersion(const std::string &vstr)
+{
+	std::stringstream ss(vstr);
+	char sep;
+	ss >> maj;
+	ss >> sep;
+	ss >> min;
+	ss >> sep;
+	ss >> rev;
+}
 
 unsigned CVersion::GetMajor(void) const
 {
@@ -56,3 +68,4 @@ std::ostream &operator <<(std::ostream &os, const CVersion &v)
 #endif
 	return os;
 };
+

@@ -1,53 +1,59 @@
 ############################################################################
 #                        M17 interlink file
-
+#
 # One line per entry, and a target reflector can only have one line.
 # Each entry specifies all the parameters that are needed to interlink one
 # or more module of a remote M17 Reflector:
-
-#       <target_designation>[L]  [ip]  [port]  <shared_modules>
-
-# Compaired to the legacy mrefd.interlink format, the only thing new is
-# the optional trailing 'L' after the target designation. So let's review.
 #
-# There will be 2, 3 or 4 different parameters seperated by white space.
+#     Target SharedModules  [Version  Ip  [Port]]
+#
+# There will be 2, 4 or 5 different parameters seperated by white space.
 # All leading and trailing white space is ignored. If the first
 # non-white space character is a '#', the entire line will be ignored.
-
-# Here are three different examples that discribe every possible situation.
-#----------------------------------  1  -----------------------------------
+#
+# Target        : The "Callsign of the reflector, e.g., M17-QQQ
+#                 ONLY FOR mrefd REFLECTORS!
+# SharedModules : The list of the shared modules, e.g., AMZ
+#                 The target must specify these same modules!
+#
+# Version       : The version of the target,      e.g., 0.12.0
+#                 MUST BE EXACT AS REPORTED BY THE TARGET!
+#
+# Ip            : IP address of target,           e.g., 44.60.1.304
+#                 Can be IPv4 or IPv6 address, CAN'T BE A DOMAIN NAME
+#
+# Port          : The UDP port for M17 packets,   e.g., 17008
+#                 You can omit this if it's 17000
+#
+# Here are TWO different examples that describe every possible situation.
+#################################   1   ####################################
 # If your reflector and the target reflector are both using the Ham-DHT:
-
+#
 #                           M17-QQQ ABC
-
+#
 # Please note that that the target can be running any version, but
 # both you and the target NUST be using the Ham-DHT. When using this
 # 2-parameter, DHT-enabled form of interlinking, BOTH sides of the
 # interlink should be using the 2-parameter method else the interlink
 # might fail.
-#----------------------------------  2  -----------------------------------
-# If you or the target is not running with the Ham-DHT, but you both are
-# running version >= 1.0.0:
-
-#                   M17-QQQ 44.45.45.100 17001 ABC
-
-# You can use an IPv6 address if both you and the target supports it.
-# If the target is using the default port of 17000, you can leave that out.
-#----------------------------------  3  -----------------------------------
-# If you or the target is not on Ham-DHT and the target is running on
-# version  <= 1.0.0, i.e., a legacy version:
-
-#                     M17-QQQL 44.45.45.100 ABC
-
-# The 'L' suffix on the reflector designator lets your system know it's 
-#connecting to a legacy mrefd reflector. Without the 'L', the system may,
-# or may not link, but traffic WILL NOT PASS in either direction, even if
-# it successfully links!
+#################################   2   ####################################
+# If you OR the target is not running with the Ham-DHT:
 #
-# If you are using method #2 or #3 you need to make sure the encryption
+#               M17-QQQ  ABC  0.12.0  2506:1234:abcd::1  17001
+#
+#	Here is another example:
+#               M17-QQQ  ABC  1.1.1-dht  44.45.45.100
+#
+# Please Note:
+#
+# You can use an IPv6 address if both you and the target support it.
+#
+# If the target is using the default port of 17000, you can leave that out.
+#
+# If you are using method #2 you need to make sure the encryption
 # capabilities of each shared module match. Please don't link a module that
 # supports encrypted Stream data with a module that doesn't!
-#
+#############################################################################
 # Once you understand this format, you can delete this entire explanation.
 # This file will always be in the config folder.
 #############################################################################
