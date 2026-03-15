@@ -57,7 +57,7 @@ void CPeers::AddPeer(SPPeer peer)
 	// if not, append to the list (put in alphabetical order)
 	Insert(peer);
 
-	std::cout << "New peer " << peer->GetCallsign() << " at " << peer->GetIp() << " added with protocol " << peer->GetProtocolName()  << std::endl;
+	std::cout << "New peer " << peer->GetCallsign() << " at " << peer->GetIp()  << std::endl;
 
 	auto clients = g_Reflector.GetClients();
 	for ( auto cit=peer->cbegin(); cit!=peer->cend(); cit++ )

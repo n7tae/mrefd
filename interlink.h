@@ -39,7 +39,7 @@ public:
 #endif
 	CInterlink(const std::string &cs, const std::string &mods, const std::string &vstr, const std::string &addr, uint16_t port);
 
-	void UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port);
+	void UpdateItem(const std::string &targetmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port);
 
 	// get
 	const CIp &GetIp(void) const              { return m_Ip; }
@@ -49,6 +49,7 @@ public:
 	const std::string &GetIPv4(void) const    { return m_IPv4; }
 	const std::string &GetIPv6(void) const    { return m_IPv6; }
 	const std::string &GetReqMods(void) const { return m_reqMods; }
+	const std::string &GetUrl(void) const     { return m_Url; }
 
 private:
 	// data
@@ -59,4 +60,5 @@ private:
 	CIp         m_Ip;
 	uint16_t    m_Port;
 	std::string m_IPv4, m_IPv6;
+	std::string m_Url;
 };

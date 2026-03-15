@@ -3,6 +3,7 @@
 		<th>#</th>
 		<th>Flag</th>
 		<th>Station</th>
+		<th>TYPE Spec</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
 		<th>ListenOnly</th>
@@ -30,6 +31,8 @@ for ($i=0;$i<$Reflector->NodeCount();$i++) {
 	}
 	echo '</td>
 	<td>'.$Reflector->Nodes[$i]->GetCallSign();
+	echo '</td>
+	<td>'.$Reflector->Nodes[$i]->GetProtocol();
 	echo '</td>
 	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetLastHeardTime()) . '<br />'.elapsedTime($Reflector->Nodes[$i]->GetLastHeardTime()) . ' ago</td>
 	<td>' . date("Y-m-d H:i", $Reflector->Nodes[$i]->GetConnectTime()) . '<br />for ' . elapsedTime($Reflector->Nodes[$i]->GetConnectTime()) . '</td>

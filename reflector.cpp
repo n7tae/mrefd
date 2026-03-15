@@ -364,7 +364,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 				if (cfg.timestamp)
 				{
 					// if the get() call was successful and there is a nonzero timestamp, then do the update
-					g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.version, cfg.ipv4addr, cfg.ipv6addr, cfg.port);
+					g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.version, cfg.ipv4addr, cfg.ipv6addr, cfg.url, cfg.port);
 				}
 			}
 			else

@@ -55,10 +55,6 @@ public:
 	std::time_t GetConnectTime(void) const          { return m_ConnectTime; }
 	EPeerType GetPeerType(void) const               { return m_PeerType; }
 
-	// set
-
-	// identity
-	const char *GetProtocolName(void) const { return "M17"; }
 
 	// status
 	bool IsTransmitting(void) const;
@@ -85,6 +81,7 @@ protected:
 	const std::string m_sharedModules;
 	const EPeerType   m_PeerType;
 	const CIp         m_Ip;
+	const std::string m_Url;
 	std::map<char, SPClient> m_Clients;
 
 	// status

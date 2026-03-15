@@ -31,7 +31,7 @@ class xReflector {
 			}
 
 			foreach ($Json->Clients as $client) {
-				$this->AddNode(new Node($client->Callsign, $client->IP, $client->Module, $client->ListenOnly, $client->ConnectTime, $client->LastHeardTime, CreateCode(16)));
+				$this->AddNode(new Node($client->Callsign, $client->IP, $client->Module, $client->Protocol, $client->ListenOnly, $client->ConnectTime, $client->LastHeardTime, CreateCode(16)));
 			}
 
 			foreach ($Json->Users as $user) {
@@ -40,7 +40,7 @@ class xReflector {
 			}
 
 			foreach ($Json->Peers as $peer) {
-				$this->AddPeer(new Peer($peer->Callsign, $peer->IP, $peer->Modules, $peer->ConnectTime, $peer->LastHeardTime));
+				$this->AddPeer(new Peer($peer->Callsign, $peer->IP, $peer->Modules, $peer->Capabilities, $peer->Url, $peer->ConnectTime, $peer->LastHeardTime));
 			}
 
 			$this->Version       = $Json->Version;

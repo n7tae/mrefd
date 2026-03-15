@@ -5,6 +5,7 @@
 	<tr class="table-center">
 		<th>#</th>
 		<th>M17 Peer</th>
+		<th>Capabilities</th>
 		<th>Last Heard</th>
 		<th>Linked</th>
 		<th>Module</th><?php
@@ -20,10 +21,16 @@ if ($PageOptions['PeerPage']['IPModus'] != 'HideIP') {
 $Reflector->LoadFlags();
 
 for ($i=0;$i<$Reflector->PeerCount();$i++) {
+	$url = $Reflector->Peers[$i]->GetUrl();
 	echo '
 	<tr class="table-center">
 	<td>' . ($i+1).'</td>';
-	echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
+	if (strlen($url) > 20) {
+		echo '<td><a href="' . $url . '" class="pl" target="_blank" rel="noopener noreferrer">' . $Reflector->$Peers[$i]->GetCallsign . '</a></td>';
+	} else {
+		echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';
+	}
+	echo '<td>' . $Reflector->Peers[$i]->GetCapabilities() . '</td>';
 	echo '
 	<td>' . date("d-m-Y H:i", $Reflector->Peers[$i]->GetLastHeardTime()) . '<br />'
 	. elapsedTime($Reflector->Peers[$i]->GetLastHeardTime()) . ' ago</td>

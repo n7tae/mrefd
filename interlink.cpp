@@ -44,9 +44,9 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_Using
 CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &vstr, const std::string &addr, uint16_t port) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
 {
 	if (g_CFG.IsIPv4Address(addr))
-		UpdateItem(mods, "", vstr, addr, "", port);
+		UpdateItem(mods, "", vstr, addr, "", "", port);
 	else if (g_CFG.IsIPv6Address(addr))
-		UpdateItem(mods, "", vstr, "", addr, port);
+		UpdateItem(mods, "", vstr, "", addr, "", port);
 	else
 		std::cerr << "ERROR: '" << addr << "' is not a valid internet address!" << std::endl;
 }
@@ -54,7 +54,7 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
-void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port)
+void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port)
 {
 	const CVersion rv(vstr), v3(1, 2, 0), lr(1, 0, 0);
 	m_PeerType = (rv.GetVersion() >= v3.GetVersion()) ? EPeerType::v3 : (rv.GetVersion() < lr.GetVersion()) ? EPeerType::legacy : EPeerType::pmsm;
@@ -80,6 +80,8 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	}
 
 	// now the other stuff
+	if (url.size() > 20)
+		m_Url.assign(url);
 	if (m_IPv4.compare(ipv4))
 	{
 		m_IPv4.assign(ipv4);

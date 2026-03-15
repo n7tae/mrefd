@@ -202,13 +202,13 @@ void CInterlinks::ToUpper(std::string &str)
 }
 
 #ifndef NO_DHT
-void CInterlinks::Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port)
+void CInterlinks::Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port)
 {
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.find(cs);
 	if (m_Imap.end() != item)
 	{
-		item->second->UpdateItem(cmods, emods, vstr, ipv4, ipv6, port);
+		item->second->UpdateItem(cmods, emods, vstr, ipv4, ipv6, url, port);
 		return;
 	}
 	std::cerr << "ERROR: Can't Update CInterlinks item '" << cs << "' because it doesn't exist!";

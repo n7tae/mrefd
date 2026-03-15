@@ -82,11 +82,19 @@ void CPeer::AddPeer(nlohmann::json &data) const
 			lht = t;
 	}
 
+	std::string caps;
+	switch (m_PeerType) {
+		case EPeerType::v3:   caps.assign("TYPE+PM+SM"); break;
+		case EPeerType::pmsm: caps.assign("PM+SM");      break;
+		default:              caps.assign("SM-Only");    break;
+	}
+
 	data += {
 		{ "Callsign",      m_Callsign.GetCS() },
+		{ "Capabilities",  caps               },
 		{ "IP",            m_Ip.GetAddress()  },
 		{ "Modules",       m_sharedModules    },
-		{ "Protocol",      GetProtocolName()  },
+		{ "Url",           m_Url              },
 		{ "ConnectTime",   m_ConnectTime      },
 		{ "LastHeardTime", lht                }
 	};

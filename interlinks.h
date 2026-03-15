@@ -48,7 +48,7 @@ public:
 	bool NeedReload(void);
 
 	#ifndef NO_DHT
-	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port);
+	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port);
 	#endif
 
 	// pass-through
