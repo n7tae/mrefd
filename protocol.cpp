@@ -152,6 +152,8 @@ void CProtocol::Task(void)
 	char mods[27];
 	CCallsign cs;
 	CPacket pack;
+	EClientType ctype;
+	EProtocol protocol;
 
 	// any incoming packet ?
 	auto len = (*this.*Receive)(pack.GetData(), ip, 20);
@@ -210,7 +212,7 @@ void CProtocol::Task(void)
 		}
 		break;
 	case 11:
-		if (IsValidConnect(pack.GetCData(), ip, cs, mod))
+		if (IsValidConnect(pack.GetCData(), ip, cs, mod, ctype, protocol))
 		{
 			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
 
@@ -240,18 +242,18 @@ void CProtocol::Task(void)
 						else
 						{
 							if (AF_INET6 == ip.GetFamily())
-								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket6));
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, ctype, protocol, mod, m_Socket6));
 							else
-								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket4));
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, ctype, protocol, mod, m_Socket4));
 							g_Reflector.ReleaseClients();
 						}
 					}
 					else
 					{
 						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket6));
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, ctype, protocol, mod, m_Socket6));
 						else
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket4));
+							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, ctype, protocol, mod, m_Socket4));
 						g_Reflector.ReleaseClients();
 					}
 				}
@@ -273,9 +275,9 @@ void CProtocol::Task(void)
 		}
 		break;
 	case sizeof(SInterConnect):
-		if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods))
+		if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods, protocol))
 		{
-			std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
+			std::cout << "CON" << char(pack.GetCData()[3]) << " packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
 
 			// callsign authorized?
 			if (g_GateKeeper.PeerMayLink(cs))
@@ -305,13 +307,12 @@ void CProtocol::Task(void)
 					auto item = g_Interlinks.Find(cs.GetCS());
 					if (item)
 					{
-						auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
 						// create the new peer
 						// this also create one client per module
 						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, m_Socket6));
 						else
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, m_Socket4));
 						publish = true;
 					}
 					else
@@ -592,119 +593,101 @@ void CProtocol::Send(const uint8_t *buf, size_t size, const CIp &Ip) const
 void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const CCallsign &dst)
 {
 	// std::cout << "SendToAll DST=" << CCallsign(packet.GetCDstAddress()) << " SRC=" << CCallsign(packet.GetCSrcAddress()) << std::endl;
-	// Dump(packet.GetCData(), packet.GetSize());
-	//  push it to all our clients linked to the module
+
+	// these are all the values needed to send the packet to every possible client on the module
 	SPClient client = nullptr;
-	const CCallsign all("@ALL");
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	const auto mod = txclient->GetReflectorModule();
+	const auto proto = client->GetProtocol();
+	const auto size = packet.GetSize();
+	const auto TYPE = packet.GetFrameType();
+	const auto fromtype = packet.GetFromType();
+	CFrameType ft(TYPE);
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
 		if (txclient == client)
 			continue; // don't send data back to the originator
-		if (packet.IsStreamData())
+		
+		// IF WE CHANGE ANYTHING IN THE PACKET, WE MUST CHANGE IT BACK
+		bool dstChanged = false;
+		bool ftChanged = false;
+		switch (client->GetClientType())
 		{
-			// the client is not parroting
-			if (parrotMap.end() != parrotMap.find(client))
-				continue;
-
-			const auto fromtype = packet.GetFromType();
-			switch (client->GetClientType())
+		case EClientType::legacy:
+			// legacy reflectors will only get streaming data from simple clients
+			if (EClientType::simple==fromtype and packet.IsStreamData())
 			{
-			case EClientType::legacy:
-				// legacy reflectors will only get streaming data from simple clients
-				if (EClientType::simple == fromtype)
+				// legacy reflectors have to be properly addressed
+				// set the address and calculate the CRC
+				client->GetCallsign().CodeOut(packet.GetDstAddress());
+				dstChanged = true;
+				if (EVersionType::v3 == ft.GetVersion())
 				{
-					// legacy reflectors have to be properly addressed
-					// set the address and calculate the CRC
-					client->GetCallsign().CodeOut(packet.GetDstAddress());
-					packet.CalcCRC();
-					packet.SetSize(55u);
+					packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+					ftChanged = true;
+				}
+				packet.CalcCRC();
 
-					// one last thing, set the 55th bit to true
-					const bool b = true;
-					packet.GetData()[54] = uint8_t(b);
+				// one last thing, set the 55th bit to true
+				const bool b = true;
+				packet.GetData()[54] = uint8_t(b);
 
-					// send this data
-					client->SendPacket(packet);
-
-					// restore the DST address and CRC
-					dst.CodeOut(packet.GetDstAddress());
-					packet.CalcCRC();
-				}
-				break;
-			case EClientType::reflector:
-				// modern reflectors will only get data from simple clients
-				if (EClientType::simple == fromtype)
-				{
-					// we will readdress, if necessary
-					bool dstChange = false;
-					if (strstr(dst.c_str(), "M17-"))
-					{
-						all.CodeOut(packet.GetDstAddress());
-						packet.CalcCRC();
-						dstChange = true;
-					}
-					packet.SetSize(55u);
-					packet.GetData()[54] = uint8_t(mod);
-					client->SendPacket(packet);
-					if (dstChange)
-					{
-						dst.CodeOut(packet.GetDstAddress());
-						packet.CalcCRC();
-					}
-				}
-				break;
-			default:
-				// all local clients, simple and listen-only, get data from anywhere
-				// bogus listen-only input is blocked in OnPacketIn
-				bool dstChange = false;
-				packet.SetSize(54u);
-				if (strstr(dst.c_str(), "M17-"))
-				{
-					all.CodeOut(packet.GetDstAddress());
-					packet.CalcCRC();
-					dstChange = true;
-				}
-				client->SendPacket(packet);
-				if (dstChange)
-				{
-					dst.CodeOut(packet.GetDstAddress());
-					packet.CalcCRC();
-				}
-				break;
+				// send this data
+				client->SendPacket(packet, 55);
 			}
+			break;
+		case EClientType::reflector:
+			// non-legacy reflectors only get packets from a simple client
+			if (EClientType::simple == fromtype)
+			{
+				packet.GetData()[size] = uint8_t(mod);
+				if (EProtocol::legacy==proto and EVersionType::v3 == ft.GetVersion())
+				{
+					packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+					ftChanged = true;
+				}
+				// Does dst begin with "M17-"?
+				//  0x24faed is "M17-"  and   0x272000 is 40^4
+				if (0x24faedu == dst.Hash() % 0x271000u)
+				{
+					memset(packet.GetDstAddress(), 0xffu, 6);
+					dstChanged = true;
+				}
+				if (dstChanged or ftChanged)
+					packet.CalcCRC();
+				client->SendPacket(packet, size+1);
+			}
+			break;
+		default:
+			// all local clients, simple and listen-only, get data from anywhere
+			// bogus listen-only input is blocked in OnPacketIn
+
+			// does the dst begin with "M17-"?
+			if (0x24faedu == dst.Hash() % 0x271000u)
+			{
+				memset(packet.GetDstAddress(), 0xffu, 6);
+				dstChanged = true;
+			}
+
+			if (EProtocol::legacy==proto and EVersionType::v3==ft.GetVersion()) {
+				packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+				ftChanged = true;
+				packet.CalcCRC();
+			} else if (EProtocol::v3==proto and EVersionType::legacy==ft.GetVersion()) {
+				packet.SetFrameType(ft.GetFrameType(EVersionType::v3));
+				ftChanged = true;
+				packet.CalcCRC();
+			}
+			client->SendPacket(packet, size);
+			break;
 		}
-		else // this is packet data
-		{
-			const auto ct = client->GetClientType();
-			switch (packet.GetFromType())
-			{
-			case EClientType::reflector:
-				if (EClientType::simple == ct or EClientType::listenonly == ct)
-				{
-					// the packet has already been trimmed in GetClient()
-					client->SendPacket(packet);
-				}
-				break;
-			case EClientType::simple:
-				if (EClientType::legacy == ct)
-					break; // legacy reflectors don't get packet data
-				if (EClientType::reflector == ct)
-				{
-					const auto size = packet.GetSize();
-					packet.SetSize(size + 1);
-					packet.GetData()[size] = uint8_t(mod);
-					client->SendPacket(packet);
-					packet.SetSize(size);
-				}
-				else
-					client->SendPacket(packet);
-				break;
-			default:
-				break;
-			}
+		if (dstChanged or ftChanged) {
+			if (ftChanged)
+			packet.SetFrameType(TYPE);
+			if (dstChanged)
+				dst.CodeOut(packet.GetDstAddress());
+			packet.CalcCRC();
 		}
 	}
 	g_Reflector.ReleaseClients();
@@ -936,43 +919,60 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client, const CCallsi
 ////////////////////////////////////////////////////////////////////////////////////////
 // packet decoding helpers
 
-bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char &mod)
+bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char &mod, EClientType &ctype, EProtocol &protocol)
 {
-	if (0 == memcmp(buf, "CONN", 4))
+	const char tchr = buf[3];
+	if (0 == memcmp(buf, "CON", 3))
 	{
+		if ('N' == tchr)
+			protocol = EProtocol::legacy;
+		else if ('3' == tchr)
+			protocol = EProtocol::v3;
+		else
+			return false;
+
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), clientRegEx))
 		{
 			mod = buf[10];
 			if (IsLetter(mod))
 			{
+				ctype = EClientType::simple;
 				return true;
 			}
-			std::cout << "Bad CONN from '" << cs.GetCS() << "'. at " << ip << std::endl;
+			std::cout << "Bad CON" << tchr << " from '" << cs.GetCS() << "'. at " << ip << std::endl;
 			Dump("The requested module is not a letter:", buf, 11);
 		}
 		else
 		{
 			if (cs.GetCS(4).compare("WPSD"))
-				std::cout << "CONN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+				std::cout << "CON" << tchr << " packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
-	else if (0 == memcmp(buf, "LSTN", 4))
+	else if (0 == memcmp(buf, "LST", 3))
 	{
+		if ('N' == tchr)
+			protocol = EProtocol::legacy;
+		if ('3' == tchr)
+			protocol = EProtocol::v3;
+		else
+			return false;
+
 		cs.CodeIn(buf + 4);
 		if (std::regex_match(cs.GetCS(), lstnRegEx))
 		{
 			mod = buf[10];
 			if (IsLetter(mod))
 			{
+				ctype = EClientType::listenonly;
 				return true;
 			}
-			std::cout << "Bad LSTN from '" << cs.GetCS() << "'. at " << ip << std::endl;
+			std::cout << "Bad LST" << tchr << " from '" << cs.GetCS() << "'. at " << ip << std::endl;
 			Dump("The requested module is not a letter:", buf, 11);
 		}
 		else
 		{
-			std::cout << "LSTN packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
+			std::cout << "LST" << tchr << " packet from " << ip << " rejected because '" << cs.GetCS() << "' didn't pass the regex!" << std::endl;
 		}
 	}
 	return false;
@@ -1082,9 +1082,16 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	return client;
 }
 
-bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char *mods)
+bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char *mods, EProtocol &protocol)
 {
-	if (memcmp(buf, "CONN", 4))
+	if (memcmp(buf, "CON", 3))
+		return false;
+	const char tchr = buf[3];
+	if ('N' == tchr)
+		protocol = EProtocol::legacy;
+	else if ('3' == tchr)
+		protocol = EProtocol::v3;
+	else
 		return false;
 
 	cs.CodeIn(buf + 4);

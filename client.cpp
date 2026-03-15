@@ -37,7 +37,7 @@ extern CConfigure g_CFG;
 ////////////////////////////////////////////////////////////////////////////////////////
 // constructors
 
-CClient::CClient(const CCallsign cs, const CIp ip, EClientType type, char mod, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_Type(type), m_ReflectorModule(mod), m_Sock(sock)
+CClient::CClient(const CCallsign cs, const CIp ip, EClientType ctype, EProtocol protocol, char mod, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_Type(ctype), m_Protocol(protocol), m_ReflectorModule(mod), m_Sock(sock)
 {
 	m_isTXing = false;
 	m_LastKeepaliveTime.Start();
@@ -69,9 +69,8 @@ bool CClient::operator ==(const CClient &client) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // function
 
-void CClient::SendPacket(const CPacket &pack) const
+void CClient::SendPacket(const CPacket &pack, size_t size) const
 {
-	auto size = pack.GetSize();
 	m_Sock.Send(pack.GetCData(), size, m_Ip);
 }
 
@@ -80,8 +79,7 @@ void CClient::SendPacket(const CPacket &pack) const
 
 void CClient::AddClient(nlohmann::json &data) const
 {
-	std::string m;
-	m.append(1, m_ReflectorModule);
+	const std::string m(1, m_ReflectorModule);
 	data += {
 		{ "Callsign",      m_Callsign.GetCS() },
 		{ "IP",            m_Ip.GetAddress()  },

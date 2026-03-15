@@ -29,19 +29,20 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 
+#include "udpsocket.h"
+#include "callsign.h"
+#include "defines.h"
 #include "version.h"
+#include "client.h"
 #include "timer.h"
 #include "ip.h"
-#include "callsign.h"
-#include "client.h"
-#include "udpsocket.h"
 
 class CPeer
 {
 public:
 	// constructors
 	CPeer() = delete;
-	CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock);
+	CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const CUdpSocket &sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor
@@ -52,7 +53,7 @@ public:
 	const CIp &GetIp(void) const                    { return m_Ip; }
 	const std::string &GetSharedModules(void) const { return m_sharedModules; }
 	std::time_t GetConnectTime(void) const          { return m_ConnectTime; }
-	EClientType GetType(void) const                 { return m_refType; }
+	EPeerType GetPeerType(void) const               { return m_PeerType; }
 
 	// set
 
@@ -81,9 +82,9 @@ public:
 protected:
 	// data
 	const CCallsign   m_Callsign;
-	const CIp         m_Ip;
-	const EClientType m_refType;
 	const std::string m_sharedModules;
+	const EPeerType   m_PeerType;
+	const CIp         m_Ip;
 	std::map<char, SPClient> m_Clients;
 
 	// status

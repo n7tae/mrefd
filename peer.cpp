@@ -30,19 +30,21 @@
 #include "reflector.h"
 #include "peer.h"
 
-CPeer::CPeer(const CCallsign cs, const CIp ip, EClientType type, const std::string &mods, const CUdpSocket &sock) : m_Callsign(cs), m_Ip(ip), m_refType(type), m_sharedModules(mods)
+CPeer::CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const CUdpSocket &sock) : m_Callsign(cs), m_sharedModules(mods), m_PeerType(ptype), m_Ip(ip)
 {
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
 
 	std::cout << "Adding M17 peer " << cs << " module(s) " << mods << std::endl;
 	CCallsign clientcs(cs);
+	const auto ctype    = ptype==EPeerType::legacy ? EClientType::legacy : EClientType::reflector;
+	const auto protocol = ptype==EPeerType::v3     ? EProtocol::v3       : EProtocol::legacy;
 	// and construct the M17 clients
 	for (auto m : m_sharedModules)
 	{
 		clientcs.SetModule(m);
 		// create and append to list
-		m_Clients[m] = std::make_shared<CClient>(clientcs, ip, type, m, sock);
+		m_Clients[m] = std::make_shared<CClient>(clientcs, ip, ctype, protocol, m, sock);
 	}
 }
 

@@ -48,7 +48,7 @@ public:
 	bool NeedReload(void);
 
 	#ifndef NO_DHT
-	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy);
+	void Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port);
 	#endif
 
 	// pass-through
@@ -62,7 +62,7 @@ protected:
 #ifndef NO_DHT
 	void Emplace(const std::string &cs, const std::string &mods);
 #endif
-	void Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy);
+	void Emplace(const std::string &cs, const std::string &mods, const std::string &vstr, const std::string &addr, uint16_t port);
 	bool GetLastModTime(time_t *);
 	void ToUpper(std::string &s);
 

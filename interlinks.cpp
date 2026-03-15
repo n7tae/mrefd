@@ -61,7 +61,7 @@ bool CInterlinks::LoadFromFile(const char *filename)
 	bool ok = false;
 	std::string line;
 
-	auto desregex = std::regex("^M17-([A-Z0-9]){3,3}[L]?$", std::regex::extended);
+	auto desregex = std::regex("^M17-([A-Z0-9]){3,3}$", std::regex::extended);
 
 	// and load
 	std::ifstream file(filename);
@@ -82,8 +82,8 @@ bool CInterlinks::LoadFromFile(const char *filename)
 			if (0 == v.size() or '#' == v[0][0])
 				continue;
 			// make sure the callsign and modules are uppercase
-			ToUpper(v[0]);        // the first word
-			ToUpper(*v.rbegin()); // the last word
+			ToUpper(v[0]); // the reflector callsign
+			ToUpper(v[1]); // the requested modules
 			// check for self-linking
 			if (std::string::npos != v[0].find(g_CFG.GetCallsign()))
 			{
@@ -94,14 +94,6 @@ bool CInterlinks::LoadFromFile(const char *filename)
 			{
 				std::cerr << m_Filename << " line #" << count << ": malformed reflect :" << v[0] << std::endl;
 				continue;
-			}
-
-			bool islegacy = false;
-
-			if (v[0].size() > 7)
-			{
-				islegacy = true;
-				v[0].resize(7);
 			}
 
 			switch(v.size())
@@ -116,17 +108,17 @@ bool CInterlinks::LoadFromFile(const char *filename)
 				Emplace(v[0], v[1]);
 #endif
 				break;
-			case 3:	// supply the default connection port
-				Emplace(v[0], v[2], v[1], 17000u, islegacy);
+			case 4:	// supply the default connection port
+				Emplace(v[0], v[1], v[2], v[3], 17000u);
 				break;
-			case 4:
-				uint16_t port = std::stoul(v[2]);
+			case 5:
+				uint16_t port = std::stoul(v[4]);
 				if (port < 1024u or port > 49000u)
 				{
 					std::cout << m_Filename << " line #" << count << ": Resetting port for " << v[0] << " from " << v[2] << " to 17000" << std::endl;
 					port = 17000u;
 				}
-				Emplace(v[0], v[3], v[1], port, islegacy);
+				Emplace(v[0], v[1], v[2], v[3], port);
 				break;
 			}
 		}
@@ -210,13 +202,13 @@ void CInterlinks::ToUpper(std::string &str)
 }
 
 #ifndef NO_DHT
-void CInterlinks::Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
+void CInterlinks::Update(const std::string &cs, const std::string &cmods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port)
 {
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	auto item = m_Imap.find(cs);
 	if (m_Imap.end() != item)
 	{
-		item->second->UpdateItem(cmods, emods, ipv4, ipv6, port, islegacy);
+		item->second->UpdateItem(cmods, emods, vstr, ipv4, ipv6, port);
 		return;
 	}
 	std::cerr << "ERROR: Can't Update CInterlinks item '" << cs << "' because it doesn't exist!";
@@ -230,9 +222,9 @@ void CInterlinks::Emplace(const std::string &cs, const std::string &mods)
 }
 #endif
 
-void CInterlinks::Emplace(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy)
+void CInterlinks::Emplace(const std::string &cs, const std::string &mods, const std::string &vstr, const std::string &addr, uint16_t port)
 {
-	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods, addr, port, islegacy));
+	auto item = m_Imap.emplace(cs, std::make_unique<CInterlink>(cs, mods, vstr, addr, port));
 	if (not item.second)
 		std::cout << cs << " was already defined earlier. This will be ignored." << std::endl;
 }

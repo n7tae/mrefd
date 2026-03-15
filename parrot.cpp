@@ -65,7 +65,7 @@ void CStreamParrot::playThread()
 		pack.CalcCRC();
 		clock = clock + std::chrono::milliseconds(40);
 		std::this_thread::sleep_until(clock);
-		client->SendPacket(pack);
+		client->SendPacket(pack, 54);
 		data[n].clear();
 	}
 	data.clear();
@@ -102,7 +102,7 @@ void CPacketParrot::returnPacket()
 	if (firstcrc and secondcrc)
 	{
 		packet.CalcCRC();
-		client->SendPacket(packet);
+		client->SendPacket(packet, packet.GetSize());
 	}
 	else
 	{
@@ -123,7 +123,7 @@ void CPacketParrot::returnPacket()
 		packet.SetType(false);
 		packet.CalcCRC();
 		for (; tps < MAX_PACKET_SIZE; tps++) packet.GetData()[tps] = 0u;
-		client->SendPacket(packet);
+		client->SendPacket(packet, packet.GetSize());
 	}
 	state = EParrotState::done;
 }

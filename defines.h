@@ -25,9 +25,9 @@
 #include <cstdint>
 
 enum class EModuleMode : uint8_t { normal, encrypted };
-
 enum class EClientType : uint8_t { listenonly, simple, reflector, legacy };
-
+enum class EPeerType { v3, pmsm, legacy };
+enum class EProtocol { v3, legacy };
 
 // defines
 #define MAX_PACKET_SIZE                 860

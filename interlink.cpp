@@ -28,6 +28,7 @@
 #include "configure.h"
 #include "interlink.h"
 #include "reflector.h"
+#include "version.h"
 
 extern CConfigure g_CFG;
 
@@ -40,12 +41,12 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods) : m_Using
 }
 #endif
 
-CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &addr, uint16_t port, bool islegacy) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
+CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std::string &vstr, const std::string &addr, uint16_t port) : m_UsingDHT(false), m_reqMods(mods), m_Callsign(cs)
 {
 	if (g_CFG.IsIPv4Address(addr))
-		UpdateItem(mods, "", addr, "", port, islegacy);
+		UpdateItem(mods, "", vstr, addr, "", port);
 	else if (g_CFG.IsIPv6Address(addr))
-		UpdateItem(mods, "", "", addr, port, islegacy);
+		UpdateItem(mods, "", vstr, "", addr, port);
 	else
 		std::cerr << "ERROR: '" << addr << "' is not a valid internet address!" << std::endl;
 }
@@ -53,9 +54,10 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std
 ////////////////////////////////////////////////////////////////////////////////////////
 // compare
 
-void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &ipv4, const std::string &ipv6, uint16_t port, bool islegacy)
+void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, uint16_t port)
 {
-	m_IsNotLegacy = not islegacy;	// this is the gatekeeper for sending packets to a reflector
+	const CVersion rv(vstr), v3(1, 2, 0), lr(1, 0, 0);
+	m_PeerType = (rv.GetVersion() >= v3.GetVersion()) ? EPeerType::v3 : (rv.GetVersion() < lr.GetVersion()) ? EPeerType::legacy : EPeerType::pmsm;
 
 	bool isbad = false;
 	for (const auto m : m_reqMods)

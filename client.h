@@ -42,7 +42,7 @@ public:
 	// constructors
 	CClient() = delete;
 	CClient(const CClient &) = delete;
-	CClient(const CCallsign cs, const CIp ip, EClientType type, char mod, const CUdpSocket &sock);
+	CClient(const CCallsign cs, const CIp ip, EClientType ctype, EProtocol protocol, char mod, const CUdpSocket &sock);
 
 	// destructor
 	virtual ~CClient() {};
@@ -54,14 +54,15 @@ public:
 	const CCallsign &GetCallsign(void) const { return m_Callsign; }
 	const CIp &GetIp(void) const             { return m_Ip; }
 	char GetModule(void) const               { return m_Callsign.GetModule(); }
+	EProtocol GetProtocol(void) const        { return m_Protocol; }
 	std::time_t GetConnectTime(void) const   { return m_ConnectTime; }
 	std::time_t GetLastHeardTime(void) const { return m_LastHeardTime; }
 	char GetReflectorModule(void) const      { return m_ReflectorModule; }
+	EClientType GetClientType(void) const    { return m_Type; }
 
 	// identity
-	const char *GetProtocolName(void) const  { return "M17"; }
+	const char *GetProtocolName(void) const  { return EProtocol::v3==m_Protocol ? "V#3.0" : "Legacy"; }
 	bool IsNode(void) const                  { return true; }
-	EClientType GetClientType(void) const    { return m_Type; }
 	bool IsListenOnly(void) const            { return m_Type == EClientType::listenonly; }
 
 	// status
@@ -73,7 +74,7 @@ public:
 	void Heard(void)                         { m_LastHeardTime = std::time(nullptr); }
 
 	// function
-	void SendPacket(const CPacket &pack) const;
+	void SendPacket(const CPacket &pack, size_t size) const;
 	// reporting
 	void AddClient(nlohmann::json &data) const;
 
@@ -81,6 +82,7 @@ protected:
 	const CCallsign   m_Callsign;
 	const CIp         m_Ip;
 	const EClientType m_Type;
+	const EProtocol   m_Protocol;
 	const char        m_ReflectorModule;
 	const CUdpSocket &m_Sock;
 
