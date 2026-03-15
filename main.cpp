@@ -56,11 +56,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-#ifdef RUN_AS_DAEMON
-	if (0 > daemon(1, 1))
-		return EXIT_FAILURE;
-#endif
-
 	std::signal(SIGINT, SigHandler);
 	std::signal(SIGHUP, SigHandler);
 	std::signal(SIGTERM, SigHandler);
