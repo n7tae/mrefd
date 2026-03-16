@@ -710,8 +710,7 @@ void CProtocol::HandleKeepalives(void)
 	SPClient client;
 	while (nullptr != (client = clients->FindNextClient(it)))
 	{
-		// Does dst begin with "M17-"?
-		//  0x24faed is "M17-"  and   0x272000 is 40^4
+		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
 		if (0x24faedu == client->GetCallsign().Hash() % 0x271000u)
 			continue;
 
@@ -1099,7 +1098,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCall
 		return false;
 
 	cs.CodeIn(buf + 4);
-	if (0x24faedu == cs.Hash() % 0x271000u)
+	if (0x24faedu != cs.Hash() % 0x271000u)
 	{
 		std::cout << "Interlink request from '" << cs << "' at " << ip << " denied" << std::endl;
 		return false;
