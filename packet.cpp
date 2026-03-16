@@ -120,6 +120,21 @@ void CPacket::CalcCRC()
 	}
 }
 
+bool CPacket::CRCisOK(bool first) const
+{
+	if (isstream)
+	{
+		return 0 == CRC.CalcCRC(data, 54);
+	}
+	else
+	{	
+		if (first)
+			return 0 == CRC.CalcCRC(data+4, 30);
+		else
+			return 0 == CRC.CalcCRC(data+34, size-34);
+	}
+}
+
 const uint8_t *CPacket::GetCVoice() const
 {
 	static uint8_t quiet[] { 0x01u, 0x00u, 0x09u, 0x43u, 0x9cu, 0xe4u, 0x21u, 0x08u, 0x01u, 0x00u, 0x09u, 0x43u, 0x9cu, 0xe4u, 0x21u, 0x08u };
@@ -145,6 +160,19 @@ uint16_t CPacket::GetCRC(bool first) const
 			rv = Get16At(size-2);
 	}
 	return rv;
+}
+
+void CPacket::SetCRC(uint16_t crc, bool first)
+{
+	if (isstream)
+		Set16At(52, crc);
+	else
+	{
+		if (first)
+			Set16At(32, crc);
+		else
+			Set16At(size-2, crc);
+	}
 }
 
 uint16_t CPacket::Get16At(size_t pos) const

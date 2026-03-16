@@ -51,6 +51,7 @@ public:
 	void SetStreamId(uint16_t sid);
 	void SetFrameType(uint16_t ft);
 	void SetFrameNumber(uint16_t fn);
+	void SetCRC(uint16_t crc, bool first = true);
 
 	// get the state data
 	size_t          GetSize() const { return size; }
@@ -58,6 +59,7 @@ public:
 	bool       IsStreamData() const { return isstream; }
 	bool       IsPacketData() const { return not isstream; }
 	bool       IsLastPacket() const;
+	bool CRCisOK(bool first = true) const;
 
 	// set state data 
 	void SetSize(size_t n) { size = n; }

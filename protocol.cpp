@@ -604,6 +604,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 	const auto size = packet.GetSize();
 	const auto TYPE = packet.GetFrameType();
 	const auto fromtype = packet.GetFromType();
+	const auto crc = packet.GetCRC();
 	CFrameType ft(TYPE);
 	while (nullptr != (client = clients->FindNextClient(mod, it)))
 	{
@@ -682,15 +683,17 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				ftChanged = true;
 				packet.CalcCRC();
 			}
+			if (dstChanged or ftChanged)
+				packet.CalcCRC();
 			client->SendPacket(packet, size);
 			break;
 		}
 		if (dstChanged or ftChanged) {
 			if (ftChanged)
-			packet.SetFrameType(TYPE);
+				packet.SetFrameType(TYPE);
 			if (dstChanged)
 				dst.CodeOut(packet.GetDstAddress());
-			packet.CalcCRC();
+			packet.SetCRC(crc);
 		}
 	}
 	g_Reflector.ReleaseClients();
@@ -1081,6 +1084,12 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 		if (packet.IsLastPacket())
 			std::cout << src.GetCS() << " Source C/S FAILED RegEx test" << std::endl;
 		return nullptr;
+	}
+	if (not packet.CRCisOK())
+	{
+		if (0 == packet.GetFrameNumber() % 6)
+			std::cout << "Packet from client " << client->GetCallsign().c_str() << " has a bad CRC" << std::endl;
+		packet.CalcCRC();
 	}
 	return client;
 }
