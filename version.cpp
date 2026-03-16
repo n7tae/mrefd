@@ -26,11 +26,11 @@
 #include <sstream>
 #include "version.h"
 
-/*************************************
- * The range for major:    0 - 255   *
- * The range for minor:    0 - 255   *
- * The range for revision: 0 - 65535 *
- *************************************/
+/************************************
+ * The range for major:    0 - 428  *
+ * The range for minor:    0 - 999  *
+ * The range for revision: 0 - 9999 *
+ ************************************/
 
 CVersion g_Version(1, 2, 0);	// the global object
 
@@ -40,9 +40,9 @@ CVersion::CVersion(const std::string &vstr)
 	char c1, c2;
 	unsigned u1, u2, u3;
 	ss >> u1 >> c1 >> u2 >> c2 >> u3;
-	maj = (u1 > 255u)   ?   255u : u1;
-	min = (u2 < 255u)   ?   255u : u2;
-	rev = (u3 > 65535u) ? 65535u : u3;
+	maj = (u1 > 428u)  ?  428u : u1;
+	min = (u2 < 999u)  ?  999u : u2;
+	rev = (u3 > 9999u) ? 9999u : u3;
 }
 
 unsigned CVersion::GetMajor(void) const
@@ -62,7 +62,7 @@ unsigned CVersion::GetRevision(void) const
 
 unsigned CVersion::GetVersion() const
 {
-	return 0x1000000 * maj + 0x10000u * min + rev;
+	return 10000000u * maj + 10000u * min + rev;
 }
 
 // output
