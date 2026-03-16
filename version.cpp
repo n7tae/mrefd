@@ -36,7 +36,7 @@ CVersion::CVersion(const std::string &vstr)
 	ss >> u1 >> c1 >> u2 >> c2 >> u3;
 	maj = u1 & 0xffu;
 	min = u2 & 0xffu;
-	rev = u3 * 0xffffu;
+	rev = u3 & 0xffffu;
 }
 
 unsigned CVersion::GetMajor(void) const
