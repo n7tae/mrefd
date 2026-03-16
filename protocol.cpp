@@ -599,7 +599,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
 	const auto mod = txclient->GetReflectorModule();
-	const auto proto = client->GetProtocol();
+	EProtocol protocol;
 	const auto size = packet.GetSize();
 	const auto TYPE = packet.GetFrameType();
 	const auto fromtype = packet.GetFromType();
@@ -641,8 +641,9 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 			// non-legacy reflectors only get packets from a simple client
 			if (EClientType::simple == fromtype)
 			{
+				protocol = client->GetProtocol();
 				packet.GetData()[size] = uint8_t(mod);
-				if (EProtocol::legacy==proto and EVersionType::v3 == ft.GetVersion())
+				if (EProtocol::legacy==protocol and EVersionType::v3 == ft.GetVersion())
 				{
 					packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
 					ftChanged = true;
@@ -670,11 +671,12 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				dstChanged = true;
 			}
 
-			if (EProtocol::legacy==proto and EVersionType::v3==ft.GetVersion()) {
+			protocol = client->GetProtocol();
+			if (EProtocol::legacy==protocol and EVersionType::v3==ft.GetVersion()) {
 				packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
 				ftChanged = true;
 				packet.CalcCRC();
-			} else if (EProtocol::v3==proto and EVersionType::legacy==ft.GetVersion()) {
+			} else if (EProtocol::v3==protocol and EVersionType::legacy==ft.GetVersion()) {
 				packet.SetFrameType(ft.GetFrameType(EVersionType::v3));
 				ftChanged = true;
 				packet.CalcCRC();
