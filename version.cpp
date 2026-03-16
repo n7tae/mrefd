@@ -31,12 +31,12 @@ CVersion g_Version(1, 2, 0);	// the global object
 CVersion::CVersion(const std::string &vstr)
 {
 	std::stringstream ss(vstr);
-	char sep;
-	ss >> maj;
-	ss >> sep;
-	ss >> min;
-	ss >> sep;
-	ss >> rev;
+	char c1, c2;
+	unsigned u1, u2, u3;
+	ss >> u1 >> c1 >> u2 >> c2 >> u3;
+	maj = u1 & 0xffu;
+	min = u2 & 0xffu;
+	rev = u3 * 0xffffu;
 }
 
 unsigned CVersion::GetMajor(void) const
