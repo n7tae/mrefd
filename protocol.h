@@ -96,7 +96,7 @@ protected:
 	void EncodeConnectNackPacket(uint8_t *);
 	void EncodeDisconnectPacket(uint8_t *, char);
 	void EncodeDisconnectedPacket(uint8_t *);
-	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
+	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &, const EPeerType);
 	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
 	void EncodeInterlinkNackPacket(uint8_t *);
 

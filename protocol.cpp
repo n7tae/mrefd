@@ -214,9 +214,10 @@ void CProtocol::Task(void)
 	case 11:
 		if (IsValidConnect(pack.GetCData(), ip, cs, mod, ctype, protocol))
 		{
-			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
-
-			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
+			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip;
+			if (EClientType::listenonly == ctype)
+				std::cout << " as listen-only";
+			std::cout << std::endl;
 
 			// callsign authorized?
 			if (g_GateKeeper.ClientMayLink(cs, ip))
@@ -229,7 +230,7 @@ void CProtocol::Task(void)
 					Send(pack.GetCData(), 4, ip);
 
 					// create the client and append
-					if (isLstn)
+					if (EClientType::listenonly == ctype)
 					{
 						if (g_CFG.GetRefMods().GetEModules().find(mod) != std::string::npos && not g_CFG.GetSWLEncryptedMods())
 						{
@@ -709,8 +710,9 @@ void CProtocol::HandleKeepalives(void)
 	SPClient client;
 	while (nullptr != (client = clients->FindNextClient(it)))
 	{
-		// don't ping reflector modules, we'll do each interlinked refectors after this while loop
-		if (0 == client->GetCallsign().GetCS(4).compare("M17-"))
+		// Does dst begin with "M17-"?
+		//  0x24faed is "M17-"  and   0x272000 is 40^4
+		if (0x24faedu == client->GetCallsign().Hash() % 0x271000u)
 			continue;
 
 		// send keepalive
@@ -808,7 +810,7 @@ void CProtocol::HandlePeerLinks(void)
 				// send connect packet to re-initiate peer link
 				SInterConnect connect;
 				const auto mods = item->GetReqMods();
-				EncodeInterlinkConnectPacket(connect, mods);
+				EncodeInterlinkConnectPacket(connect, mods, item->GetPeerType());
 				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
 				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 			}
@@ -1097,7 +1099,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCall
 		return false;
 
 	cs.CodeIn(buf + 4);
-	if (cs.GetCS(4).compare("M17-"))
+	if (0x24faedu == cs.Hash() % 0x271000u)
 	{
 		std::cout << "Interlink request from '" << cs << "' at " << ip << " denied" << std::endl;
 		return false;
@@ -1106,7 +1108,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCall
 	auto pmods = (const char *)buf + 10;
 	if (strnlen(pmods, 27) > 26)
 	{
-		std::cout << "Could not fine a null in the mods field of a CONN packet from " << cs << " at " << ip << std::endl;
+		std::cout << "Could not fine a null in the mods field of a CON" << tchr << " packet from " << cs << " at " << ip << std::endl;
 		return false;
 	}
 
@@ -1114,7 +1116,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCall
 	auto pInterlinkItem = g_Interlinks.Find(cs.GetCS());
 	if (nullptr == pInterlinkItem)
 	{
-		std::cout << "Interlink request from " << cs.GetCS() << " at " << ip << " is not defined in the mrefd interlink file" << std::endl;
+		std::cout << "Interlink request from " << cs.GetCS() << " at " << ip << " is not defined in the mrefd.interlink file" << std::endl;
 		return false;
 	}
 
@@ -1122,7 +1124,7 @@ bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCall
 	const std::string imods(pInterlinkItem->GetReqMods());
 	if (imods.compare(rmods))
 	{
-		std::cout << cs.GetCS() << " CONN packet from " << cs.GetCS() << " at " << ip << " is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
+		std::cout << cs.GetCS() << " CON" << tchr << " packet from " << cs.GetCS() << " at " << ip << " is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
 		return false;
 	}
 
@@ -1162,10 +1164,12 @@ void CProtocol::EncodeKeepAlivePacket(uint8_t *buf)
 	GetReflectorCallsign().CodeOut(buf + 4);
 }
 
-void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
+void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods, EPeerType ptype)
 {
 	memset(conn.magic, 0, sizeof(SInterConnect));
 	memcpy(conn.magic, "CONN", 4);
+	if (EPeerType::v3 == ptype)
+		conn.magic[3] = '3';
 	GetReflectorCallsign().CodeOut(conn.fromcs);
 	memcpy(conn.mods, mods.c_str(), mods.size());
 }

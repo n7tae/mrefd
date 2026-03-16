@@ -62,7 +62,6 @@ public:
 
 	// identity
 	const char *GetProtocolName(void) const  { return EProtocol::v3==m_Protocol ? "V#3.0" : "Legacy"; }
-	bool IsNode(void) const                  { return true; }
 	bool IsListenOnly(void) const            { return m_Type == EClientType::listenonly; }
 
 	// status

@@ -244,7 +244,8 @@ void CReflector::WriteDashboardData(nlohmann::json &data)
 	// iterate on clients
 	for ( auto cit=clients->cbegin(); cit!=clients->cend(); cit++ )
 	{
-		if ( (*cit)->IsNode() && (*cit)->GetCallsign().GetCS(4).compare("M17-") )
+		const auto ct = (*cit)->GetClientType();
+		if (EClientType::simple==ct or EClientType::listenonly==ct)
 		{
 			(*cit)->AddClient(data["Clients"]);
 		}
