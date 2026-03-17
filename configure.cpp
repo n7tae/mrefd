@@ -29,8 +29,6 @@
 
 #include "configure.h"
 
-CConfigure g_CFG;
-
 static inline void split(const std::string &s, char delim, std::vector<std::string> &v)
 {
 	std::istringstream iss(s);

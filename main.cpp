@@ -29,9 +29,9 @@
 #include "configure.h"
 #include "version.h"
 
-extern CConfigure g_CFG;
-extern CVersion g_Version;
-extern CReflector g_Reflector;
+CVersion g_Version(1,2,0);
+CConfigure g_CFG;
+CReflector g_Reflector;
 
 void SigHandler(int sig)
 {

@@ -1087,7 +1087,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	}
 	if (not packet.CRCisOK())
 	{
-		if (0 == packet.GetFrameNumber() % 6)
+		if (0 == packet.GetFrameNumber() % 24)
 			std::cout << "Packet from client " << client->GetCallsign().c_str() << " has a bad CRC" << std::endl;
 		packet.CalcCRC();
 	}

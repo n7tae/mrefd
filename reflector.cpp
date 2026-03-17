@@ -35,7 +35,6 @@
 #include "version.h"
 #include "interlinks.h"
 
-CReflector g_Reflector;
 extern CGateKeeper g_GateKeeper;
 extern CConfigure g_CFG;
 extern CVersion g_Version;
