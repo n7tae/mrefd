@@ -626,7 +626,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				dstChanged = true;
 				if (EVersionType::v3 == ft.GetVersion())
 				{
-					packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+					packet.SetFrameType(ft.GetFrameType(EVersionType::deprecated));
 					ftChanged = true;
 				}
 				packet.CalcCRC();
@@ -647,7 +647,7 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 				packet.GetData()[size] = uint8_t(mod);
 				if (EProtocol::legacy==protocol and EVersionType::v3 == ft.GetVersion())
 				{
-					packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+					packet.SetFrameType(ft.GetFrameType(EVersionType::deprecated));
 					ftChanged = true;
 				}
 				// Does dst begin with "M17-"?
@@ -675,10 +675,10 @@ void CProtocol::SendToClients(CPacket &packet, const SPClient &txclient, const C
 
 			protocol = client->GetProtocol();
 			if (EProtocol::legacy==protocol and EVersionType::v3==ft.GetVersion()) {
-				packet.SetFrameType(ft.GetFrameType(EVersionType::legacy));
+				packet.SetFrameType(ft.GetFrameType(EVersionType::deprecated));
 				ftChanged = true;
 				packet.CalcCRC();
-			} else if (EProtocol::v3==protocol and EVersionType::legacy==ft.GetVersion()) {
+			} else if (EProtocol::v3==protocol and EVersionType::deprecated==ft.GetVersion()) {
 				packet.SetFrameType(ft.GetFrameType(EVersionType::v3));
 				ftChanged = true;
 				packet.CalcCRC();

@@ -1,5 +1,5 @@
 /*
-				  mrefd - An M17-only refector
+	     A useable TYPE buider, interpreter and converter
 				Copyright (C) 2026 Thomas A. Early
 
 	This program is free software: you can redistribute it and/or modify
@@ -24,12 +24,20 @@
 enum class EPayloadType { dataonly, c2_3200, c2_1600, packet };
 enum class EEncryptType { none, scram8, scram16, scram24, aes128, aes192, aes256 };
 enum class EMetaDatType { none, gnss, ecd, text, aes };
-enum class EVersionType { legacy, v3 };
+enum class EVersionType { v3, deprecated };
 
 class CFrameType
 {
 public:
-	CFrameType(uint16_t t = 0u) { SetFrameType(t); }
+	CFrameType()
+		 : m_payload(EPayloadType::c2_3200)
+		 , m_encrypt(EEncryptType::none)
+		 , m_isSigned(false)
+		 , m_metatype(EMetaDatType::none)
+		 , m_can(0)
+		 , m_version(EVersionType::v3)
+		 {}
+	CFrameType(uint16_t t) { SetFrameType(t); }
 	void SetFrameType(uint16_t t);
 	uint16_t GetFrameType(EVersionType vt);
 	uint16_t GetOriginType() { return GetFrameType(m_version);  }
@@ -39,21 +47,20 @@ public:
 	bool GetIsSigned() const { return m_isSigned; }
 	EVersionType GetVersion() const { return m_version; }
 	uint8_t GetCan() const { return m_can; }
-	void SetPayloadType(EPayloadType t)  { m_payload = t;  (EVersionType::v3==m_version) ? buildV3() : buildLegacy(); }
-	void SetEncryptType(EEncryptType t)  { m_encrypt = t;  (EVersionType::v3==m_version) ? buildV3() : buildLegacy(); }
-	void SetMetaDataType(EMetaDatType t) { m_metatype = t; (EVersionType::v3==m_version) ? buildV3() : buildLegacy(); }
-	void SetSigned(bool issigned) { m_isSigned = issigned; (EVersionType::v3==m_version) ? buildV3() : buildLegacy(); }
-	void SetCan(uint8_t can)      { m_can = can;           (EVersionType::v3==m_version) ? buildV3() : buildLegacy(); }
+	void SetPayloadType(EPayloadType t)  { m_payload = t; }
+	void SetEncryptType(EEncryptType t)  { m_encrypt = t; }
+	void SetMetaDataType(EMetaDatType t) { m_metatype = t; }
+	void SetSigned(bool issigned) { m_isSigned = issigned; }
+	void SetCan(uint8_t can)      { m_can = can; }
 
 private:
-	bool m_isSigned;
-	uint16_t m_can;
-	EVersionType m_version;
 	EPayloadType m_payload;
 	EEncryptType m_encrypt;
+	bool m_isSigned;
 	EMetaDatType m_metatype;
-	uint16_t m_legacy, m_v3;
+	uint8_t m_can;
+	EVersionType m_version;
 
-	void buildLegacy();
-	void buildV3();
+	uint16_t buildDeprecated();
+	uint16_t buildV3();
 };
