@@ -29,7 +29,7 @@
 #include "configure.h"
 #include "version.h"
 
-CVersion g_Version(1,2,0);
+CVersion g_Version(2, 0, 0);
 CConfigure g_CFG;
 CReflector g_Reflector;
 

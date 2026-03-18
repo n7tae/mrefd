@@ -61,7 +61,7 @@ public:
 	EClientType GetClientType(void) const    { return m_Type; }
 
 	// identity
-	const char *GetProtocolName(void) const  { return EProtocol::v3==m_Protocol ? "V#3.0" : "Legacy"; }
+	const char *GetProtocolName(void) const  { return EProtocol::v3==m_Protocol ? "V#3.0" : "deprecated"; }
 	bool IsListenOnly(void) const            { return m_Type == EClientType::listenonly; }
 
 	// status
