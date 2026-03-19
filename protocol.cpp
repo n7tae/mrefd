@@ -1024,13 +1024,22 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	if (not client)
 		return nullptr;
 	// is it from a client, so is this a viable packet?
-	if ((' ' == char(buf[3])) and (0x1u == (0x1u & buf[19])) and ((54u == size) or (55u == size)))
+	CFrameType t;
+	if ((' ' == char(buf[3])) and ((54u == size) or (55u == size)))
 	{
-		packet.Initialize(size, true);
+		t.SetFrameType(0x100u * buf[18] + buf[19]);
+		if (EPayloadType::packet != t.GetPayloadType())
+			packet.Initialize(size, true);
+		else
+			return nullptr;
 	}
-	else if (('P' == char(buf[3])) and ((sizeof(SInterConnect) < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
+	else if (('P' == char(buf[3])) and ((sizeof(SInterConnect) < size) and (size <= MAX_PACKET_SIZE)))
 	{
-		packet.Initialize(size, false);
+		t.SetFrameType(0x100u * buf[16] + buf[17]);
+		if (EPayloadType::packet == t.GetPayloadType())
+			packet.Initialize(size, true);
+		else
+			return nullptr;
 	}
 	else
 	{
@@ -1067,7 +1076,6 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	// check validity of packet
 	if (std::regex_match(src.GetCS(), clientRegEx))
 	{ // looks like a valid source
-		const CFrameType t(packet.GetFrameType());
 		if (packet.IsStreamData() and (EEncryptType::none != t.GetEncryptType()))
 		{ // looks like this packet is encrypted
 			const auto mod = client->GetReflectorModule();
