@@ -675,11 +675,9 @@ void CProtocol::SendToClients(SPacket &sp, const SPClient &txclient, const CCall
 			if (EProtocol::legacy==protocol and EVersionType::v3==sp.t.GetVersion()) {
 				sp.p.SetFrameType(sp.t.GetFrameType(EVersionType::deprecated));
 				ftChanged = true;
-				sp.p.CalcCRC();
 			} else if (EProtocol::v3==protocol and EVersionType::deprecated==sp.t.GetVersion()) {
 				sp.p.SetFrameType(sp.t.GetFrameType(EVersionType::v3));
 				ftChanged = true;
-				sp.p.CalcCRC();
 			}
 			if (dstChanged or ftChanged)
 				sp.p.CalcCRC();
