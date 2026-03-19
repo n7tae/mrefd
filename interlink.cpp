@@ -56,8 +56,8 @@ CInterlink::CInterlink(const std::string &cs, const std::string &mods, const std
 
 void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, const std::string &vstr, const std::string &ipv4, const std::string &ipv6, const std::string &url, uint16_t port)
 {
-	const CVersion rv(vstr), v3(1, 2, 0), lr(1, 0, 0);
-	m_PeerType = (rv.GetVersion() >= v3.GetVersion()) ? EPeerType::v3 : (rv.GetVersion() < lr.GetVersion()) ? EPeerType::legacy : EPeerType::pmsm;
+	const CVersion rv(vstr);
+	m_PeerType = (rv.GetVersion() >= 20000000u) ? EPeerType::v3 : (rv.GetVersion() < 10000000u) ? EPeerType::legacy : EPeerType::pmsm;
 
 	bool isbad = false;
 	for (const auto m : m_reqMods)
