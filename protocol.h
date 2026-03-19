@@ -33,7 +33,7 @@
 #include "packetstream.h"
 #include "udpsocket.h"
 #include "clients.h"
-#include "packet.h"
+#include "spacket.h"
 #include "parrot.h"
 #include "base.h"
 
@@ -66,9 +66,9 @@ public:
 
 protected:
 	// queue helper
-	void SendToClients(CPacket &, const SPClient &, const CCallsign &dst);
+	void SendToClients(SPacket &, const SPClient &, const CCallsign &dst);
 	// dashboard data
-	void UpdateDashData(const CCallsign &src, const CCallsign &dst, SPClient client, const CPacket &pack);
+	void UpdateDashData(const CCallsign &src, const CCallsign &dst, SPClient client, const SPacket &pack);
 
 	// keepalive helpers
 	void HandlePeerLinks(void);
@@ -77,12 +77,12 @@ protected:
 	// stream helpers
 	CPacketStream *OpenStream(CPacket &, SPClient);
 	void CloseStream(char mod);
-	bool OnPacketIn(CPacket &, const SPClient, const CCallsign &src, const CCallsign &dst);
+	bool OnPacketIn(SPacket &, const SPClient, const CCallsign &src, const CCallsign &dst);
 	CPacketStream *GetStream(CPacket &, const SPClient);
 	void CheckStreamsTimeout(void);
 
 	// packet decoding helpers
-	SPClient GetClient(const CIp &ip, const unsigned size, CPacket &p, CCallsign &dst, CCallsign &src);
+	SPClient GetClient(const CIp &ip, const unsigned size, SPacket &p, CCallsign &dst, CCallsign &src);
 	bool IsValidConnect(const uint8_t *, const CIp &, CCallsign &, char &, EClientType &, EProtocol &);
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
