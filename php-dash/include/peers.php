@@ -25,7 +25,7 @@ for ($i=0;$i<$Reflector->PeerCount();$i++) {
 	echo '
 	<tr class="table-center">
 	<td>' . ($i+1).'</td>';
-	if (strlen($url) > 20) {
+	if (strlen($url) > 10) {
 		echo '<td><a href="' . $url . '" class="pl" target="_blank" rel="noopener noreferrer">' . $Reflector->$Peers[$i]->GetCallsign . '</a></td>';
 	} else {
 		echo '<td>' . $Reflector->Peers[$i]->GetCallSign() . '</td>';

@@ -42,7 +42,7 @@ class CPeer
 public:
 	// constructors
 	CPeer() = delete;
-	CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const CUdpSocket &sock);
+	CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const std::string &url, const CUdpSocket &sock);
 	CPeer(const CPeer &) = delete;
 
 	// destructor

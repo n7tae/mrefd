@@ -80,7 +80,7 @@ void CInterlink::UpdateItem(const std::string &mods, const std::string &emods, c
 	}
 
 	// now the other stuff
-	if (url.size() > 20)
+	if (url.size() > 10)
 		m_Url.assign(url);
 	if (m_IPv4.compare(ipv4))
 	{

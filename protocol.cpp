@@ -311,9 +311,9 @@ void CProtocol::Task(void)
 						// create the new peer
 						// this also create one client per module
 						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, m_Socket6));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, item->GetUrl(), m_Socket6));
 						else
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, m_Socket4));
+							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, mods, item->GetPeerType(), ip, item->GetUrl(), m_Socket4));
 						publish = true;
 					}
 					else

@@ -30,7 +30,7 @@
 #include "reflector.h"
 #include "peer.h"
 
-CPeer::CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const CUdpSocket &sock) : m_Callsign(cs), m_sharedModules(mods), m_PeerType(ptype), m_Ip(ip)
+CPeer::CPeer(const CCallsign cs, const std::string &mods, EPeerType ptype, const CIp ip, const std::string &url, const CUdpSocket &sock) : m_Callsign(cs), m_sharedModules(mods), m_PeerType(ptype), m_Ip(ip), m_Url(url)
 {
 	m_LastKeepaliveTime.Start();
 	m_ConnectTime = std::time(nullptr);
