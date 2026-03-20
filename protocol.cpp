@@ -933,7 +933,7 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs,
 			return false;
 
 		cs.CodeIn(buf + 4);
-		if (std::regex_match(cs.GetCS(), clientRegEx))
+		if (std::regex_match(cs.c_str(), clientRegEx))
 		{
 			mod = buf[10];
 			if (IsLetter(mod))
@@ -960,7 +960,7 @@ bool CProtocol::IsValidConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs,
 			return false;
 
 		cs.CodeIn(buf + 4);
-		if (std::regex_match(cs.GetCS(), lstnRegEx))
+		if (std::regex_match(cs.c_str(), lstnRegEx))
 		{
 			mod = buf[10];
 			if (IsLetter(mod))
@@ -984,8 +984,7 @@ bool CProtocol::IsValidDisconnect(const uint8_t *buf, CCallsign &cs)
 	if (0 == memcmp(buf, "DISC", 4))
 	{
 		cs.CodeIn(buf + 4);
-		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
+		if (std::regex_match(cs.c_str(), clientRegEx) || std::regex_match(cs.c_str(), peerRegEx) || std::regex_match(cs.c_str(), lstnRegEx))
 		{
 			return true;
 		}
@@ -998,8 +997,7 @@ bool CProtocol::IsValidKeepAlive(const uint8_t *buf, CCallsign &cs)
 	if ('P' == buf[0] && ('I' == buf[1] || 'O' == buf[1]) && 'N' == buf[2] && 'G' == buf[3])
 	{
 		cs.CodeIn(buf + 4);
-		auto call = cs.GetCS();
-		if (std::regex_match(call, clientRegEx) || std::regex_match(call, peerRegEx) || std::regex_match(call, lstnRegEx))
+		if (std::regex_match(cs.c_str(), clientRegEx) || std::regex_match(cs.c_str(), peerRegEx) || std::regex_match(cs.c_str(), lstnRegEx))
 		{
 			return true;
 		}
@@ -1031,7 +1029,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, SPacket &sp, C
 	{
 		sp.t.SetFrameType(0x100u * buf[16] + buf[17]);
 		if (EPayloadType::packet == sp.t.GetPayloadType())
-			sp.p.Initialize(size, true);
+			sp.p.Initialize(size, false);
 		else
 			return nullptr;
 	}
@@ -1068,7 +1066,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, SPacket &sp, C
 		sp.p.SetSize(size - 1);
 	}
 	// check validity of packet
-	if (std::regex_match(src.GetCS(), clientRegEx))
+	if (std::regex_match(src.c_str(), clientRegEx))
 	{ // looks like a valid source
 		if (sp.p.IsStreamData() and (EEncryptType::none != sp.t.GetEncryptType()))
 		{ // looks like this packet is encrypted
