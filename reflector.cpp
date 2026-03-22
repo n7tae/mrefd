@@ -129,7 +129,7 @@ bool CReflector::Start(const char *cfgfilename)
 	}
 
 	// start the reporting threads
-	std::cout << "Starting the XML thread..." << std::endl;
+	std::cout << "Starting the JSON thread..." << std::endl;
 	m_JsonReportFuture = std::async(std::launch::async, &CReflector::DashboardDataThread, this);
 #ifndef NO_DHT
 	PutDHTConfig();
