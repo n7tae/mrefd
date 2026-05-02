@@ -141,6 +141,7 @@ void CProtocol::Thread()
 	{
 		Task();
 	}
+	std::cout << "Main processing thread exiting..." << std::endl;
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 // task
@@ -327,6 +328,10 @@ void CProtocol::Task(void)
 		{
 			CCallsign dst, src;
 			auto client = GetClient(ip, len, pack, dst, src);
+			#ifdef DEBUG
+			std::cout << "IP:" << ip.GetAddress() << " DST:" << dst.c_str() << " SRC:" << src.c_str() << " length:" << len << std::endl;
+			Dump(pack.GetCData(), pack.GetSize());
+			#endif
 			if (client)
 			{
 				// std::cout << "Data:" << (pack.IsStreamData()?"Stream":"Packet") << " Module:" << mod << " Client:" << client->GetCallsign() << " SRC:" << src << " IP:" << ip << std::endl;
