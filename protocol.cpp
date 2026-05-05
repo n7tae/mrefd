@@ -61,10 +61,13 @@ CProtocol::~CProtocol()
 bool CProtocol::StartProtocol(const uint16_t port, const std::string &strIPv4, const std::string &strIPv6)
 {
 	// init reflector apparent callsign
-	m_ReflectorCallsign = g_CFG.GetCallsign();
+	m_ReflectorCallsign.CSIn(g_CFG.GetCallsign());
 
 	// reset stop flag
 	keep_running = true;
+	// make the keepalive packet
+	EncodeKeepAlivePacket(keepalive);
+
 
 	// create our sockets
 	if (not strIPv4.empty())
@@ -700,9 +703,6 @@ void CProtocol::SendToClients(SPacket &sp, const SPClient &txclient, const CCall
 
 void CProtocol::HandleKeepalives(void)
 {
-	uint8_t keepalive[10];
-	EncodeKeepAlivePacket(keepalive);
-
 	// iterate on clients
 	auto clients = g_Reflector.GetClients();
 	auto it = clients->begin();
@@ -1169,7 +1169,7 @@ bool CProtocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 void CProtocol::EncodeKeepAlivePacket(uint8_t *buf)
 {
 	memcpy(buf, "PING", 4);
-	GetReflectorCallsign().CodeOut(buf + 4);
+	m_ReflectorCallsign.CodeOut(buf + 4);
 }
 
 void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods, EPeerType ptype)

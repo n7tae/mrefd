@@ -86,7 +86,6 @@ const char *CPosition::GetPosition(std::string &la, std::string &lo)
 		la.assign(buf);
 		snprintf(buf, 15, "%+.6f", longitude);
 		lo.assign(buf);
-		return maidenhead;
 	}
 	return maidenhead;
 }
