@@ -137,6 +137,7 @@ protected:
 	bool publish;
 
 private:
+	uint8_t keepalive[10];
 	std::regex clientRegEx, peerRegEx, lstnRegEx;
 	std::unordered_map<SPClient, std::unique_ptr<CParrot>> parrotMap;
 };
