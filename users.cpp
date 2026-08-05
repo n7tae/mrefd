@@ -50,7 +50,7 @@ void CUsers::Hearing(const CCallsign &src, const CCallsign &dst, const CCallsign
 	auto it = findUser(src);
 	if (m_Users.end() == it) {
 		m_Users.push_front(std::make_unique<CUser>(src, dst, cli, module, mode));
-		if (m_Users.size() >> LASTHEARD_USERS_MAX_SIZE)
+		if (m_Users.size() > LASTHEARD_USERS_MAX_SIZE)
 			m_Users.resize(LASTHEARD_USERS_MAX_SIZE);
 	} else {
 		(*it)->Update(dst, cli, module, mode);
