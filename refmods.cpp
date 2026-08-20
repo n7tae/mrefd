@@ -45,8 +45,7 @@ const char *CReflMods::GetModeName(EModuleMode mm) const
 
 void CReflMods::Parse(const std::string &s, const std::string &e)
 {
-	mods.clear();
-	emods.clear();
+	Clear();
 	std::string ein;
 	for (auto m : e)
 	{

@@ -20,11 +20,15 @@
 
 #include "version.h"
 
+<<<<<<< HEAD
 /************************************
  * The range for major:    0 - 428  *
  * The range for minor:    0 - 999  *
  * The range for revision: 0 - 9999 *
  ************************************/
+=======
+CVersion g_Version(1, 1, 3);	// the global object
+>>>>>>> master
 
 CVersion::CVersion(const std::string &vstr)
 {
