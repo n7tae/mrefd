@@ -39,7 +39,7 @@ public:
 	// utilities
 	size_t GetSize() const { return mmMap.size(); }
 	bool IsIn(const CReflMods &rm, bool checkmodes, const std::string &cs) const;
-	void Clear() { mmMap.clear(); mods.erase(); emods.erase(); }
+	void Clear() { mmMap.clear(); mods.clear(); emods.clear(); }
 	// get data from the map
 	const std::string &GetModules() const { return mods; };
 	const std::string &GetEModules() const { return emods; };
