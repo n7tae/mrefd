@@ -87,7 +87,7 @@ void CClient::AddClient(nlohmann::json &data) const
 		{ "IP",            m_Ip.GetAddress()  },
 		{ "Module",        m                  },
 		{ "Protocol",      GetProtocolName()  },
-		{ "ListenOnly",    IsListenOnly()     },
+		{ "ListenOnly",    IsListenOnly()?"Yes":"No" },
 		{ "ConnectTime",   m_ConnectTime      },
 		{ "LastHeardTime", m_LastHeardTime    }
 	};
