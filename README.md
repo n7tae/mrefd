@@ -64,32 +64,36 @@ The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT 
 
 **Ham-DHT** is implemented using a distributed hash table provided by OpenDHT.
 
-If you are using a new OS, like Debian 12 or Ubuntu 24, you may not have to build the OpenDHT support. Try:
+Some OS releases have pre-build development package. Try:
 
 ```
 sudo apt install libopendht-dev
 ```
 
-If the description shows that this package was build with C++17 or newer, go ahead and let it install, otherwise you should build your own version of the OpenDHT library.
+If the description doesn't show that this package was build with C++17 or newer, go ahead and remove it:
 
-OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Building and installing instructions are in the [OpenDHT Wiki](https://github.com/savoirfairelinux/opendht/wiki/Build-the-library). Python support and proxy-server support (RESTinio) is not required for mrefd and so can be considered optional. With this in mind, this should work on Debian/Ubuntu-based systems:
+```
+sudo apt remove libopendht-dev
+```
 
-```bash
-# Install OpenDHT dependencies
-sudo apt install libncurses5-dev libreadline-dev nettle-dev libgnutls28-dev libargon2-0-dev libmsgpack-dev  libssl-dev libfmt-dev libjsoncpp-dev libhttp-parser-dev libasio-dev cmake pkg-config libcppunit-dev
+You'll need to build it yourself.
 
+#### Build your own version of libopendht-dev
+
+OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Building and installing instructions are the `BUILD.md` fil. First, installing the dependencies listed, you don't need python or any extra OpenDHT tools, just do the minimum build to make the libopendht-dev library:
+
+```
 # clone the repo
 git clone https://github.com/savoirfairelinux/opendht.git
 
 # build and install
 cd opendht
 mkdir build && cd build
-cmake -DOPENDHT_PYTHON=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+cmake -DOPENDHT_TOOLS=OFF ..
 make
 sudo make install
+cd ../..
 ```
-
-Please note that if you end up building the OpenDHT library, there is no easy way to uninstall it once it's been installed.
 
 ### Download the *mrefd* repository and enter the directory
 
