@@ -53,19 +53,24 @@ cp config/mrefd.blacklist .
 cp config/mrefd.whitelist .
 cp config/mrefd.interlink .
 cp example.cfg mrefd.cfg
-# Note: in mrefd.cfg, a few edits are expected in order to run properly in the containerized environment:
-#   - IPv4ExtAddr _must be set_, as the automated way of fetching the external IP does not work when in a container
+# Note: in mrefd.cfg, set these paths for the container:
 #   - PidPath = /app/data/mrefd.pid
-#   - XmlPath = /app/data/mrefd.xml
+#   - JsonPath = /app/data/mrefd.json
 #   - WhitelistPath = /app/config/mrefd.whitelist
 #   - BlacklistPath = /app/config/mrefd.blacklist
 #   - InterlinkPath = /app/config/mrefd.interlink
+#   - DHTSavePath = /app/data/mrefd.dht.bin
+# Note: mrefd looks up its external addresses at startup and logs them as "IPv4=... IPv6=...".
+#   The default compose network is IPv4 only. For dual-stack operation, give it IPv6 in compose.yaml:
+#     networks:
+#       default:
+#         enable_ipv6: true
+#   If either address in the log is empty, set IPv4ExtAddr or IPv6ExtAddr, or mrefd drops that bind address.
 
 cp php-dash/include/config.inc.php.dist php-dash/include/config.inc.php
 # Edit the php-dash/include/config.inc.php file with your editor of choice
-# Note: $PageOptions['IPV4'] needs to be set to "mrefd-mrefd" thanks to docker magic
-# Note: PIDFile and XMLFile need to be set to /app/data/mrefd.pid and /app/data/mrefd.xml accordingly
-# Note: comment out the date_default_timezone_set line, since we're setting timezone via env vars instead
+# Note: set PIDFile and JsonFile to /app/data/mrefd.pid and /app/data/mrefd.json
+# Note: the PHP image has no /etc/timezone, so set your zone directly, e.g. date_default_timezone_set("America/Chicago");
 cp .env.example .env
 # Edit the .env file as you need for your deployment
 docker compose up
