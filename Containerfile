@@ -1,4 +1,10 @@
+# Distroless has glibc, CA certificates and tzdata, but no shell or package
+# manager. The nonroot tag runs as uid 65532.
+FROM gcr.io/distroless/cc-debian13:nonroot AS runtime
+
 FROM debian:13-slim AS build
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
 ARG OPENDHT_VERSION=v4.4.1
 
@@ -19,28 +25,30 @@ RUN git clone --depth 1 --branch "$OPENDHT_VERSION" https://github.com/savoirfai
 
 # Set the working directory
 WORKDIR /app
-# Copy project to the build context
+# Copy the sources (see .dockerignore)
 COPY . ./
 
 # The config files are mounted at /app/config at run time
 RUN cp example.mk mrefd.mk \
-    && make
+    && make -j"$(nproc)"
 
-# Collect the shared libraries mrefd links, except the C/C++ runtime that the
-# distroless image already has, keeping their Debian paths
-RUN ldd mrefd | awk '$2 == "=>" {print $3}' \
-    | grep -v -E '/(libc|libm|libresolv|libgcc_s|libstdc\+\+)\.so' \
-    | while read -r lib; do \
-        dir="/runtime$(dirname "$(readlink -f "$lib")")"; \
-        mkdir -p "$dir" && cp -L "$lib" "$dir/"; \
+# Collect the shared libraries mrefd links that the runtime image doesn't
+# already have, keeping their Debian paths
+COPY --from=runtime /usr/lib/ /base/usr/lib/
+RUN mkdir -p /runtime /app/data \
+    && ldd mrefd | awk '$2 == "=>" {print $3}' | while read -r lib; do \
+        dir="$(dirname "$(readlink -f "$lib")")"; \
+        [ -e "/base$dir/$(basename "$lib")" ] || { mkdir -p "/runtime$dir" && cp -L "$lib" "/runtime$dir/"; }; \
     done
 
-# Distroless has glibc, CA certificates and tzdata, but no shell or package manager
-FROM gcr.io/distroless/cc-debian13
+FROM runtime
 
 COPY --from=build /runtime/ /
 COPY --from=build /app/mrefd /usr/local/bin/mrefd
+# Owned by nonroot so a new volume mounted here is writable
+COPY --from=build --chown=nonroot:nonroot /app/data /app/data
 
 EXPOSE 17000/udp 17171/udp
 
-CMD [ "/usr/local/bin/mrefd", "/app/config/mrefd.cfg" ]
+ENTRYPOINT [ "/usr/local/bin/mrefd" ]
+CMD [ "/app/config/mrefd.cfg" ]
