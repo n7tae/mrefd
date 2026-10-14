@@ -64,7 +64,7 @@ The `libcurl4-gnutls-dev` package is only necessary if you use OpenDHT. OpenDHT 
 
 **Ham-DHT** is implemented using a distributed hash table provided by OpenDHT.
 
-Some OS releases have pre-build development package. Try:
+Some OS releases have a pre-build development package. Try:
 
 ```
 sudo apt install libopendht-dev
@@ -80,18 +80,22 @@ You'll need to build it yourself.
 
 #### Build your own version of libopendht-dev
 
-OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Building and installing instructions are the `BUILD.md` fil. First, installing the dependencies listed, you don't need python or any extra OpenDHT tools, just do the minimum build to make the libopendht-dev library:
+OpenDHT is available [here](https://github.com/savoirfairelinux/opendht.git). Building and installing instructions are the `BUILD.md` file. First, install the dependencies listed in the file. Then, build the development library. You don't need python or any extra OpenDHT tools, just do the minimum build to make the libopendht-dev library:
 
 ```
 # clone the repo
 git clone https://github.com/savoirfairelinux/opendht.git
 
-# build and install
+# go there
 cd opendht
+
+# build and install
 mkdir build && cd build
 cmake -DOPENDHT_TOOLS=OFF ..
 make
 sudo make install
+
+# return to the parent directory
 cd ../..
 ```
 

@@ -158,86 +158,72 @@ void CProtocol::Task(void)
 
 	switch (len)
 	{
-	case 0:
-		break;
-	case 10:
-		if (IsValidKeepAlive(pack.GetCData(), cs))
-		{
-			auto client = g_Reflector.GetClients()->FindClient(ip);
-			g_Reflector.ReleaseClients();
-			if (client)
+		case 0:
+			break;
+		case 10:
+			if (IsValidKeepAlive(pack.GetCData(), cs))
 			{
-				const auto ct = client->GetClientType();
-				if (EClientType::simple == ct or EClientType::listenonly == ct)
-					client->Alive();
-				else
+				auto client = g_Reflector.GetClients()->FindClient(ip);
+				g_Reflector.ReleaseClients();
+				if (client)
 				{
-					auto peer = g_Reflector.GetPeers().FindPeer(ip);
-					if (peer)
-						peer->Alive();
-				}
-			}
-		}
-		else if (IsValidDisconnect(pack.GetCData(), cs))
-		{
-			auto client = g_Reflector.GetClients()->FindClient(ip);
-			g_Reflector.ReleaseClients();
-			if (client)
-			{
-				const auto ct = client->GetClientType();
-				if (EClientType::simple == ct or EClientType::listenonly == ct)
-				{
-					std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
-					uint8_t disc[4];
-					EncodeDisconnectedPacket(disc);
-					Send(disc, 4, ip);
-					g_Reflector.GetClients()->RemoveClient(client);
-					g_Reflector.ReleaseClients();
-				}
-				else
-				{
-					auto peer = g_Reflector.GetPeers().FindPeer(ip);
-					if (peer)
+					const auto ct = client->GetClientType();
+					if (EClientType::simple == ct or EClientType::listenonly == ct)
+						client->Alive();
+					else
 					{
-						g_Reflector.GetPeers().RemovePeer(peer);
+						auto peer = g_Reflector.GetPeers().FindPeer(ip);
+						if (peer)
+							peer->Alive();
 					}
 				}
 			}
-		}
-		else if (IsValidNAcknowledge(pack.GetCData(), cs))
-		{
-			std::cout << "NACK packet received from " << cs << " at " << ip << std::endl;
-		}
-		break;
-	case 11:
-		if (IsValidConnect(pack.GetCData(), ip, cs, mod))
-		{
-			bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
-
-			std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
-
-			// callsign authorized?
-			if (g_GateKeeper.ClientMayLink(cs, ip))
+			else if (IsValidDisconnect(pack.GetCData(), cs))
 			{
-				// valid module ?
-				if (g_CFG.IsValidModule(mod))
+				auto client = g_Reflector.GetClients()->FindClient(ip);
+				g_Reflector.ReleaseClients();
+				if (client)
 				{
-					// acknowledge a normal request from a repeater/hot-spot/mvoice
-					EncodeConnectAckPacket(pack.GetData());
-					Send(pack.GetCData(), 4, ip);
-
-					// create the client and append
-					if (isLstn)
+					const auto ct = client->GetClientType();
+					if (EClientType::simple == ct or EClientType::listenonly == ct)
 					{
-						if (g_CFG.GetRefMods().GetEModules().find(mod) != std::string::npos && not g_CFG.GetSWLEncryptedMods())
+						std::cout << "Disconnect packet from " << cs << " at " << ip << std::endl;
+						uint8_t disc[4];
+						EncodeDisconnectedPacket(disc);
+						Send(disc, 4, ip);
+						g_Reflector.GetClients()->RemoveClient(client);
+						g_Reflector.ReleaseClients();
+					}
+					else
+					{
+						auto peer = g_Reflector.GetPeers().FindPeer(ip);
+						if (peer)
 						{
-							std::cout << "SWL Node " << cs << " is not allowed to connect to encrypted Module '" << mod << "'" << std::endl;
-
-							// deny the request
-							EncodeConnectNackPacket(pack.GetData());
-							Send(pack.GetCData(), 4, ip);
+							g_Reflector.GetPeers().RemovePeer(peer);
 						}
-						else
+					}
+				}
+			}
+			else if (IsValidNAcknowledge(pack.GetCData(), cs))
+			{
+				std::cout << "NACK packet received from " << cs << " at " << ip << std::endl;
+			}
+			break;
+		case 11:
+			if (IsValidConnect(pack.GetCData(), ip, cs, mod))
+			{
+				bool isLstn = (0 == memcmp(pack.GetCData(), "LSTN", 4));
+
+				std::cout << "Connect packet for module " << mod << " from " << cs << " at " << ip << (isLstn ? " as listen-only" : "") << std::endl;
+
+				// callsign authorized?
+				if (g_GateKeeper.ClientMayLink(cs, ip))
+				{
+					// valid module ?
+					if (g_CFG.IsValidModule(mod))
+					{
+						// create the client and append
+						if (isLstn)
 						{
 							if (AF_INET6 == ip.GetFamily())
 								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket6));
@@ -245,124 +231,126 @@ void CProtocol::Task(void)
 								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::listenonly, mod, m_Socket4));
 							g_Reflector.ReleaseClients();
 						}
+						else
+						{
+							if (AF_INET6 == ip.GetFamily())
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket6));
+							else
+								g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket4));
+							g_Reflector.ReleaseClients();
+						}
+						// acknowledge a normal request from a repeater/hot-spot/mvoice
+						EncodeConnectAckPacket(pack.GetData());
+						Send(pack.GetCData(), 4, ip);
 					}
 					else
 					{
-						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket6));
-						else
-							g_Reflector.GetClients()->AddClient(std::make_shared<CClient>(cs, ip, EClientType::simple, mod, m_Socket4));
-						g_Reflector.ReleaseClients();
+						std::cout << "Node " << cs << " connect attempt on non-existing module '" << mod << "'" << std::endl;
+
+						// deny the request
+						EncodeConnectNackPacket(pack.GetData());
+						Send(pack.GetCData(), 4, ip);
 					}
 				}
 				else
 				{
-					std::cout << "Node " << cs << " connect attempt on non-existing module '" << mod << "'" << std::endl;
-
 					// deny the request
 					EncodeConnectNackPacket(pack.GetData());
 					Send(pack.GetCData(), 4, ip);
 				}
 			}
-			else
+			break;
+		case sizeof(SInterConnect):
+			if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods))
 			{
-				// deny the request
-				EncodeConnectNackPacket(pack.GetData());
-				Send(pack.GetCData(), 4, ip);
-			}
-		}
-		break;
-	case sizeof(SInterConnect):
-		if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods))
-		{
-			std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
+				std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
 
-			// callsign authorized?
-			if (g_GateKeeper.PeerMayLink(cs))
-			{
-				SInterConnect ackn;
-				// acknowledge the request
-				EncodeInterlinkAckPacket(ackn, mods);
-				Send(ackn.magic, sizeof(SInterConnect), ip);
-			}
-			else
-			{
-				// deny the request
-				EncodeInterlinkNackPacket(pack.GetData());
-				Send(pack.GetCData(), 10, ip);
-			}
-		}
-		else if (IsValidInterlinkAcknowledge(pack.GetCData(), cs, mods))
-		{
-			std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
-
-			// callsign authorized?
-			if (g_GateKeeper.PeerMayLink(cs))
-			{
-				// already connected ?
-				if (nullptr == g_Reflector.GetPeers().FindPeer(cs))
+				// callsign authorized?
+				if (g_GateKeeper.PeerMayLink(cs))
 				{
-					auto item = g_Interlinks.Find(cs.GetCS());
-					if (item)
-					{
-						auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
-						// create the new peer
-						// this also create one client per module
-						if (AF_INET6 == ip.GetFamily())
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
-						else
-							g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
-						publish = true;
-					}
-					else
-					{
-						std::cerr << "ERROR: got an ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
-					}
-				}
-			}
-		}
-		break;
-	default:
-		if (len > sizeof(SInterConnect))
-		{
-			CCallsign dst, src;
-			auto client = GetClient(ip, len, pack, dst, src);
-			if (client)
-			{
-				// std::cout << "Data:" << (pack.IsStreamData()?"Stream":"Packet") << " Module:" << mod << " Client:" << client->GetCallsign() << " SRC:" << src << " IP:" << ip << std::endl;
-				//  make sure the SRC callsign is not blacklisted
-				if (g_GateKeeper.MayTransmit(src, ip))
-				{
-					// might open a new stream if it's the first packet
-					// if there is a problem, return false
-					if (OnPacketIn(pack, client))
-					{
-						if (0 == ((0x7fffu & pack.GetFrameNumber()) % 6))
-							UpdateDashData(src, dst, client, pack);
-						SendToClients(pack, client, dst);
-						if (pack.IsStreamData() and pack.IsLastPacket())
-						{
-							CloseStream(client->GetReflectorModule()); // so this only closes streams
-						}
-					}
-				}
-				else if (pack.IsStreamData())
-				{
-					// this voicestream is blocked, so
-					if (pack.GetFrameNumber() & 0x8000u)
-					{
-						// when the stream closes, log it.
-						std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
-					}
+					SInterConnect ackn;
+					// acknowledge the request
+					EncodeInterlinkAckPacket(ackn, mods);
+					Send(ackn.magic, sizeof(SInterConnect), ip);
 				}
 				else
 				{
-					// here is a blocked PM packet
-					std::cout << "Blocked Packet from " << src << " at " << ip << std::endl;
+					// deny the request
+					EncodeInterlinkNackPacket(pack.GetData());
+					Send(pack.GetCData(), 10, ip);
 				}
 			}
-		}
-		break;
+			else if (IsValidInterlinkAcknowledge(pack.GetCData(), cs, mods))
+			{
+				std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
+
+				// callsign authorized?
+				if (g_GateKeeper.PeerMayLink(cs))
+				{
+					// already connected ?
+					if (nullptr == g_Reflector.GetPeers().FindPeer(cs))
+					{
+						auto item = g_Interlinks.Find(cs.GetCS());
+						if (item)
+						{
+							auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
+							// create the new peer
+							// this also create one client per module
+							if (AF_INET6 == ip.GetFamily())
+								g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+							else
+								g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+							publish = true;
+						}
+						else
+						{
+							std::cerr << "ERROR: got an ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
+						}
+					}
+				}
+			}
+			break;
+		default:
+			if (len > sizeof(SInterConnect))
+			{
+				CCallsign dst, src;
+				auto client = GetClient(ip, len, pack, dst, src);
+				if (client)
+				{
+					// std::cout << "Data:" << (pack.IsStreamData()?"Stream":"Packet") << " Module:" << mod << " Client:" << client->GetCallsign() << " SRC:" << src << " IP:" << ip << std::endl;
+					//  make sure the SRC callsign is not blacklisted
+					if (g_GateKeeper.MayTransmit(src, ip))
+					{
+						// might open a new stream if it's the first packet
+						// if there is a problem, return false
+						if (OnPacketIn(pack, client))
+						{
+							if (0 == ((0x7fffu & pack.GetFrameNumber()) % 6))
+								UpdateDashData(src, dst, client, pack);
+							SendToClients(pack, client, dst);
+							if (pack.IsStreamData() and pack.IsLastPacket())
+							{
+								CloseStream(client->GetReflectorModule()); // so this only closes streams
+							}
+						}
+					}
+					else if (pack.IsStreamData())
+					{
+						// this voicestream is blocked, so
+						if (pack.GetFrameNumber() & 0x8000u)
+						{
+							// when the stream closes, log it.
+							std::cout << "Blocked voice stream from " << src << " at " << ip << std::endl;
+						}
+					}
+					else
+					{
+						// here is a blocked PM packet
+						std::cout << "Blocked Packet from " << src << " at " << ip << std::endl;
+					}
+				}
+			}
+			break;
 	}
 
 	// Now we do all the other maintenance

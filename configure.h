@@ -35,7 +35,6 @@ using CFGDATA = struct CFGData_struct {
 #endif
 	std::string pidpath, jsonpath, whitepath, blackpath, interlinkpath;
 	unsigned long port;
-	bool swlencryptedmods;
 	CReflMods refmods;
 };
 
@@ -69,10 +68,6 @@ public:
 	const std::string &GetBlackPath()        const { return data.blackpath;        }
 	const std::string &GetInterlinkPath()    const { return data.interlinkpath;    }
 	unsigned long      GetPort()             const { return data.port;             }
-
-	bool               GetSWLEncryptedMods() const { return data.swlencryptedmods; }
-
-
 
 private:
 #ifndef NO_DHT
