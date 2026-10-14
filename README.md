@@ -47,11 +47,11 @@ Below are instructions for building an mrefd reflector.
 
 ### Running with Docker
 
+Docker compose runs mrefd and its dashboard from prebuilt images for linux/amd64, linux/arm64 and linux/arm/v7 (Raspberry Pi 2 and newer). If it can't pull them, it builds them from this repository.
+
 ```bash
-# First, copy the configuration files to your working directory and edit them as you see fit according to the rest of the documentation
-cp config/mrefd.blacklist .
-cp config/mrefd.whitelist .
-cp config/mrefd.interlink .
+# Copy the configuration files and edit them as described in the rest of this document
+cp config/mrefd.blacklist config/mrefd.whitelist config/mrefd.interlink .
 cp example.cfg mrefd.cfg
 # Note: in mrefd.cfg, set these paths for the container:
 #   - PidPath = /app/data/mrefd.pid
@@ -71,10 +71,13 @@ cp php-dash/include/config.inc.php.dist php-dash/include/config.inc.php
 # Edit the php-dash/include/config.inc.php file with your editor of choice
 # Note: set PIDFile and JsonFile to /app/data/mrefd.pid and /app/data/mrefd.json
 # Note: the PHP image has no /etc/timezone, so set your zone directly, e.g. date_default_timezone_set("America/Chicago");
-cp .env.example .env
-# Edit the .env file as you need for your deployment
-docker compose up
+
+# Optional: to change ports, file locations or images, copy .env.example to .env and edit it
+docker compose up -d
+docker compose logs -f mrefd
 ```
+
+To update, run `docker compose pull && docker compose up -d`.
 
 ### After a clean installation of a Debian-based OS make sure to run update and upgrade
 
