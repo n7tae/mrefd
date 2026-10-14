@@ -1,0 +1,53 @@
+name: Test Docker images
+
+# Only when something that goes into the images or the compose setup changes
+on:
+  push:
+    paths: &paths
+      - '.github/workflows/test-docker.yaml'
+      - '.github/scripts/test-docker.sh'
+      - '**/.dockerignore'
+      - '**/Containerfile'
+      - 'compose.yaml'
+      - '.env.example'
+      - 'example.cfg'
+      - 'example.mk'
+      - 'config/**'
+      - 'php-dash/**'
+      - 'Makefile'
+      - '**.cpp'
+      - '**.h'
+  pull_request:
+    paths: *paths
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # Apt packages are deliberately unpinned (DL3008)
+      - name: Lint mrefd Containerfile
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: Containerfile
+          ignore: DL3008
+
+      - name: Lint mrefd-dash Containerfile
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: php-dash/Containerfile
+          ignore: DL3008
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build and test the compose stack
+        run: .github/scripts/test-docker.sh
