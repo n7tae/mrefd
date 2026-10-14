@@ -1,0 +1,28 @@
+version: 2
+
+# Keep the container dependencies current in one weekly pull request
+multi-ecosystem-groups:
+  containers:
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "turnrye"
+
+updates:
+  # Base images in Containerfile and php-dash/Containerfile
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+      - "/php-dash"
+    patterns:
+      - "*"
+    multi-ecosystem-group: "containers"
+    open-pull-requests-limit: 1
+
+  # Actions used to build, test and publish the images
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    patterns:
+      - "*"
+    multi-ecosystem-group: "containers"
+    open-pull-requests-limit: 1
