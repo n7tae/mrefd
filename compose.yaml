@@ -1,13 +1,12 @@
-
 services:
   mrefd:
+    # Pulls the published image, or builds it from this repository if it can't
+    image: ${MREFD_IMAGE:-ghcr.io/n7tae/mrefd:latest}
     build:
       context: .
       dockerfile: Containerfile
-    image: mrefd:latest
-    container_name: mrefd
     environment:
-      - TZ=${TZ:-America/Chicago}
+      - TZ=${TZ:-UTC}
     volumes:
       - "${CONFIG_PATH:-./mrefd.cfg}:/app/config/mrefd.cfg:ro"
       - "${BLACKLIST_PATH:-./mrefd.blacklist}:/app/config/mrefd.blacklist:ro"
@@ -15,25 +14,33 @@ services:
       - "${INTERLINK_PATH:-./mrefd.interlink}:/app/config/mrefd.interlink:ro"
       - mrefd_data:/app/data
     ports:
-      - ${HOST_M17_PORT:-17000}:${CONTAINER_M17_PORT:-17000}/udp
-      - ${HOST_DHT_PORT:-17171}:${CONTAINER_DHT_PORT:-17171}/udp
-
+      # Must match Port in mrefd.cfg, which is what clients and the Ham-DHT are told
+      - ${M17_PORT:-17000}:${M17_PORT:-17000}/udp
+      # Ham-DHT
+      - 17171:17171/udp
+    # mrefd only writes to /app/data and needs no privileges
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
+
   mrefd_dashboard:
+    image: ${MREFD_DASH_IMAGE:-ghcr.io/n7tae/mrefd-dash:latest}
     build:
       context: ./php-dash
       dockerfile: Containerfile
-    image: mrefd-dash:latest
     depends_on:
       - mrefd
-    container_name: mrefd_dashboard
     environment:
-      - TZ=${TZ:-America/Chicago}
+      - TZ=${TZ:-UTC}
     volumes:
       - "${DASH_CONFIG_PATH:-./php-dash/include/config.inc.php}:/var/www/html/include/config.inc.php:ro"
-      - mrefd_data:/app/data
+      - mrefd_data:/app/data:ro
     ports:
-      - ${HOST_DASHBOARD_PORT:-8080}:${CONTAINER_DASHBOARD_PORT:-80}
+      - ${DASHBOARD_PORT:-8080}:80
     restart: unless-stopped
+
 volumes:
   mrefd_data:

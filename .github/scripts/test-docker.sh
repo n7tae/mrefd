@@ -33,10 +33,12 @@ sed -e 's/^Callsign = .*/Callsign = M17-TST/' \
 	-e 's#^InterlinkPath = .*#InterlinkPath = /app/config/mrefd.interlink#' \
 	-e 's#^DHTSavePath = .*#DHTSavePath = /app/data/mrefd.dht.bin#' \
 	-e 's#^Bootstrap = .*#Bootstrap = 127.0.0.1#' \
+	-e 's/^Port = .*/Port = 27000/' \
 	example.cfg > "$work/mrefd.cfg"
 for key in PidPath JsonPath WhitelistPath BlacklistPath InterlinkPath DHTSavePath; do
 	grep -q "^$key = /app/" "$work/mrefd.cfg" || fail "example.cfg has no $key; update the README"
 done
+grep -q '^Port = 27000' "$work/mrefd.cfg" || fail "example.cfg has no Port"
 
 # The README's config.inc.php edits
 sed -e 's#^date_default_timezone_set(trim.*#date_default_timezone_set("UTC");#' \
@@ -51,9 +53,10 @@ BLACKLIST_PATH=$work/mrefd.blacklist
 WHITELIST_PATH=$work/mrefd.whitelist
 INTERLINK_PATH=$work/mrefd.interlink
 DASH_CONFIG_PATH=$work/config.inc.php
-HOST_M17_PORT=27000
-HOST_DHT_PORT=27171
-HOST_DASHBOARD_PORT=28080
+M17_PORT=27000
+DASHBOARD_PORT=28080
+MREFD_IMAGE=mrefd-test
+MREFD_DASH_IMAGE=mrefd-dash-test
 EOF
 
 "${compose[@]}" up -d --build
