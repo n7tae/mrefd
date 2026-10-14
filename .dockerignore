@@ -1,0 +1,6 @@
+# Only the sources are needed to build mrefd
+*
+!*.cpp
+!*.h
+!Makefile
+!example.mk

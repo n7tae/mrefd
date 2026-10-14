@@ -1,0 +1,2 @@
+# The config is mounted at run time
+include/config.inc.php
