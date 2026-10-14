@@ -14,7 +14,6 @@ services:
       - "${WHITELIST_PATH:-./mrefd.whitelist}:/app/config/mrefd.whitelist:ro"
       - "${INTERLINK_PATH:-./mrefd.interlink}:/app/config/mrefd.interlink:ro"
       - mrefd_data:/app/data
-      # - "${DHT_PATH:-./mrefd.dht.bin}:/app/config/mrefd.dht.bin" # TODO: sort out how to initialize the dht bin as part of env setup before the contrainer loads; empty file results in errors
     ports:
       - ${HOST_M17_PORT:-17000}:${CONTAINER_M17_PORT:-17000}/udp
       - ${HOST_DHT_PORT:-17171}:${CONTAINER_DHT_PORT:-17171}/udp
@@ -31,7 +30,7 @@ services:
     environment:
       - TZ=${TZ:-America/Chicago}
     volumes:
-      - "${DASH_CONFIG_PATH:-./php-dash/include/config.inc.php}:/var/www/html/php-dash/include/config.inc.php:ro"
+      - "${DASH_CONFIG_PATH:-./php-dash/include/config.inc.php}:/var/www/html/include/config.inc.php:ro"
       - mrefd_data:/app/data
     ports:
       - ${HOST_DASHBOARD_PORT:-8080}:${CONTAINER_DASHBOARD_PORT:-80}
