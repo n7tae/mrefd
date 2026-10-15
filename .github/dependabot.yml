@@ -7,6 +7,7 @@ multi-ecosystem-groups:
       interval: "weekly"
     assignees:
       - "turnrye"
+    open-pull-requests-limit: 1
 
 updates:
   # Base images in Containerfile and php-dash/Containerfile
@@ -17,7 +18,6 @@ updates:
     patterns:
       - "*"
     multi-ecosystem-group: "containers"
-    open-pull-requests-limit: 1
 
   # Actions used to build, test and publish the images
   - package-ecosystem: "github-actions"
@@ -25,4 +25,3 @@ updates:
     patterns:
       - "*"
     multi-ecosystem-group: "containers"
-    open-pull-requests-limit: 1
