@@ -1,59 +1,59 @@
 name: Publish mrefd Docker Image to GHCR
 
-env:
-  REGISTRY: ghcr.io
-  REGISTRY_IMAGE: ${{ github.repository_owner }}/mrefd
-
-
+# Only when something that goes into the image changes; tag pushes always run
 on:
   push:
     branches:
       - "**"
     tags:
       - "v*.*.*"
+    paths: &paths
+      - '.github/workflows/publish-docker.yaml'
+      - '.dockerignore'
+      - 'Containerfile'
+      - 'Makefile'
+      - 'example.mk'
+      - '**.cpp'
+      - '**.h'
   pull_request:
+    paths: *paths
+
+# A newer push to a pull request replaces its build in progress
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
+  # Builds each platform on its own native runner (Arm on ubuntu-24.04-arm)
+  # and merges them into one multi-platform image
   build-and-publish-mrefd:
-    runs-on: ubuntu-latest
+    uses: docker/github-builder/.github/workflows/build.yml@v1
     permissions:
       contents: read
-      packages: write # Required to push to GHCR
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY}}
+      packages: write # to push to GHCR
+      id-token: write # to sign the build provenance
+    with:
+      output: image
+      push: ${{ github.event_name != 'pull_request' }}
+      file: Containerfile
+      platforms: linux/amd64,linux/arm64,linux/arm/v7
+      set-meta-labels: true
+      set-meta-annotations: true
+      meta-images: ghcr.io/${{ github.repository_owner }}/mrefd
+      meta-tags: |
+        type=schedule
+        type=ref,event=branch
+        type=ref,event=pr
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=semver,pattern={{major}}
+        type=sha
+        type=raw,value=latest,enable={{is_default_branch}}
+    secrets:
+      registry-auths: |
+        - registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build and push Docker image for mrefd
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: Containerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
