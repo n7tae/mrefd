@@ -3,6 +3,9 @@ name: Test Docker images
 # Only when something that goes into the images or the compose setup changes
 on:
   push:
+    # Dependabot branches are tested by their pull requests
+    branches-ignore:
+      - "dependabot/**"
     paths: &paths
       - '.github/workflows/test-docker.yaml'
       - '.github/scripts/test-docker.sh'
