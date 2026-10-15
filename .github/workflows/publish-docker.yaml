@@ -3,8 +3,9 @@ name: Publish mrefd Docker Image to GHCR
 # Only when something that goes into the image changes; tag pushes always run
 on:
   push:
-    branches:
-      - "**"
+    # Dependabot branches are built by their pull requests
+    branches-ignore:
+      - "dependabot/**"
     tags:
       - "v*.*.*"
     paths: &paths

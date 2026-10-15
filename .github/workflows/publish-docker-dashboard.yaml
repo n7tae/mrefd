@@ -9,8 +9,9 @@ on:
     paths:
       - '.github/workflows/publish-docker-dashboard.yaml'
       - 'php-dash/**'
-    branches:
-      - "**"
+    # Dependabot branches are built by their pull requests
+    branches-ignore:
+      - "dependabot/**"
     tags:
       - "v*.*.*"
   pull_request:
