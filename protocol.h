@@ -38,11 +38,13 @@
 #include "base.h"
 
 
-using SInterConnect = struct __attribute__((__packed__)) interconnect_tag {
+using SInterlinkPacket = struct __attribute__((__packed__)) interlinkType {
 	uint8_t magic[4];
 	uint8_t fromcs[6];
-	uint8_t mods[27];
+	char mods[27];
 }; // 37 bytes
+
+enum class EInterlinkPacketType { bad, conn, ackn };
 
 class CProtocol : public CBase
 {
@@ -87,8 +89,7 @@ protected:
 	bool IsValidDisconnect(const uint8_t *, CCallsign &);
 	bool IsValidKeepAlive(const uint8_t *, CCallsign &);
 	bool IsValidNAcknowledge(const uint8_t *, CCallsign &);
-	bool IsValidInterlinkConnect(const uint8_t *, const CIp &, CCallsign &, char *);
-	bool IsValidInterlinkAcknowledge(const uint8_t *, CCallsign &, char *);
+	EInterlinkPacketType GetInterlinkPacket(const uint8_t *, const CIp &, CCallsign &, char *);
 
 	// packet encoding helpers
 	void EncodeKeepAlivePacket(uint8_t *);
@@ -96,8 +97,8 @@ protected:
 	void EncodeConnectNackPacket(uint8_t *);
 	void EncodeDisconnectPacket(uint8_t *, char);
 	void EncodeDisconnectedPacket(uint8_t *);
-	void EncodeInterlinkConnectPacket(SInterConnect &, const std::string &);
-	void EncodeInterlinkAckPacket(SInterConnect &, const char *);
+	void EncodeInterlinkConnectPacket(SInterlinkPacket &, const std::string &);
+	void EncodeInterlinkAckPacket(SInterlinkPacket &, const char *);
 	void EncodeInterlinkNackPacket(uint8_t *);
 
 	// syntax helper
