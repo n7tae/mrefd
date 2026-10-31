@@ -407,7 +407,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 		std::cout << "Waiting on DHT values for " << cs << std::endl;
 		#endif
         std::unique_lock lock(mtx);
-        cv.wait(lock, [complete]{
+        cv.wait(lock, [&complete]{
 			#ifdef DEBUG
 			if (not complete) std::cout << "Waiting on results...not completed" << std::endl;
 			#endif
