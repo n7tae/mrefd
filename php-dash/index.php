@@ -19,12 +19,13 @@ if (file_exists("./include/config.inc.php")) {
     die("config.inc.php does not exist. Be sure to copy /include/config.inc.php.dist to /include/config.inc.php and edit the file accordingly.");
 }
 
+// only accept known page names; anything else falls back to the default page
+if (!isset($_GET['show']) || !in_array($_GET['show'], ['users', 'links', 'peers'], true)) $_GET['show'] = '';
+
 if (!class_exists('Node')) require_once("./include/class.node.php");
 if (!class_exists('xReflector')) require_once("./include/class.reflector.php");
 if (!class_exists('Station')) require_once("./include/class.station.php");
 if (!class_exists('Peer')) require_once("./include/class.peer.php");
-
-if (!isset($_GET['show']) || !in_array($_GET['show'], ['users', 'links', 'peers'], true)) $_GET['show'] = '';
 
 $Reflector = new xReflector();
 $Reflector->SetFlagFile("./include/country.csv");
@@ -82,7 +83,7 @@ $Reflector->LoadJson();
             });
       }';
 
-	if (!isset($_GET['show']) || (($_GET['show'] != 'reflectors') && ($_GET['show'] != 'interlinks'))) {
+	if (!isset($_GET['show']) || (($_GET['show'] != 'links') && ($_GET['show'] != 'peers'))) {
             echo '
       PageRefresh = setTimeout(ReloadPage, ' . $PageOptions['PageRefreshDelay'] . ');';
         }

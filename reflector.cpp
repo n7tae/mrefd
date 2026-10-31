@@ -352,9 +352,6 @@ void CReflector::GetDHTConfig(const std::string &cs)
 					auto rdat = dht::Value::unpack<SMrefdConfig1>(*v);
 					if (rdat.timestamp > cfg.timestamp)
 					{
-						#ifdef DEBUG
-						std::cout << "New data for " << cs << " with timestamp " << rdat.timestamp << std::endl;
-						#endif
 						// the time stamp is the newest so far, so put it in the static cfg struct
 						cfg = dht::Value::unpack<SMrefdConfig1>(*v);
 					}
@@ -376,10 +373,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
 					} else {
 						// if the get() call was successful and there is a nonzero timestamp, then do the update
 						g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.ipv4addr, cfg.ipv6addr, cfg.port, (cfg.version[0] == '0'));
-						#ifdef DEBUG
-						std::cout << cs << " has been updated and is running version " << cfg.version << std::endl;
-						#endif
-					}
+				}
 				}
 			}
 			else
@@ -393,26 +387,14 @@ void CReflector::GetDHTConfig(const std::string &cs)
 			}	// release the lock right after marking it complete
 
 			cv.notify_one();
-			#ifdef DEBUG
-			if (complete) std::cout << "complete has been set to true!" << std::endl;
-			std::cout << "Request for " << cs << " done. Notification sent!" << std::endl;
-			#endif
 		},
 		{}, // empty filter
 		w	// just the configuration section
 	);
 	// wait until the get() returns
 	{
-		#ifdef DEBUG
-		std::cout << "Waiting on DHT values for " << cs << std::endl;
-		#endif
         std::unique_lock lock(mtx);
-        cv.wait(lock, [&complete]{
-			#ifdef DEBUG
-			if (not complete) std::cout << "Waiting on results...not completed" << std::endl;
-			#endif
-			return complete;
-		});
+        cv.wait(lock, [&complete]{ return complete; });
 	}
 }
 
