@@ -394,7 +394,8 @@ void CReflector::GetDHTConfig(const std::string &cs)
 
 			cv.notify_one();
 			#ifdef DEBUG
-			std::cout << "Request for " << cs << " has been completed and notification sent!" << std::endl;
+			if (complete) std::cout << "complete has been set to true!" << std::endl;
+			std::cout << "Request for " << cs << " done. Notification sent!" << std::endl;
 			#endif
 		},
 		{}, // empty filter
@@ -408,7 +409,7 @@ void CReflector::GetDHTConfig(const std::string &cs)
         std::unique_lock lock(mtx);
         cv.wait(lock, [complete]{
 			#ifdef DEBUG
-			if (not complete) std::cout << "waiting on results...not completed" << std::endl;
+			if (not complete) std::cout << "Waiting on results...not completed" << std::endl;
 			#endif
 			return complete;
 		});
