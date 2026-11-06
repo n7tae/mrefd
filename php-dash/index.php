@@ -19,6 +19,9 @@ if (file_exists("./include/config.inc.php")) {
     die("config.inc.php does not exist. Be sure to copy /include/config.inc.php.dist to /include/config.inc.php and edit the file accordingly.");
 }
 
+// only accept known page names; anything else falls back to the default page
+if (!isset($_GET['show']) || !in_array($_GET['show'], ['users', 'links', 'peers'], true)) $_GET['show'] = '';
+
 if (!class_exists('Node')) require_once("./include/class.node.php");
 if (!class_exists('xReflector')) require_once("./include/class.reflector.php");
 if (!class_exists('Station')) require_once("./include/class.station.php");
@@ -80,7 +83,7 @@ $Reflector->LoadJson();
             });
       }';
 
-	if (!isset($_GET['show']) || (($_GET['show'] != 'liveircddb') && ($_GET['show'] != 'reflectors') && ($_GET['show'] != 'interlinks') && ($_GET['show'] != 'livequadnet'))) {
+	if (!isset($_GET['show']) || (($_GET['show'] != 'links') && ($_GET['show'] != 'peers'))) {
             echo '
       PageRefresh = setTimeout(ReloadPage, ' . $PageOptions['PageRefreshDelay'] . ');';
         }
@@ -110,7 +113,7 @@ $Reflector->LoadJson();
             <li<?php echo ($_GET['show'] == "links") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=links">Links (<?php echo $Reflector->NodeCount();  ?>)</a></li>
             <li<?php echo ($_GET['show'] == "peers") ? ' class="nav-item active"' : ''; ?>><a class="nav-link" href="./index.php?show=peers">Peers (<?php echo $Reflector->PeerCount();  ?>)</a></li>
         </ul>
-        <span class="navbar-text px-2">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard v1.5.1 <?php echo $PageOptions['LocalModification']; ?></span>
+        <span class="navbar-text px-2">mrefd v<?php echo $Reflector->GetVersion(); ?> - Dashboard v1.5.2 <?php echo $PageOptions['LocalModification']; ?></span>
         <span class="navbar-text px-2">Service uptime: <?php echo FormatSeconds($Reflector->GetServiceUptime()); ?></span>
     </div>
 </nav>

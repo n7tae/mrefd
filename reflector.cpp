@@ -326,7 +326,7 @@ void CReflector::PutDHTConfig()
 
 void CReflector::GetDHTConfig(const std::string &cs)
 {
-	static SMrefdConfig1 cfg;
+	SMrefdConfig1 cfg;
 	cfg.timestamp = 0;	// every time this is called, zero the timestamp
 	auto item = g_Interlinks.Find(cs);
 	if (nullptr == item)
@@ -339,42 +339,63 @@ void CReflector::GetDHTConfig(const std::string &cs)
 	// we only want the configuration section of the reflector's document
 	dht::Where w;
 	w.id(toUType(EMrefdValueID::Config));
+	std::condition_variable cv;
+	std::mutex mtx;
+	bool complete = false;
 
 	node.get(
 		dht::InfoHash::get(cs),
-		[](const std::shared_ptr<dht::Value> &v) {
-			if (0 == v->user_type.compare(MREFD_CONFIG_1))
-			{
-				auto rdat = dht::Value::unpack<SMrefdConfig1>(*v);
-				if (rdat.timestamp > cfg.timestamp)
+		[&cfg, &cs](const std::shared_ptr<dht::Value> &v) {
+			if (v->checkSignature()) {
+				if (0 == v->user_type.compare(MREFD_CONFIG_1))
 				{
-					// the time stamp is the newest so far, so put it in the static cfg struct
-					cfg = dht::Value::unpack<SMrefdConfig1>(*v);
+					auto rdat = dht::Value::unpack<SMrefdConfig1>(*v);
+					if (rdat.timestamp > cfg.timestamp)
+					{
+						// the time stamp is the newest so far, so put it in the static cfg struct
+						cfg = dht::Value::unpack<SMrefdConfig1>(*v);
+					}
+				} else {
+					std::cerr << "Get() returned unknown user_type: '" << v->user_type << "' for '" << cs << "'" << std::endl;
 				}
-			}
-			else
-			{
-				std::cerr << "Get() returned unknown user_type: '" << v->user_type << "'" << std::endl;
+			} else {
+				std::cerr << "ERROR: Signature check failed for '" << cs << "'" << std::endl;
 			}
 			return true;	// check all the values returned
 		},
-		[](bool success) {
+		[&cfg, &mtx, &complete, &cv, &cs](bool success) {
 			if (success)
 			{
 				if (cfg.timestamp)
 				{
-					// if the get() call was successful and there is a nonzero timestamp, then do the update
-					g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.ipv4addr, cfg.ipv6addr, cfg.port, (cfg.version[0] == '0'));
+					if (cs.compare(cfg.callsign)) {
+						std::cerr << "ERROR: GetDHTConfig(" << cs << ") returned data for '" << cfg.callsign << "'!" << std::endl;
+					} else {
+						// if the get() call was successful and there is a nonzero timestamp, then do the update
+						g_Interlinks.Update(cfg.callsign, cfg.modules, cfg.encryptedmods, cfg.ipv4addr, cfg.ipv6addr, cfg.port, (cfg.version[0] == '0'));
+				}
 				}
 			}
 			else
 			{
 				std::cout << "Get() was unsuccessful" << std::endl;
 			}
+
+			{
+				std::lock_guard<std::mutex> lock(mtx);
+				complete = true;
+			}	// release the lock right after marking it complete
+
+			cv.notify_one();
 		},
 		{}, // empty filter
 		w	// just the configuration section
 	);
+	// wait until the get() returns
+	{
+        std::unique_lock lock(mtx);
+        cv.wait(lock, [&complete]{ return complete; });
+	}
 }
 
 #endif

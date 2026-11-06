@@ -168,10 +168,9 @@ void CProtocol::Task(void)
 				if (client)
 				{
 					const auto ct = client->GetClientType();
-					if (EClientType::simple == ct or EClientType::listenonly == ct)
+					if (EClientType::simple == ct or EClientType::listenonly == ct) {
 						client->Alive();
-					else
-					{
+					} else {
 						auto peer = g_Reflector.GetPeers().FindPeer(ip);
 						if (peer)
 							peer->Alive();
@@ -260,58 +259,60 @@ void CProtocol::Task(void)
 				}
 			}
 			break;
-		case sizeof(SInterConnect):
-			if (IsValidInterlinkConnect(pack.GetCData(), ip, cs, mods))
-			{
-				std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
+		case sizeof(SInterlinkPacket):
+			switch (GetInterlinkPacket(pack.GetCData(), ip, cs, mods)) {
+				case EInterlinkPacketType::conn:
+					std::cout << "CONN packet from " << cs << " at " << ip << " to module(s) " << mods << std::endl;
 
-				// callsign authorized?
-				if (g_GateKeeper.PeerMayLink(cs))
-				{
-					SInterConnect ackn;
-					// acknowledge the request
-					EncodeInterlinkAckPacket(ackn, mods);
-					Send(ackn.magic, sizeof(SInterConnect), ip);
-				}
-				else
-				{
-					// deny the request
-					EncodeInterlinkNackPacket(pack.GetData());
-					Send(pack.GetCData(), 10, ip);
-				}
-			}
-			else if (IsValidInterlinkAcknowledge(pack.GetCData(), cs, mods))
-			{
-				std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
-
-				// callsign authorized?
-				if (g_GateKeeper.PeerMayLink(cs))
-				{
-					// already connected ?
-					if (nullptr == g_Reflector.GetPeers().FindPeer(cs))
+					// callsign authorized?
+					if (g_GateKeeper.PeerMayLink(cs))
 					{
-						auto item = g_Interlinks.Find(cs.GetCS());
-						if (item)
+						SInterlinkPacket ackn;
+						// acknowledge the request
+						EncodeInterlinkAckPacket(ackn, mods);
+						Send(ackn.magic, sizeof(SInterlinkPacket), ip);
+					}
+					else
+					{
+						// deny the request
+						EncodeInterlinkNackPacket(pack.GetData());
+						Send(pack.GetCData(), 10, ip);
+					}
+					break;
+				case EInterlinkPacketType::ackn:
+					std::cout << "ACQN packet from " << cs << " at " << ip << " on module(s) " << mods << std::endl;
+
+					// callsign authorized?
+					if (g_GateKeeper.PeerMayLink(cs))
+					{
+						// already connected ?
+						if (nullptr == g_Reflector.GetPeers().FindPeer(cs))
 						{
-							auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
-							// create the new peer
-							// this also create one client per module
-							if (AF_INET6 == ip.GetFamily())
-								g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+							auto item = g_Interlinks.Find(cs.c_str());
+							if (item)
+							{
+								auto type = item->IsNotLegacy() ? EClientType::reflector : EClientType::legacy;
+								// create the new peer
+								// this also create one client per module
+								if (AF_INET6 == ip.GetFamily())
+									g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket6));
+								else
+									g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
+								publish = true;
+							}
 							else
-								g_Reflector.GetPeers().AddPeer(std::make_shared<CPeer>(cs, ip, type, mods, m_Socket4));
-							publish = true;
-						}
-						else
-						{
-							std::cerr << "ERROR: got an ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
+							{
+								std::cerr << "ERROR: got an ACKN packet from " << cs.GetCS() << " but could not find the interlink item!" << std::endl;
+							}
 						}
 					}
-				}
+					break;
+				default:
+					break;
 			}
 			break;
 		default:
-			if (len > sizeof(SInterConnect))
+			if (len > sizeof(SInterlinkPacket))
 			{
 				CCallsign dst, src;
 				auto client = GetClient(ip, len, pack, dst, src);
@@ -783,10 +784,10 @@ void CProtocol::HandlePeerLinks(void)
 			if (nullptr == g_Reflector.GetPeers().FindPeer(item->GetCallsign()))
 			{
 				// send connect packet to re-initiate peer link
-				SInterConnect connect;
+				SInterlinkPacket connect;
 				const auto mods = item->GetReqMods();
 				EncodeInterlinkConnectPacket(connect, mods);
-				Send(connect.magic, sizeof(SInterConnect), item->GetIp());
+				Send(connect.magic, sizeof(SInterlinkPacket), item->GetIp());
 				std::cout << "Sent connect packet to M17 peer " << item->GetCallsign() << " @ " << item->GetIp() << " for module(s) " << mods << std::endl;
 			}
 		}
@@ -875,6 +876,7 @@ bool CProtocol::OnPacketIn(CPacket &packet, const SPClient client)
 		return false;
 	}
 
+	// Blocking LO transmissions is now handled in the GetClient sub, but we'll leave this here for safety's sake.
 	if (client->IsListenOnly())
 	{
 		if (packet.IsLastPacket())
@@ -993,7 +995,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	{
 		packet.Initialize(size, true);
 	}
-	else if (('P' == char(buf[3])) and ((sizeof(SInterConnect) < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
+	else if (('P' == char(buf[3])) and ((sizeof(SInterlinkPacket) < size) and (size <= MAX_PACKET_SIZE)) and (0x0u == (0x1u & buf[17])))
 	{
 		packet.Initialize(size, false);
 	}
@@ -1007,9 +1009,21 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	// we need to make sure we have the correct client
 	const auto ct = client->GetClientType();
 	packet.SetFromType(ct);
+	if (EClientType::listenonly == ct)
+	{
+		if (0 == packet.GetFrameNumber())
+			std::cout << "ALERT: Listen-only client " << src.c_str() << " @ " << ip.GetAddress() << " is trying to transmit!" << std::endl;
+		return nullptr;
+	}
 	if (EClientType::simple != ct) // if this a simple client, then we are good
 	{ // this client is a reflector. we need the peer
 		auto peer = g_Reflector.GetPeers().FindPeer(ip);
+		if (not peer)
+		{
+			if (0 == packet.GetFrameNumber())
+				std::cerr << "GetClient ERROR: Could not find peer at " << ip.GetAddress() << std::endl;
+			return nullptr;
+		}
 		if (peer->GetNbClients() > 1)
 		{ // this peer has more than one interlinked module
 			// we have to get the right one
@@ -1026,6 +1040,12 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 			}
 			// because is came from a reflector, we don't need the last byte anymore
 			client = peer->GetClient(mod);
+			if (not client)
+			{
+				if (0 == packet.GetFrameNumber())
+					std::cerr << "GetClient ERRPR: Band module '" << mod << "' fouund for reflector at " << ip.GetAddress() << std::endl;
+				return nullptr;
+			}
 		}
 		packet.SetSize(size - 1);
 	}
@@ -1039,7 +1059,7 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 			if (not g_CFG.IsEncyrptionAllowed(mod))
 			{
 				if (0 == packet.GetFrameNumber()) // we only log this once
-					std::cout << "Blocking " << src.GetCS() << " on module " << mod << " because it is encrypted!" << std::endl;
+					std::cout << "Blocking " << src.c_str() << " on module " << mod << " because it is encrypted!" << std::endl;
 				return nullptr;
 			}
 		}
@@ -1053,57 +1073,45 @@ SPClient CProtocol::GetClient(const CIp &ip, const unsigned size, CPacket &packe
 	return client;
 }
 
-bool CProtocol::IsValidInterlinkConnect(const uint8_t *buf, const CIp &ip, CCallsign &cs, char *mods)
+EInterlinkPacketType CProtocol::GetInterlinkPacket(const uint8_t *buf, const CIp &ip, CCallsign &cs, char *mods)
 {
-	if (memcmp(buf, "CONN", 4))
-		return false;
+	EInterlinkPacketType rtv;
+	const SInterlinkPacket *p = (SInterlinkPacket *)buf;
+	if (0 == memcmp(p->magic, "CONN", 4))
+		rtv = EInterlinkPacketType::conn;
+	else if (0 == memcmp(p->magic, "ACKN", 4))
+		rtv = EInterlinkPacketType::ackn;
+	else
+		return EInterlinkPacketType::bad;
 
-	cs.CodeIn(buf + 4);
-	if (cs.GetCS(4).compare("M17-"))
-	{
-		std::cout << "Interlink request from '" << cs << "' at " << ip << " denied" << std::endl;
-		return false;
-	}
-
-	auto pmods = (const char *)buf + 10;
-	if (strnlen(pmods, 27) > 26)
-	{
-		std::cout << "Could not fine a null in the mods field of a CONN packet from " << cs << " at " << ip << std::endl;
-		return false;
-	}
-
-	// we have to check if our interlink entry has the same module
-	auto pInterlinkItem = g_Interlinks.Find(cs.GetCS());
-	if (nullptr == pInterlinkItem)
-	{
-		std::cout << "Interlink request from " << cs.GetCS() << " at " << ip << " is not defined in the mrefd interlink file" << std::endl;
-		return false;
-	}
-
-	const std::string rmods(CReflMods(pmods, "").GetModules());
-	const std::string imods(pInterlinkItem->GetReqMods());
-	if (imods.compare(rmods))
-	{
-		std::cout << cs.GetCS() << " CONN packet from " << cs.GetCS() << " at " << ip << " is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
-		return false;
-	}
-
-	strcpy(mods, imods.c_str());
-
-	return true;
-}
-
-bool CProtocol::IsValidInterlinkAcknowledge(const uint8_t *buf, CCallsign &cs, char *mods)
-{
-	SInterConnect *p = (SInterConnect *)buf;
-	if (0 == memcmp(p->magic, "ACKN", 4))
-	{
+	const std::string magic((EInterlinkPacketType::conn == rtv) ? "CONN" : "ACKN");
+	auto pmods = (const char *)p->mods;
+	if (strnlen(pmods, 27) < 27) {
 		cs.CodeIn(p->fromcs);
-		memcpy(mods, p->mods, 27);
-		return (0 == mods[26]);
+		auto pInterlinkItem = g_Interlinks.Find(cs.c_str());
+		if (pInterlinkItem) {
+			if (pInterlinkItem->GetIp().IsSet() and ip == pInterlinkItem->GetIp()) {
+				const std::string rmods(CReflMods(pmods, "").GetModules());
+				const std::string imods(pInterlinkItem->GetReqMods());
+				if (0 == imods.compare(rmods)) {
+					strcpy(mods, imods.c_str());
+					return rtv;
+				} else {
+					std::cout << cs.c_str() << " " << magic << " packet from " << cs.GetCS() << " at " << ip << " is for '" << rmods << "' but the mrefd interlink file specifies '" << imods << "'" << std::endl;
+				}
+			} else {
+				std::cout << magic << "request from " << ip << " does not match the address specified in the interlink file" << std::endl;
+			}
+		} else {
+			std::cout << magic << " request from " << cs.c_str() << " at " << ip << " is not defined in the mrefd interlink file" << std::endl;
+		}
+	} else {
+		std::cout << "Could not find a null in the mods field of a " << magic << " packet from " << cs << " at " << ip << std::endl;
 	}
-	return false;
+
+	return EInterlinkPacketType::bad;
 }
+
 
 bool CProtocol::IsValidNAcknowledge(const uint8_t *buf, CCallsign &cs)
 {
@@ -1124,9 +1132,9 @@ void CProtocol::EncodeKeepAlivePacket(uint8_t *buf)
 	GetReflectorCallsign().CodeOut(buf + 4);
 }
 
-void CProtocol::EncodeInterlinkConnectPacket(SInterConnect &conn, const std::string &mods)
+void CProtocol::EncodeInterlinkConnectPacket(SInterlinkPacket &conn, const std::string &mods)
 {
-	memset(conn.magic, 0, sizeof(SInterConnect));
+	memset(conn.magic, 0, sizeof(SInterlinkPacket));
 	memcpy(conn.magic, "CONN", 4);
 	GetReflectorCallsign().CodeOut(conn.fromcs);
 	memcpy(conn.mods, mods.c_str(), mods.size());
@@ -1137,9 +1145,9 @@ void CProtocol::EncodeConnectAckPacket(uint8_t *buf)
 	memcpy(buf, "ACKN", 4);
 }
 
-void CProtocol::EncodeInterlinkAckPacket(SInterConnect &ackn, const char *mods)
+void CProtocol::EncodeInterlinkAckPacket(SInterlinkPacket &ackn, const char *mods)
 {
-	memset(ackn.magic, 0, sizeof(SInterConnect));
+	memset(ackn.magic, 0, sizeof(SInterlinkPacket));
 	memcpy(ackn.magic, "ACKN", 4);
 	GetReflectorCallsign().CodeOut(ackn.fromcs);
 	memcpy(ackn.mods, mods, strlen(mods));

@@ -32,17 +32,18 @@
 #                   M17-QQQ 44.45.45.100 17001 ABC
 
 # You can use an IPv6 address if both you and the target supports it.
-# If the target is using the default port of 17000, you can leave that out.
+# If the target is using the default port of 17000, you can omit it.
 #----------------------------------  3  -----------------------------------
 # If you or the target is not on Ham-DHT and the target is running on
 # version  <= 1.0.0, i.e., a legacy version:
 
-#                     M17-QQQL 44.45.45.100 ABC
+#                     M17-QQQL 44.45.45.100 17002 ABC
 
 # The 'L' suffix on the reflector designator lets your system know it's 
 #connecting to a legacy mrefd reflector. Without the 'L', the system may,
 # or may not link, but traffic WILL NOT PASS in either direction, even if
 # it successfully links!
+# Again, if the target is uisng the default port of 17000, you can omit it.
 #
 # If you are using method #2 or #3 you need to make sure the encryption
 # capabilities of each shared module match. Please don't link a module that

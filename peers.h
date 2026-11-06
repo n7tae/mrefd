@@ -64,6 +64,6 @@ public:
 protected:
 	void Insert(SPPeer peer);
 	// data
-	std::mutex         m_Mutex;
+	std::mutex m_Mutex;
 	std::list<SPPeer> m_Peers;
 };
